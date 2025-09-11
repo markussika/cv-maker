@@ -3,51 +3,71 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CvController;
+use Illuminate\Support\Facades\Http;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
+Route::get('/', fn() => view('welcome'))->name('welcome');
+Route::get('/dashboard', fn() => view('dashboard'))->middleware(['auth','verified'])->name('dashboard');
 
-// Welcome page (public)
-Route::get('/', function () {
-    return view('welcome');
-})->name('welcome');
-
-// Dashboard (home page)
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-// Auth routes for profile
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Profile
+    Route::controller(ProfileController::class)->group(function () {
+        Route::get('/profile','edit')->name('profile.edit');
+        Route::patch('/profile','update')->name('profile.update');
+        Route::delete('/profile','destroy')->name('profile.destroy');
+    });
+
+    // CV
+    Route::controller(CvController::class)->group(function () {
+        Route::get('/cv/create','create')->name('cv.create');
+        Route::post('/cv/preview','preview')->name('cv.preview');
+        Route::post('/cv/pdf','pdf')->name('cv.pdf');
+        Route::get('/cv/guide', fn()=> view('cv.guide'))->name('cv.guide');
+        Route::get('/cv/templates', fn()=> view('cv.templates.index'))->name('cv.templates');
+    });
+
+    // API endpoints for dynamic dropdowns
+    Route::get('/countries', function () {
+        $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions');
+        return response()->json(collect($response->json('data'))->pluck('name'));
+    });
+
+    Route::get('/cities', function () {
+        $country = request('country');
+        $response = Http::post('https://countriesnow.space/api/v0.1/countries/cities', ['country'=>$country]);
+        return response()->json($response->json('data'));
+    });
+
+    Route::get('/companies', function () {
+        $country = request('country');
+        $city = request('city');
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer '.config('services.companies_api.key')
+        ])->get("https://www.thecompaniesapi.com/api/enrich-company-from-domain", [
+            'country'=>$country,'city'=>$city
+        ]);
+
+        $fakeCompanies = [
+            'Tech Solutions Ltd','Global IT Services','Future Innovations','Smart Systems Inc','NextGen Software'
+        ];
+
+        if($response->failed()){
+            return response()->json($fakeCompanies);
+        }
+
+        $data = $response->json();
+        $companies = [];
+        if(isset($data['companies']) && is_array($data['companies'])){
+            foreach($data['companies'] as $company){
+                $companies[] = $company['name'] ?? '';
+            }
+        }
+        if(empty($companies)) $companies=$fakeCompanies;
+
+        return response()->json($companies);
+    });
+
 });
 
-// CV routes (all under auth)
-Route::middleware('auth')->group(function () {
-    // CV creation form
-    Route::get('/cv/create', [CvController::class, 'create'])->name('cv.create');
-
-    // CV preview
-    Route::post('/cv/preview', [CvController::class, 'preview'])->name('cv.preview');
-
-    // CV PDF download
-    Route::post('/cv/pdf', [CvController::class, 'pdf'])->name('cv.pdf');
-
-    // CV Guide page
-    Route::get('/cv/guide', function () {
-        return view('cv.guide');
-    })->name('cv.guide');
-
-    // CV Templates page
-    Route::get('/cv/templates', function () {
-        return view('cv.templates.index');
-    })->name('cv.templates');
-});
-
-// Include default Laravel auth routes
 require __DIR__.'/auth.php';

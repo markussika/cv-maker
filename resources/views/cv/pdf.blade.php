@@ -1,97 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>{{ $data['first_name'] ?? '' }} {{ $data['last_name'] ?? '' }} - CV</title>
+    <meta charset="utf-8">
+    <title>CV PDF</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; line-height: 1.4; margin: 20px; }
-        h1 { font-size: 24px; margin-bottom: 10px; }
-        h2 { font-size: 18px; margin-top: 20px; margin-bottom: 5px; }
-        p, li { font-size: 14px; margin-bottom: 5px; }
-        ul { padding-left: 20px; margin-bottom: 10px; }
-        .section { margin-bottom: 15px; }
-        .border { border: 1px solid #ccc; padding: 10px; border-radius: 4px; margin-bottom: 10px; }
+        body{font-family: DejaVu Sans, sans-serif; margin:20px;}
+        h2{margin-bottom:5px;}
+        h3{margin-top:15px; margin-bottom:5px;}
+        ul{list-style: square; padding-left:20px;}
+        img{max-width:100px; max-height:100px;}
     </style>
 </head>
 <body>
 
-<h1>{{ trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')) }}</h1>
+    @php
+        $hobbies = is_string($data['hobbies'] ?? null) ? json_decode($data['hobbies'], true) : ($data['hobbies'] ?? []);
+        $languages = is_string($data['languages'] ?? null) ? json_decode($data['languages'], true) : ($data['languages'] ?? []);
+        $skills = is_string($data['skills'] ?? null) ? json_decode($data['skills'], true) : ($data['skills'] ?? []);
+        $education = is_string($data['education'] ?? null) ? json_decode($data['education'], true) : ($data['education'] ?? []);
+        $extra_activities = is_string($data['extra_curriculum_activities'] ?? null) ? json_decode($data['extra_curriculum_activities'], true) : ($data['extra_curriculum_activities'] ?? []);
+        $work_experience = is_string($data['work_experience'] ?? null) ? json_decode($data['work_experience'], true) : ($data['work_experience'] ?? []);
+    @endphp
 
-{{-- Personal Information --}}
-@if(!empty($data['first_name']) || !empty($data['last_name']) || !empty($data['email']))
-<div class="section">
-    <h2>Personal Information</h2>
-    @if(!empty($data['email']))<p>Email: {{ $data['email'] }}</p>@endif
-    @if(!empty($data['phone']))<p>Phone: {{ $data['phone'] }}</p>@endif
-    @if(!empty($data['location']))<p>Location: {{ $data['location'] }}</p>@endif
-    @if(!empty($data['website']))<p>Website: {{ $data['website'] }}</p>@endif
-    @if(!empty($data['summary']))<p>Summary: {{ $data['summary'] }}</p>@endif
-</div>
-@endif
+    <h2>{{ $data['first_name'] ?? '' }} {{ $data['last_name'] ?? '' }}</h2>
+    <p>Email: {{ $data['email'] ?? '' }} | Phone: {{ $data['phone'] ?? '' }}</p>
 
-{{-- Work Experience --}}
-@if(!empty($data['experiences']))
-<div class="section">
-    <h2>Work Experience</h2>
-    @foreach($data['experiences'] as $exp)
-        @php
-            $hasExp = !empty($exp['company']) || !empty($exp['role']);
-        @endphp
-        @if($hasExp)
-        <div class="border">
-            @if(!empty($exp['company']))<p><strong>{{ $exp['company'] }}</strong></p>@endif
-            @if(!empty($exp['role']))<p>Role: {{ $exp['role'] }}</p>@endif
-            @if(!empty($exp['city']) || !empty($exp['country']))<p>Location: {{ $exp['city'] ?? '' }}{{ !empty($exp['city']) && !empty($exp['country']) ? ', ' : '' }}{{ $exp['country'] ?? '' }}</p>@endif
-            @if(!empty($exp['start_date']) || !empty($exp['end_date']) || !empty($exp['currently_working']))
-                <p>Period: {{ $exp['start_date'] ?? '' }} - {{ !empty($exp['currently_working']) ? 'Present' : ($exp['end_date'] ?? '') }}</p>
-            @endif
-            @if(!empty($exp['description']))<p>{{ $exp['description'] }}</p>@endif
-        </div>
-        @endif
-    @endforeach
-</div>
-@endif
+    @if(isset($data['profile_image']))
+        <img src="{{ public_path('storage/'.$data['profile_image']) }}">
+    @endif
 
-{{-- Activities --}}
-@if(!empty($data['activities']))
-<div class="section">
-    <h2>Activities</h2>
-    @foreach($data['activities'] as $act)
-        @if(!empty($act['title']) || !empty($act['description']))
-        <div class="border">
-            @if(!empty($act['title']))<p><strong>{{ $act['title'] }}</strong></p>@endif
-            @if(!empty($act['description']))<p>{{ $act['description'] }}</p>@endif
-        </div>
-        @endif
-    @endforeach
-</div>
-@endif
+    @if(!empty($work_experience))
+        <h3>Work Experience</h3>
+        <ul>
+            @foreach($work_experience as $we)
+                @if(!empty($we['position']))
+                    <li>{{ $we['position'] }} at {{ $we['company'] ?? '' }}, {{ $we['city'] ?? '' }}, {{ $we['country'] ?? '' }}
+                    @if(isset($we['still_working']) && $we['still_working']) (Currently Working) @endif
+                    </li>
+                @endif
+            @endforeach
+        </ul>
+    @endif
 
-{{-- Hobbies --}}
-@if(!empty($data['hobbies']))
-<div class="section">
-    <h2>Hobbies</h2>
-    <ul>
-        @foreach($data['hobbies'] as $hobby)
-            @if(!empty($hobby))<li>{{ $hobby }}</li>@endif
-        @endforeach
-    </ul>
-</div>
-@endif
+    @if(!empty($hobbies))
+        <h3>Hobbies</h3>
+        <ul>@foreach($hobbies as $h)<li>{{ $h }}</li>@endforeach</ul>
+    @endif
 
-{{-- Languages --}}
-@if(!empty($data['languages']))
-<div class="section">
-    <h2>Languages</h2>
-    <ul>
-        @foreach($data['languages'] as $lang)
-            @if(!empty($lang['name']))
-                <li>{{ $lang['name'] }}{{ !empty($lang['level']) ? ' - '.ucfirst($lang['level']) : '' }}</li>
-            @endif
-        @endforeach
-    </ul>
-</div>
-@endif
+    @if(!empty($languages))
+        <h3>Languages</h3>
+        <ul>@foreach($languages as $l)<li>{{ $l }}</li>@endforeach</ul>
+    @endif
+
+    @if(!empty($skills))
+        <h3>Skills</h3>
+        <ul>@foreach($skills as $s)<li>{{ $s }}</li>@endforeach</ul>
+    @endif
+
+    @if(!empty($education))
+        <h3>Education</h3>
+        <ul>@foreach($education as $e)<li>{{ $e }}</li>@endforeach</ul>
+    @endif
+
+    @if(!empty($extra_activities))
+        <h3>Extra Curricular Activities</h3>
+        <ul>@foreach($extra_activities as $ea)<li>{{ $ea }}</li>@endforeach</ul>
+    @endif
 
 </body>
 </html>

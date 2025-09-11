@@ -1,93 +1,81 @@
 <x-app-layout>
-<div class="container mx-auto py-8 max-w-4xl">
-    <h1 class="text-3xl font-bold mb-6">CV Preview</h1>
+    <x-slot name="header">CV Preview</x-slot>
+    <div class="p-6 bg-white rounded shadow">
 
-    {{-- Personal Info --}}
-    @if(!empty($data['first_name']) || !empty($data['last_name']) || !empty($data['email']))
-    <div class="mb-6">
-        <h2 class="font-bold text-xl mb-2">Personal Information</h2>
-        @if(!empty($data['first_name']) || !empty($data['last_name']))
-            <p>{{ $data['first_name'] ?? '' }} {{ $data['last_name'] ?? '' }}</p>
+        @php
+            // Pārvērš JSON string vai null par array
+            $hobbies = is_string($data['hobbies'] ?? null) ? json_decode($data['hobbies'], true) : ($data['hobbies'] ?? []);
+            $languages = is_string($data['languages'] ?? null) ? json_decode($data['languages'], true) : ($data['languages'] ?? []);
+            $skills = is_string($data['skills'] ?? null) ? json_decode($data['skills'], true) : ($data['skills'] ?? []);
+            $education = is_string($data['education'] ?? null) ? json_decode($data['education'], true) : ($data['education'] ?? []);
+            $extra_activities = is_string($data['extra_curriculum_activities'] ?? null) ? json_decode($data['extra_curriculum_activities'], true) : ($data['extra_curriculum_activities'] ?? []);
+            $work_experience = is_string($data['work_experience'] ?? null) ? json_decode($data['work_experience'], true) : ($data['work_experience'] ?? []);
+        @endphp
+
+        <h2 class="text-2xl font-bold">{{ $data['first_name'] ?? '' }} {{ $data['last_name'] ?? '' }}</h2>
+        <p>Email: {{ $data['email'] ?? '' }}</p>
+        <p>Phone: {{ $data['phone'] ?? '' }}</p>
+
+        @if(isset($data['profile_image']))
+            <img src="{{ asset('storage/'.$data['profile_image']) }}" class="w-32 h-32 rounded mt-2 mb-4">
         @endif
-        @if(!empty($data['email']))<p>Email: {{ $data['email'] }}</p>@endif
-        @if(!empty($data['phone']))<p>Phone: {{ $data['phone'] }}</p>@endif
-        @if(!empty($data['location']))<p>Location: {{ $data['location'] }}</p>@endif
-        @if(!empty($data['website']))<p>Website: {{ $data['website'] }}</p>@endif
-        @if(!empty($data['summary']))<p>Summary: {{ $data['summary'] }}</p>@endif
-    </div>
-    @endif
 
-    {{-- Work Experience --}}
-    @if(!empty($data['experiences']))
-    <div class="mb-6">
-        <h2 class="font-bold text-xl mb-2">Work Experience</h2>
-        @foreach($data['experiences'] as $exp)
-            @php
-                $hasExp = !empty($exp['company']) || !empty($exp['role']);
-            @endphp
-            @if($hasExp)
-            <div class="border p-2 rounded mb-2">
-                @if(!empty($exp['company']))<p><strong>{{ $exp['company'] }}</strong></p>@endif
-                @if(!empty($exp['role']))<p>Role: {{ $exp['role'] }}</p>@endif
-                @if(!empty($exp['city']) || !empty($exp['country']))
-                    <p>Location: {{ $exp['city'] ?? '' }}{{ !empty($exp['city']) && !empty($exp['country']) ? ', ' : '' }}{{ $exp['country'] ?? '' }}</p>
-                @endif
-                @if(!empty($exp['start_date']) || !empty($exp['end_date']) || !empty($exp['currently_working']))
-                    <p>Period: {{ $exp['start_date'] ?? '' }} - {{ !empty($exp['currently_working']) ? 'Present' : ($exp['end_date'] ?? '') }}</p>
-                @endif
-                @if(!empty($exp['description']))<p>{{ $exp['description'] }}</p>@endif
-            </div>
-            @endif
-        @endforeach
-    </div>
-    @endif
+        @if(!empty($work_experience))
+            <h3 class="text-xl mt-4">Work Experience</h3>
+            <ul class="list-disc pl-6">
+                @foreach($work_experience as $we)
+                    @if(!empty($we['position']))
+                        <li>{{ $we['position'] }} at {{ $we['company'] ?? '' }}, {{ $we['city'] ?? '' }}, {{ $we['country'] ?? '' }}
+                        @if(isset($we['still_working']) && $we['still_working']) (Currently Working) @endif
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        @endif
 
-    {{-- Activities --}}
-    @if(!empty($data['activities']))
-    <div class="mb-6">
-        <h2 class="font-bold text-xl mb-2">Activities</h2>
-        @foreach($data['activities'] as $act)
-            @if(!empty($act['title']) || !empty($act['description']))
-            <div class="border p-2 rounded mb-2">
-                @if(!empty($act['title']))<p><strong>{{ $act['title'] }}</strong></p>@endif
-                @if(!empty($act['description']))<p>{{ $act['description'] }}</p>@endif
-            </div>
-            @endif
-        @endforeach
-    </div>
-    @endif
+        @if(!empty($hobbies))
+            <h3 class="text-xl mt-4">Hobbies</h3>
+            <ul class="list-disc pl-6">
+                @foreach($hobbies as $h)<li>{{ $h }}</li>@endforeach
+            </ul>
+        @endif
 
-    {{-- Hobbies --}}
-    @if(!empty($data['hobbies']))
-    <div class="mb-6">
-        <h2 class="font-bold text-xl mb-2">Hobbies</h2>
-        <ul class="list-disc ml-6">
-            @foreach($data['hobbies'] as $hobby)
-                @if(!empty($hobby))<li>{{ $hobby }}</li>@endif
-            @endforeach
-        </ul>
-    </div>
-    @endif
+        @if(!empty($languages))
+            <h3 class="text-xl mt-4">Languages</h3>
+            <ul class="list-disc pl-6">
+                @foreach($languages as $l)<li>{{ $l }}</li>@endforeach
+            </ul>
+        @endif
 
-    {{-- Languages --}}
-    @if(!empty($data['languages']))
-    <div class="mb-6">
-        <h2 class="font-bold text-xl mb-2">Languages</h2>
-        <ul class="list-disc ml-6">
-            @foreach($data['languages'] as $lang)
-                @if(!empty($lang['name']))
-                    <li>{{ $lang['name'] }}{{ !empty($lang['level']) ? ' - '.ucfirst($lang['level']) : '' }}</li>
+        @if(!empty($skills))
+            <h3 class="text-xl mt-4">Skills</h3>
+            <ul class="list-disc pl-6">
+                @foreach($skills as $s)<li>{{ $s }}</li>@endforeach
+            </ul>
+        @endif
+
+        @if(!empty($education))
+            <h3 class="text-xl mt-4">Education</h3>
+            <ul class="list-disc pl-6">
+                @foreach($education as $e)<li>{{ $e }}</li>@endforeach
+            </ul>
+        @endif
+
+        @if(!empty($extra_activities))
+            <h3 class="text-xl mt-4">Extra Curricular Activities</h3>
+            <ul class="list-disc pl-6">
+                @foreach($extra_activities as $ea)<li>{{ $ea }}</li>@endforeach
+            </ul>
+        @endif
+
+        <form method="POST" action="{{ route('cv.pdf') }}" class="mt-4">
+            @csrf
+            @foreach($data as $key=>$val)
+                @if(is_array($val) || is_string($val))
+                    <input type="hidden" name="{{ $key }}" value="{{ is_array($val)?json_encode($val):$val }}">
                 @endif
             @endforeach
-        </ul>
+            <button type="submit" class="bg-blue-500 text-white p-2 rounded">Download PDF</button>
+        </form>
     </div>
-    @endif
-
-    {{-- Download PDF --}}
-    <form action="{{ route('cv.pdf') }}" method="POST">
-        @csrf
-        <input type="hidden" name="data" value="{{ htmlspecialchars(json_encode($data), ENT_QUOTES, 'UTF-8') }}">
-        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition">Download PDF</button>
-    </form>
-</div>
 </x-app-layout>
