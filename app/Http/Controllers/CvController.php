@@ -17,7 +17,12 @@ class CvController extends Controller
         // Example templates list
         $templates = ['classic','modern','creative','minimal','elegant','corporate','gradient','darkmode','futuristic'];
 
-        return view('cv.form', compact('countries', 'templates'));
+        $initialTemplate = request('template');
+        if ($initialTemplate && !in_array($initialTemplate, $templates, true)) {
+            $initialTemplate = null;
+        }
+
+        return view('cv.form', compact('countries', 'templates', 'initialTemplate'));
     }
 
     public function store(Request $request)
