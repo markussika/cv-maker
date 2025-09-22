@@ -1,124 +1,117 @@
 <x-app-layout>
-    <x-slot name="header">Create CV</x-slot>
-    <div class="p-6 bg-white rounded shadow">
-        <form method="POST" action="{{ route('cv.preview') }}" enctype="multipart/form-data">
-            @csrf
-            <!-- Personal info -->
-            <div class="mb-4">
-                <label>First Name</label>
-                <input type="text" name="first_name" class="border p-2 w-full">
-                <label>Last Name</label>
-                <input type="text" name="last_name" class="border p-2 w-full">
-                <label>Email</label>
-                <input type="email" name="email" class="border p-2 w-full">
-                <label>Phone</label>
-                <input type="text" name="phone" class="border p-2 w-full">
-                <label>Profile Image</label>
-                <input type="file" name="profile_image" class="border p-2 w-full">
-            </div>
-
-            <!-- Work experience -->
-            <div id="work_experience_section" class="mb-4">
-                <h3>Work Experience</h3>
-                <div class="experience_item mb-2">
-                    <input type="text" name="work_experience[0][position]" placeholder="Position" class="border p-2 w-full">
-                    <select name="work_experience[0][country]" class="border p-2 country_select">
-                        <option value="">Select Country</option>
-                    </select>
-                    <select name="work_experience[0][city]" class="border p-2 city_select">
-                        <option value="">Select City</option>
-                    </select>
-                    <select name="work_experience[0][company]" class="border p-2 company_select">
-                        <option value="">Select Company</option>
-                    </select>
-                    <label><input type="checkbox" name="work_experience[0][still_working]"> Still working</label>
+    <div class="max-w-4xl mx-auto py-10">
+        <!-- Step Indicator -->
+        <div class="flex justify-between items-center mb-8">
+            @foreach (['1' => 'Personal Info', '2' => 'Education', '3' => 'Experience', '4' => 'Finish'] as $step => $label)
+                <div class="flex-1 text-center">
+                    <div class="w-10 h-10 mx-auto rounded-full flex items-center justify-center 
+                        {{ $loop->first ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700' }}">
+                        {{ $step }}
+                    </div>
+                    <p class="text-sm mt-2">{{ $label }}</p>
                 </div>
-                <button type="button" id="add_experience">Add Experience</button>
+            @endforeach
+        </div>
+
+        <!-- Form -->
+        <form method="POST" action="{{ route('cv.store') }}" class="bg-white shadow-lg rounded-xl p-8 space-y-6">
+            @csrf
+
+            <!-- Step 1: Personal Info -->
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Personal Information</h2>
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="block mb-1 font-medium">First Name</label>
+                        <input type="text" name="first_name" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">Last Name</label>
+                        <input type="text" name="last_name" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">Birthday</label>
+                        <input type="date" name="birthday" max="{{ date('Y-m-d') }}" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">Country</label>
+                        <select name="country" id="country" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                            <option value="">Select Country</option>
+                            @foreach($countries as $country)
+                                <option value="{{ $country }}">{{ $country }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">City</label>
+                        <select name="city" id="city" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                            <option value="">Select City</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
-            <!-- Hobbies, Languages, Skills -->
-            <div class="mb-4">
-                <label>Hobbies</label>
-                <select name="hobbies[]" multiple class="border p-2 w-full">
-                    <option>Reading</option>
-                    <option>Traveling</option>
-                    <option>Sports</option>
-                </select>
-
-                <label>Languages</label>
-                <select name="languages[]" multiple class="border p-2 w-full">
-                    <option>English</option>
-                    <option>Spanish</option>
-                    <option>French</option>
-                </select>
-
-                <label>Skills</label>
-                <input type="text" name="skills[]" class="border p-2 w-full">
+            <!-- Step 2: Education -->
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Education</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-1 font-medium">School / University</label>
+                        <input type="text" name="education[school]" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">Degree</label>
+                        <input type="text" name="education[degree]" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                </div>
             </div>
 
-            <!-- Education & Extra -->
-            <div class="mb-4">
-                <label>Education</label>
-                <input type="text" name="education[]" class="border p-2 w-full">
-                <label>Extra Curricular Activities</label>
-                <input type="text" name="extra_curriculum_activities[]" class="border p-2 w-full">
+            <!-- Step 3: Experience -->
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Experience</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block mb-1 font-medium">Company</label>
+                        <input type="text" name="experience[company]" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-medium">Role</label>
+                        <input type="text" name="experience[role]" class="w-full rounded-lg border-gray-300 focus:ring-blue-500">
+                    </div>
+                </div>
             </div>
 
-            <button type="submit" class="bg-blue-500 text-white p-2">Preview CV</button>
+            <!-- Step 4: Finish -->
+            <div class="text-right">
+                <button type="submit" class="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
+                    Save & Preview
+                </button>
+            </div>
         </form>
     </div>
 
     <script>
-        // Fetch countries on page load
-        fetch('/countries')
-        .then(res => res.json())
-        .then(countries => {
-            document.querySelectorAll('.country_select').forEach(sel=>{
-                countries.forEach(c=>sel.add(new Option(c,c)));
-            });
-        });
+        document.getElementById('country').addEventListener('change', function () {
+            const country = this.value;
+            const cityDropdown = document.getElementById('city');
+            cityDropdown.innerHTML = '<option value="">Loading...</option>';
 
-        // Event delegation for country->city->company
-        document.addEventListener('change', async function(e){
-            if(e.target.classList.contains('country_select')){
-                let country = e.target.value;
-                let citySelect = e.target.closest('.experience_item').querySelector('.city_select');
-                let companySelect = e.target.closest('.experience_item').querySelector('.company_select');
-
-                citySelect.innerHTML='<option>Select City</option>';
-                companySelect.innerHTML='<option>Select Company</option>';
-
-                if(country){
-                    let cities = await fetch(`/cities?country=${country}`).then(r=>r.json());
-                    cities.forEach(c=>citySelect.add(new Option(c,c)));
-                }
+            if (country) {
+                fetch(`/api/cities/${country}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        cityDropdown.innerHTML = '<option value="">Select City</option>';
+                        data.forEach(city => {
+                            let option = document.createElement('option');
+                            option.value = city;
+                            option.textContent = city;
+                            cityDropdown.appendChild(option);
+                        });
+                    })
+                    .catch(() => {
+                        cityDropdown.innerHTML = '<option value="">Error loading cities</option>';
+                    });
             }
-
-            if(e.target.classList.contains('city_select')){
-                let country = e.target.closest('.experience_item').querySelector('.country_select').value;
-                let city = e.target.value;
-                let companySelect = e.target.closest('.experience_item').querySelector('.company_select');
-
-                companySelect.innerHTML='<option>Select Company</option>';
-
-                if(country && city){
-                    let companies = await fetch(`/companies?country=${country}&city=${city}`).then(r=>r.json());
-                    companies.forEach(c=>companySelect.add(new Option(c,c)));
-                }
-            }
-        });
-
-        // Add new experience
-        document.getElementById('add_experience').addEventListener('click', ()=>{
-            let container=document.getElementById('work_experience_section');
-            let count = container.querySelectorAll('.experience_item').length;
-            let clone = container.querySelector('.experience_item').cloneNode(true);
-            clone.querySelectorAll('input, select').forEach(inp=>{
-                let name = inp.name.replace(/\[\d+\]/, `[${count}]`);
-                inp.name=name;
-                inp.value='';
-            });
-            container.appendChild(clone);
         });
     </script>
 </x-app-layout>
