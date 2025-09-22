@@ -13,31 +13,42 @@ class Cv extends Model
         'user_id',
         'first_name',
         'last_name',
-        'birth_date',
         'email',
         'phone',
+        'profile_image',
+        'birth_date',
         'address',
         'city',
         'country',
         'linkedin',
         'github',
         'website',
-        'education',
-        'experience',
-        'languages',
-        'skills',
+        'summary',
+        'template',
         'hobbies',
-        'activities',
+        'languages',
+        'work_experience',
+        'education',
+        'skills',
+        'extra_curriculum_activities',
     ];
 
     protected $casts = [
-        'education' => 'array',
-        'experience' => 'array',
-        'languages' => 'array',
-        'skills' => 'array',
+        'birth_date' => 'date',
         'hobbies' => 'array',
-        'activities' => 'array',
+        'languages' => 'array',
+        'work_experience' => 'array',
+        'education' => 'array',
+        'skills' => 'array',
+        'extra_curriculum_activities' => 'array',
     ];
+
+    protected $appends = ['full_name'];
+
+    public function getFullNameAttribute(): string
+    {
+        return trim(($this->first_name ?? '') . ' ' . ($this->last_name ?? ''));
+    }
 
     public function user()
     {

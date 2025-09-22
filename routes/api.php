@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Http;
 
 // Get all countries
 Route::get('/countries', function () {
-    $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions');
+    $response = Http::withoutProxy()->timeout(10)->get('https://countriesnow.space/api/v0.1/countries/positions');
 
     if ($response->failed()) {
         return response()->json([], 500);
@@ -19,7 +19,7 @@ Route::get('/countries', function () {
 Route::get('/cities', function () {
     $country = request('country');
 
-    $response = Http::post('https://countriesnow.space/api/v0.1/countries/cities', [
+    $response = Http::withoutProxy()->timeout(10)->post('https://countriesnow.space/api/v0.1/countries/cities', [
         'country' => $country,
     ]);
 
@@ -35,9 +35,9 @@ Route::get('/companies', function () {
     $country = request('country');
     $city = request('city');
 
-    $response = Http::withHeaders([
+    $response = Http::withoutProxy()->withHeaders([
         'Authorization' => 'Bearer ' . env('COMPANIES_API_KEY'),
-    ])->get("https://www.thecompaniesapi.com/api/enrich-company-from-domain", [
+    ])->timeout(10)->get("https://www.thecompaniesapi.com/api/enrich-company-from-domain", [
         'country' => $country,
         'city' => $city,
     ]);

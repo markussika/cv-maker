@@ -35,7 +35,7 @@
             @foreach($work_experience as $we)
                 @if(!empty($we['position']))
                     <li>{{ $we['position'] }} at {{ $we['company'] ?? '' }}, {{ $we['city'] ?? '' }}, {{ $we['country'] ?? '' }}
-                    @if(isset($we['still_working']) && $we['still_working']) (Currently Working) @endif
+                    @if((isset($we['still_working']) && $we['still_working']) || (!empty($we['currently']))) (Currently Working) @endif
                     </li>
                 @endif
             @endforeach
