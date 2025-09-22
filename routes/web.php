@@ -23,7 +23,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/cv/preview','preview')->name('cv.preview');
         Route::post('/cv/pdf','pdf')->name('cv.pdf');
         Route::get('/cv/guide', fn()=> view('cv.guide'))->name('cv.guide');
-        Route::get('/cv/templates', fn()=> view('cv.templates.index'))->name('cv.templates');
+        Route::get('/cv/templates', fn()=> view('templates.index'))->name('cv.templates');
     });
 
     // API endpoints for dynamic dropdowns
