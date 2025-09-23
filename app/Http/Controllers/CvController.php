@@ -2,67 +2,143 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 use PDF;
 
 class CvController extends Controller
 {
-    public function create()
+    public function create(Request $request)
     {
-        // Valstu saraksts no API
-        $response = Http::get('https://countriesnow.space/api/v0.1/countries/positions');
-        $countries = collect($response->json('data'))->pluck('name')->toArray();
+        $countries = $this->fetchCountries();
+        $templates = $this->templateOptions();
 
-        // Example templates list
-        $templates = ['classic','modern','creative','minimal','elegant','corporate','gradient','darkmode','futuristic'];
+        $prefill = $request->user()?->cvs()->latest()->first();
 
-        $initialTemplate = request('template');
-        if ($initialTemplate && !in_array($initialTemplate, $templates, true)) {
-            $initialTemplate = null;
+        $initialTemplate = $templates[0] ?? 'classic';
+        if ($prefill && in_array($prefill->template, $templates, true)) {
+            $initialTemplate = $prefill->template;
         }
 
-        return view('cv.form', compact('countries', 'templates', 'initialTemplate'));
+        $requestedTemplate = $request->string('template')->toString();
+        if ($requestedTemplate && in_array($requestedTemplate, $templates, true)) {
+            $initialTemplate = $requestedTemplate;
+        }
+
+        return view('cv.form', [
+            'countries' => $countries,
+            'templates' => $templates,
+            'initialTemplate' => $initialTemplate,
+            'prefill' => $prefill,
+        ]);
     }
 
     public function store(Request $request)
     {
-        // (optional) validate what you need here
-        // $request->validate([...]);
+        $templates = $this->templateOptions();
 
-        // Save all form data into session so preview/download can use it
-        session(['cv_data' => $request->all()]);
+        $validated = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'birthday' => ['nullable', 'date'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'template' => ['required', 'string', Rule::in($templates)],
+            'education' => ['nullable', 'array'],
+            'education.institution' => ['nullable', 'string', 'max:255'],
+            'education.degree' => ['nullable', 'string', 'max:255'],
+            'education.field' => ['nullable', 'string', 'max:255'],
+            'education.start_year' => ['nullable', 'string', 'max:25'],
+            'education.end_year' => ['nullable', 'string', 'max:25'],
+            'experience' => ['nullable', 'array'],
+            'experience.position' => ['nullable', 'string', 'max:255'],
+            'experience.company' => ['nullable', 'string', 'max:255'],
+            'experience.country' => ['nullable', 'string', 'max:255'],
+            'experience.city' => ['nullable', 'string', 'max:255'],
+            'experience.from' => ['nullable', 'string', 'max:25'],
+            'experience.to' => ['nullable', 'string', 'max:25'],
+            'experience.currently' => ['nullable', 'boolean'],
+            'experience.achievements' => ['nullable', 'string', 'max:2000'],
+        ]);
 
-        // Redirect to preview which will read from session
-        return redirect()->route('cv.preview');
+        $education = $this->normaliseEducation($validated['education'] ?? []);
+        $experience = $this->normaliseExperience($validated['experience'] ?? []);
+
+        $cv = Cv::create([
+            'user_id' => $request->user()->id,
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'birthday' => $validated['birthday'] ?? null,
+            'country' => $validated['country'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'template' => $validated['template'],
+            'education' => !empty($education) ? $education : null,
+            'work_experience' => !empty($experience) ? $experience : null,
+        ]);
+
+        $cvData = $this->formatCvForView($cv);
+
+        session(['cv_data' => $cvData]);
+
+        return redirect()->route('cv.preview')->with('status', __('Your CV details have been saved.'));
     }
 
-    public function preview()
+    public function preview(Request $request)
     {
-        // Always provide $cvData (array) to the view to avoid undefined variable
-        $cvData = session('cv_data', []);
-        $templates = ['classic','modern','creative','minimal','elegant','corporate','gradient','darkmode','futuristic'];
+        $templates = $this->templateOptions();
+        $cvData = $this->resolveCvData($request);
 
         return view('cv.preview', compact('cvData', 'templates'));
     }
 
     public function pdf(Request $request)
     {
-        $data = $request->all();
-        $pdf = PDF::loadView('cv.pdf', compact('data'));
-        return $pdf->download('cv.pdf');
+        $cvData = $this->resolveCvData($request);
+        $template = $cvData['template'] ?? 'classic';
+
+        return $this->renderPdf($cvData, $template, 'cv.pdf');
     }
 
     public function getCities(Request $request)
     {
-        $country = $request->input('country');
-        if (!$country) return response()->json([]);
+        $country = trim((string) $request->input('country', ''));
 
-        $response = Http::post('https://countriesnow.space/api/v0.1/countries/cities', [
-            'country' => $country
-        ]);
+        if ($country === '') {
+            return response()->json([]);
+        }
 
-        return response()->json($response->json('data') ?? []);
+        try {
+            $response = Http::timeout(8)->post('https://countriesnow.space/api/v0.1/countries/cities', [
+                'country' => $country,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([]);
+        }
+
+        if ($response->failed()) {
+            return response()->json([]);
+        }
+
+        $cities = $response->json('data');
+
+        if (!is_array($cities)) {
+            $cities = [];
+        }
+
+        $cities = collect($cities)
+            ->filter(fn ($city) => is_string($city) && $city !== '')
+            ->unique()
+            ->sort()
+            ->values()
+            ->all();
+
+        return response()->json($cities);
     }
 
     public function getCompanies(Request $request)
@@ -70,48 +146,228 @@ class CvController extends Controller
         $country = $request->input('country');
         $city = $request->input('city');
 
-        $fakeCompanies = [
-            'Tech Solutions Ltd','Global IT Services','Future Innovations','Smart Systems Inc','NextGen Software'
+        $fallback = [
+            'Tech Solutions Ltd',
+            'Global IT Services',
+            'Future Innovations',
+            'Smart Systems Inc',
+            'NextGen Software',
         ];
 
-        if (!$country || !$city) return response()->json($fakeCompanies);
+        if (!$country || !$city) {
+            return response()->json($fallback);
+        }
 
-        $response = Http::withHeaders([
-            'Authorization' => 'Bearer '.config('services.companies_api.key')
-        ])->get('https://www.thecompaniesapi.com/api/enrich-company-from-domain', [
-            'country' => $country,
-            'city' => $city
-        ]);
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . config('services.companies_api.key'),
+            ])->timeout(8)->get('https://www.thecompaniesapi.com/api/enrich-company-from-domain', [
+                'country' => $country,
+                'city' => $city,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json($fallback);
+        }
 
-        if ($response->failed()) return response()->json($fakeCompanies);
+        if ($response->failed()) {
+            return response()->json($fallback);
+        }
 
         $data = $response->json();
-        $companies = [];
-        if (isset($data['companies']) && is_array($data['companies'])) {
-            foreach ($data['companies'] as $company) {
-                $companies[] = $company['name'] ?? '';
-            }
+
+        $companies = collect($data['companies'] ?? [])
+            ->map(fn ($company) => is_array($company) ? ($company['name'] ?? null) : null)
+            ->filter()
+            ->values()
+            ->all();
+
+        if (empty($companies)) {
+            $companies = $fallback;
         }
-        if (empty($companies)) $companies = $fakeCompanies;
 
         return response()->json($companies);
     }
 
     public function templates()
     {
-        $templates = ['classic','modern','creative','minimal','elegant','corporate','gradient','darkmode','futuristic'];
-        return view('cv.templates', compact('templates'));
+        return view('cv.templates', ['templates' => $this->templateOptions()]);
     }
 
-    public function download($template)
+    public function download(Request $request, string $template)
     {
-        $data = session('cv_data', []);
-        // Ensure template exists; adjust path to your template blades
-        return PDF::loadView("cv.templates.pdf.$template", compact('data'))->download("cv-{$template}.pdf");
+        $templates = $this->templateOptions();
+        if (!in_array($template, $templates, true)) {
+            $template = $templates[0] ?? 'classic';
+        }
+
+        $cvData = $this->resolveCvData($request);
+        $cvData['template'] = $template;
+
+        return $this->renderPdf($cvData, $template, "cv-{$template}.pdf");
     }
 
     public function guide()
     {
         return view('cv.guide');
+    }
+
+    protected function templateOptions(): array
+    {
+        return ['classic', 'modern', 'creative', 'minimal', 'elegant', 'corporate', 'gradient', 'darkmode', 'futuristic'];
+    }
+
+    protected function fetchCountries(): array
+    {
+        try {
+            $response = Http::timeout(8)->get('https://countriesnow.space/api/v0.1/countries/positions');
+            if ($response->successful()) {
+                $countries = collect($response->json('data'))
+                    ->pluck('name')
+                    ->filter()
+                    ->unique()
+                    ->sort()
+                    ->values()
+                    ->all();
+
+                if (!empty($countries)) {
+                    return $countries;
+                }
+            }
+        } catch (\Throwable $e) {
+            // ignore network errors and use fallback list below
+        }
+
+        return [
+            'Canada',
+            'France',
+            'Germany',
+            'Latvia',
+            'United Kingdom',
+            'United States',
+        ];
+    }
+
+    protected function normaliseEducation(?array $education): array
+    {
+        if (!is_array($education)) {
+            return [];
+        }
+
+        $clean = [];
+        foreach ($education as $key => $value) {
+            if (is_string($value)) {
+                $value = trim($value);
+            }
+            if ($value !== '' && $value !== null) {
+                $clean[$key] = $value;
+            }
+        }
+
+        return $clean;
+    }
+
+    protected function normaliseExperience(?array $experience): array
+    {
+        if (!is_array($experience)) {
+            return [];
+        }
+
+        $fields = ['position', 'company', 'country', 'city', 'from', 'to', 'achievements'];
+        $clean = [];
+
+        foreach ($fields as $field) {
+            $value = $experience[$field] ?? null;
+            if (is_string($value)) {
+                $value = trim($value);
+            }
+            if ($value !== '' && $value !== null) {
+                $clean[$field] = $value;
+            }
+        }
+
+        $clean['currently'] = !empty($experience['currently']);
+        if ($clean['currently']) {
+            unset($clean['to']);
+        }
+
+        $hasContent = $clean['currently'];
+        foreach ($clean as $key => $value) {
+            if ($key === 'currently') {
+                continue;
+            }
+            if ($value !== null && $value !== '') {
+                $hasContent = true;
+                break;
+            }
+        }
+
+        if (!$hasContent) {
+            return [];
+        }
+
+        return $clean;
+    }
+
+    protected function formatCvForView(Cv $cv): array
+    {
+        $education = $cv->education ?? [];
+        if (is_array($education) && isset($education[0]) && is_array($education[0])) {
+            $education = $education[0];
+        }
+
+        $experience = $cv->work_experience ?? [];
+        if (is_array($experience) && isset($experience[0]) && is_array($experience[0])) {
+            $experience = $experience[0];
+        }
+
+        return [
+            'id' => $cv->id,
+            'first_name' => $cv->first_name,
+            'last_name' => $cv->last_name,
+            'email' => $cv->email,
+            'phone' => $cv->phone,
+            'birthday' => optional($cv->birthday)->toDateString(),
+            'country' => $cv->country,
+            'city' => $cv->city,
+            'template' => $cv->template,
+            'education' => $education,
+            'experience' => $experience,
+        ];
+    }
+
+    protected function resolveCvData(Request $request): array
+    {
+        $sessionData = session('cv_data');
+        if (!empty($sessionData)) {
+            return $sessionData;
+        }
+
+        $cv = $request->user()?->cvs()->latest()->first();
+
+        return $cv ? $this->formatCvForView($cv) : [];
+    }
+
+    protected function renderPdf(array $data, string $template, string $filename)
+    {
+        return PDF::loadView('cv.pdf', [
+            'data' => $data,
+            'template' => $template,
+            'accentColor' => $this->accentColour($template),
+        ])->download($filename);
+    }
+
+    protected function accentColour(string $template): string
+    {
+        return match ($template) {
+            'modern' => '#2563eb',
+            'creative' => '#ec4899',
+            'minimal' => '#0f172a',
+            'elegant' => '#c026d3',
+            'corporate' => '#0f172a',
+            'gradient' => '#0ea5e9',
+            'darkmode' => '#1f2937',
+            'futuristic' => '#7c3aed',
+            default => '#1e293b',
+        };
     }
 }

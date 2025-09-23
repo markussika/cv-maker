@@ -55,18 +55,85 @@
             ],
         ];
 
-        $initialTemplate = old('template', $initialTemplate ?? ($templates[0] ?? 'classic'));
-        $inputClasses = 'mt-1 block w-full rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/60 focus:outline-none transition';
+        $prefill = $prefill ?? null;
+
+        $prefillEducation = [];
+        $rawEducation = $prefill ? data_get($prefill, 'education') : null;
+        if ($rawEducation) {
+            $prefillEducation = $rawEducation;
+            if (is_string($prefillEducation)) {
+                $decodedEducation = json_decode($prefillEducation, true);
+                $prefillEducation = is_array($decodedEducation) ? $decodedEducation : [];
+            }
+            if (is_array($prefillEducation) && isset($prefillEducation[0]) && is_array($prefillEducation[0])) {
+                $prefillEducation = $prefillEducation[0];
+            }
+        }
+
+        $prefillExperience = [];
+        if ($prefill) {
+            $rawExperience = data_get($prefill, 'work_experience', data_get($prefill, 'experience', []));
+            if (is_string($rawExperience)) {
+                $decodedExperience = json_decode($rawExperience, true);
+                $rawExperience = is_array($decodedExperience) ? $decodedExperience : [];
+            }
+            if (is_array($rawExperience) && isset($rawExperience[0]) && is_array($rawExperience[0])) {
+                $prefillExperience = $rawExperience[0];
+            } elseif (is_array($rawExperience)) {
+                $prefillExperience = $rawExperience;
+            }
+        }
+
+        $prefillEducation = is_array($prefillEducation) ? $prefillEducation : [];
+        $prefillExperience = is_array($prefillExperience) ? $prefillExperience : [];
+
+        $prefillBirthdayValue = data_get($prefill, 'birthday');
+        if ($prefillBirthdayValue instanceof \Carbon\CarbonInterface) {
+            $prefilledBirthday = $prefillBirthdayValue->format('Y-m-d');
+        } else {
+            $prefilledBirthday = $prefillBirthdayValue ?: null;
+        }
+
+        $initialCountry = old('country', data_get($prefill, 'country') ?? request('country'));
+        $initialCity = old('city', data_get($prefill, 'city') ?? '');
+
+        $requestedTemplate = $initialTemplate ?? ($templates[0] ?? 'classic');
+        if (!in_array($requestedTemplate, $templates, true)) {
+            $requestedTemplate = $templates[0] ?? 'classic';
+        }
+
+        $selectedTemplate = old('template', $requestedTemplate);
+        if (!in_array($selectedTemplate, $templates, true)) {
+            $selectedTemplate = $templates[0] ?? 'classic';
+        }
+
+        $inputClasses = 'mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/60 focus:outline-none transition';
+        $errorClasses = 'border-red-500 ring-1 ring-red-200 focus:border-red-500 focus:ring-red-200';
     @endphp
 
-    <div class="min-h-screen -mx-4 -mt-8 px-4 py-8 bg-gradient-to-br from-slate-950 via-slate-900 to-black">
+    <div class="min-h-screen -mx-4 -mt-8 bg-gradient-to-br from-slate-100 via-white to-slate-200 px-4 py-10 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto">
-            <div class="text-center text-white mb-12">
-                <h1 class="text-4xl md:text-5xl font-semibold tracking-tight">Craft your CV</h1>
-                <p class="mt-3 text-base md:text-lg text-slate-300">Follow the guided steps to build a polished, Apple-inspired resume.</p>
+            <div class="text-center text-slate-900 mb-12">
+                <div class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 shadow-sm">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
+                    {{ __('Guided builder') }}
+                </div>
+                <h1 class="mt-5 text-4xl md:text-5xl font-semibold tracking-tight">Craft your CV</h1>
+                <p class="mt-3 text-base md:text-lg text-slate-500">Follow the guided steps to build a polished resume with live templates and smart defaults.</p>
             </div>
 
-            <div class="bg-white/80 backdrop-blur-2xl shadow-2xl rounded-[32px] p-6 sm:p-10 md:p-12">
+            @if ($errors->any())
+                <div class="mb-10 rounded-3xl border border-red-200 bg-red-50/90 p-6 text-sm text-red-700 shadow-sm">
+                    <p class="font-semibold">{{ __('We couldn’t save yet. Please fix the highlighted fields.') }}</p>
+                    <ul class="mt-3 space-y-1 list-disc list-inside">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div class="bg-white/95 backdrop-blur-xl shadow-xl rounded-[32px] p-6 sm:p-10 md:p-12">
                 <div class="mb-12">
                     <div class="flex flex-col gap-6 md:flex-row md:items-center md:gap-4">
                         @foreach ($stepItems as $index => $step)
@@ -98,23 +165,32 @@
                         <div class="grid gap-6 md:grid-cols-2">
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">First name</label>
-                                <input type="text" name="first_name" value="{{ old('first_name') }}" class="{{ $inputClasses }}" autocomplete="given-name" placeholder="Tim" required>
+                                <input type="text" name="first_name" value="{{ old('first_name', data_get($prefill, 'first_name', '')) }}" class="{{ $inputClasses }} @error('first_name') {{ $errorClasses }} @enderror" autocomplete="given-name" placeholder="Tim" required>
+                                @error('first_name')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Last name</label>
-                                <input type="text" name="last_name" value="{{ old('last_name') }}" class="{{ $inputClasses }}" autocomplete="family-name" placeholder="Cook" required>
+                                <input type="text" name="last_name" value="{{ old('last_name', data_get($prefill, 'last_name', '')) }}" class="{{ $inputClasses }} @error('last_name') {{ $errorClasses }} @enderror" autocomplete="family-name" placeholder="Cook" required>
+                                @error('last_name')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Email</label>
-                                <input type="email" name="email" value="{{ old('email') }}" class="{{ $inputClasses }}" autocomplete="email" placeholder="you@example.com" required>
+                                <input type="email" name="email" value="{{ old('email', data_get($prefill, 'email', '')) }}" class="{{ $inputClasses }} @error('email') {{ $errorClasses }} @enderror" autocomplete="email" placeholder="you@example.com" required>
+                                @error('email')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Phone</label>
-                                <input type="tel" name="phone" value="{{ old('phone') }}" class="{{ $inputClasses }}" autocomplete="tel" placeholder="(+371) 20000000">
+                                <input type="tel" name="phone" value="{{ old('phone', data_get($prefill, 'phone', '')) }}" class="{{ $inputClasses }}" autocomplete="tel" placeholder="(+371) 20000000">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Birthday</label>
-                                <input type="date" name="birthday" max="{{ date('Y-m-d') }}" value="{{ old('birthday') }}" class="{{ $inputClasses }}">
+                                <input type="date" name="birthday" max="{{ date('Y-m-d') }}" value="{{ old('birthday', $prefilledBirthday ?? '') }}" class="{{ $inputClasses }}">
                             </div>
                             <div class="grid gap-6 md:grid-cols-2 md:col-span-2">
                                 <div>
@@ -122,14 +198,17 @@
                                     <select name="country" id="country" class="{{ $inputClasses }} appearance-none pr-10">
                                         <option value="">Select country</option>
                                         @foreach ($countries as $country)
-                                            <option value="{{ $country }}" @selected(old('country', request('country')) === $country)>{{ $country }}</option>
+                                            <option value="{{ $country }}" @selected($initialCountry === $country)>{{ $country }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-600">City</label>
-                                    <select name="city" id="city" class="{{ $inputClasses }} appearance-none pr-10" data-selected-city="{{ old('city') }}">
+                                    <select name="city" id="city" class="{{ $inputClasses }} appearance-none pr-10" data-selected-city="{{ $initialCity }}">
                                         <option value="">Select city</option>
+                                        @if ($initialCity)
+                                            <option value="{{ $initialCity }}" selected>{{ $initialCity }}</option>
+                                        @endif
                                     </select>
                                 </div>
                             </div>
@@ -145,23 +224,23 @@
                         <div class="grid gap-6 md:grid-cols-2">
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-600">School / University</label>
-                                <input type="text" name="education[institution]" value="{{ old('education.institution') ?? old('education.school') }}" class="{{ $inputClasses }}" placeholder="Stanford University">
+                                <input type="text" name="education[institution]" value="{{ old('education.institution', $prefillEducation['institution'] ?? ($prefillEducation['school'] ?? '')) }}" class="{{ $inputClasses }}" placeholder="Stanford University">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Degree</label>
-                                <input type="text" name="education[degree]" value="{{ old('education.degree') }}" class="{{ $inputClasses }}" placeholder="MBA">
+                                <input type="text" name="education[degree]" value="{{ old('education.degree', $prefillEducation['degree'] ?? '') }}" class="{{ $inputClasses }}" placeholder="MBA">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Field of study</label>
-                                <input type="text" name="education[field]" value="{{ old('education.field') }}" class="{{ $inputClasses }}" placeholder="Business Administration">
+                                <input type="text" name="education[field]" value="{{ old('education.field', $prefillEducation['field'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Business Administration">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Start year</label>
-                                <input type="text" name="education[start_year]" value="{{ old('education.start_year') }}" class="{{ $inputClasses }}" placeholder="2017">
+                                <input type="text" name="education[start_year]" value="{{ old('education.start_year', $prefillEducation['start_year'] ?? '') }}" class="{{ $inputClasses }}" placeholder="2017">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Graduation year</label>
-                                <input type="text" name="education[end_year]" value="{{ old('education.end_year') }}" class="{{ $inputClasses }}" placeholder="2021">
+                                <input type="text" name="education[end_year]" value="{{ old('education.end_year', $prefillEducation['end_year'] ?? '') }}" class="{{ $inputClasses }}" placeholder="2021">
                             </div>
                         </div>
                     </div>
@@ -175,35 +254,35 @@
                         <div class="grid gap-6 md:grid-cols-2">
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Role / Position</label>
-                                <input type="text" name="experience[position]" value="{{ old('experience.position') }}" class="{{ $inputClasses }}" placeholder="Product Manager">
+                                <input type="text" name="experience[position]" value="{{ old('experience.position', $prefillExperience['position'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Product Manager">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Company</label>
-                                <input type="text" name="experience[company]" value="{{ old('experience.company') }}" class="{{ $inputClasses }}" placeholder="Apple">
+                                <input type="text" name="experience[company]" value="{{ old('experience.company', $prefillExperience['company'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Apple">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Country</label>
-                                <input type="text" name="experience[country]" value="{{ old('experience.country') }}" class="{{ $inputClasses }}" placeholder="Latvia">
+                                <input type="text" name="experience[country]" value="{{ old('experience.country', $prefillExperience['country'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Latvia">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">City</label>
-                                <input type="text" name="experience[city]" value="{{ old('experience.city') }}" class="{{ $inputClasses }}" placeholder="Rīga">
+                                <input type="text" name="experience[city]" value="{{ old('experience.city', $prefillExperience['city'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Rīga">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Start date</label>
-                                <input type="month" name="experience[from]" value="{{ old('experience.from') }}" class="{{ $inputClasses }}">
+                                <input type="month" name="experience[from]" value="{{ old('experience.from', $prefillExperience['from'] ?? '') }}" class="{{ $inputClasses }}">
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">End date</label>
-                                <input type="month" id="experience-to" name="experience[to]" value="{{ old('experience.to') }}" class="{{ $inputClasses }}">
+                                <input type="month" id="experience-to" name="experience[to]" value="{{ old('experience.to', $prefillExperience['to'] ?? '') }}" class="{{ $inputClasses }}">
                             </div>
                             <div class="md:col-span-2 flex items-center gap-3">
-                                <input type="checkbox" id="experience-currently" name="experience[currently]" value="1" class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" @checked(old('experience.currently'))>
+                                <input type="checkbox" id="experience-currently" name="experience[currently]" value="1" class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" @checked(old('experience.currently', $prefillExperience['currently'] ?? false))>
                                 <label for="experience-currently" class="text-sm text-slate-600">I&rsquo;m currently working in this role</label>
                             </div>
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-600">Key achievements</label>
-                                <textarea name="experience[achievements]" rows="4" class="{{ $inputClasses }}" placeholder="Summarise measurable achievements">{{ old('experience.achievements') }}</textarea>
+                                <textarea name="experience[achievements]" rows="4" class="{{ $inputClasses }}" placeholder="Summarise measurable achievements">{{ old('experience.achievements', $prefillExperience['achievements'] ?? '') }}</textarea>
                             </div>
                         </div>
                     </div>
@@ -225,7 +304,7 @@
                                     $inputId = 'template-' . $template;
                                 @endphp
                                 <label for="{{ $inputId }}" data-template-card class="group cursor-pointer">
-                                    <input type="radio" id="{{ $inputId }}" name="template" value="{{ $template }}" class="peer sr-only" @checked($initialTemplate === $template)>
+                                    <input type="radio" id="{{ $inputId }}" name="template" value="{{ $template }}" class="peer sr-only" @checked($selectedTemplate === $template)>
                                     <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition-all duration-300 peer-checked:border-blue-500 peer-checked:shadow-xl peer-checked:shadow-blue-100">
                                         <div class="flex items-center justify-between gap-4">
                                             <div>
@@ -243,6 +322,10 @@
                                 </label>
                             @endforeach
                         </div>
+
+                        @error('template')
+                            <p class="text-sm text-red-600">{{ $message }}</p>
+                        @enderror
 
                         <div class="rounded-3xl border border-slate-200 bg-white/60 p-6 text-sm text-slate-600">
                             <p class="font-semibold text-slate-800">What happens next?</p>
@@ -359,23 +442,43 @@
             // Country and city dynamic behaviour
             const countrySelect = document.getElementById('country');
             const citySelect = document.getElementById('city');
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? null;
+            const citiesEndpoint = @json(route('cv.cities'));
             const preselectedCountry = countrySelect ? countrySelect.value : null;
-            let rememberedCity = citySelect ? citySelect.dataset.selectedCity || null : null;
+            const preselectedCity = citySelect ? citySelect.dataset.selectedCity || null : null;
+            let rememberedCity = preselectedCity;
 
             async function fetchCities(country, selectedCity = rememberedCity) {
                 if (!country || !citySelect) {
                     return;
                 }
 
+                citySelect.disabled = true;
                 citySelect.innerHTML = '<option value="">Loading...</option>';
 
                 try {
-                    const response = await fetch(`/api/cities?country=${encodeURIComponent(country)}`);
+                    const response = await fetch(citiesEndpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
+                        },
+                        body: JSON.stringify({ country })
+                    });
+
                     if (!response.ok) {
-                        throw new Error('Failed to fetch cities');
+                        throw new Error(`Failed to fetch cities for ${country}`);
                     }
+
                     const cities = await response.json();
                     citySelect.innerHTML = '<option value="">Select city</option>';
+
+                    if (!Array.isArray(cities) || cities.length === 0) {
+                        citySelect.innerHTML = '<option value="">No cities found</option>';
+                        return;
+                    }
+
                     cities.forEach(city => {
                         const option = document.createElement('option');
                         option.value = city;
@@ -385,31 +488,49 @@
                         }
                         citySelect.appendChild(option);
                     });
+
+                    if (selectedCity && citySelect.value !== selectedCity) {
+                        const existingOption = Array.from(citySelect.options).find(option => option.value === selectedCity);
+                        if (existingOption) {
+                            existingOption.selected = true;
+                        }
+                    }
+
+                    if (citySelect.value) {
+                        citySelect.dataset.selectedCity = citySelect.value;
+                        rememberedCity = citySelect.value;
+                    }
                 } catch (error) {
                     citySelect.innerHTML = '<option value="">Unable to load cities</option>';
+                } finally {
+                    citySelect.disabled = false;
                 }
             }
 
             if (countrySelect) {
                 countrySelect.addEventListener('change', () => {
+                    if (!citySelect) {
+                        return;
+                    }
                     const selected = countrySelect.value;
                     rememberedCity = null;
                     citySelect.dataset.selectedCity = '';
                     if (selected) {
-                        fetchCities(selected, rememberedCity);
+                        fetchCities(selected, null);
                     } else if (citySelect) {
                         citySelect.innerHTML = '<option value="">Select city</option>';
                     }
                 });
 
                 if (preselectedCountry) {
-                    fetchCities(preselectedCountry, rememberedCity);
+                    fetchCities(preselectedCountry, preselectedCity);
                 }
             }
 
             if (citySelect) {
                 citySelect.addEventListener('change', () => {
                     rememberedCity = citySelect.value || null;
+                    citySelect.dataset.selectedCity = citySelect.value || '';
                 });
             }
 
