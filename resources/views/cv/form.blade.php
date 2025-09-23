@@ -58,15 +58,14 @@
         $prefill = $prefill ?? null;
 
         $prefillEducation = [];
-        $rawEducation = $prefill ? data_get($prefill, 'education') : null;
-        if ($rawEducation) {
-            $prefillEducation = $rawEducation;
-            if (is_string($prefillEducation)) {
-                $decodedEducation = json_decode($prefillEducation, true);
-                $prefillEducation = is_array($decodedEducation) ? $decodedEducation : [];
+        if ($prefill) {
+            $rawEducation = data_get($prefill, 'education');
+            if (is_string($rawEducation)) {
+                $decodedEducation = json_decode($rawEducation, true);
+                $rawEducation = is_array($decodedEducation) ? $decodedEducation : [];
             }
-            if (is_array($prefillEducation) && isset($prefillEducation[0]) && is_array($prefillEducation[0])) {
-                $prefillEducation = $prefillEducation[0];
+            if (is_array($rawEducation)) {
+                $prefillEducation = array_is_list($rawEducation) ? $rawEducation : [$rawEducation];
             }
         }
 
@@ -77,15 +76,52 @@
                 $decodedExperience = json_decode($rawExperience, true);
                 $rawExperience = is_array($decodedExperience) ? $decodedExperience : [];
             }
-            if (is_array($rawExperience) && isset($rawExperience[0]) && is_array($rawExperience[0])) {
-                $prefillExperience = $rawExperience[0];
-            } elseif (is_array($rawExperience)) {
-                $prefillExperience = $rawExperience;
+            if (is_array($rawExperience)) {
+                $prefillExperience = array_is_list($rawExperience) ? $rawExperience : [$rawExperience];
             }
         }
 
-        $prefillEducation = is_array($prefillEducation) ? $prefillEducation : [];
-        $prefillExperience = is_array($prefillExperience) ? $prefillExperience : [];
+        $educationEntries = old('education', $prefillEducation);
+        if (!is_array($educationEntries)) {
+            $educationEntries = [];
+        }
+        $educationEntries = array_values(array_filter($educationEntries, fn($entry) => is_array($entry)));
+        if (empty($educationEntries)) {
+            $educationEntries = [[]];
+        }
+        $educationNextIndex = count($educationEntries);
+
+        $experienceEntries = old('experience', $prefillExperience);
+        if (!is_array($experienceEntries)) {
+            $experienceEntries = [];
+        }
+        $experienceEntries = array_values(array_filter($experienceEntries, fn($entry) => is_array($entry)));
+        if (empty($experienceEntries)) {
+            $experienceEntries = [[]];
+        }
+        $experienceNextIndex = count($experienceEntries);
+
+        $prefillHobbies = [];
+        if ($prefill) {
+            $rawHobbies = data_get($prefill, 'hobbies', []);
+            if (is_string($rawHobbies)) {
+                $decodedHobbies = json_decode($rawHobbies, true);
+                $rawHobbies = is_array($decodedHobbies) ? $decodedHobbies : [];
+            }
+            if (is_array($rawHobbies)) {
+                $prefillHobbies = $rawHobbies;
+            }
+        }
+
+        $hobbyEntries = old('hobbies', $prefillHobbies);
+        if (!is_array($hobbyEntries)) {
+            $hobbyEntries = [];
+        }
+        $hobbyEntries = array_values(array_filter(array_map(fn($value) => is_string($value) ? $value : null, $hobbyEntries)));
+        if (empty($hobbyEntries)) {
+            $hobbyEntries = [''];
+        }
+        $hobbyNextIndex = count($hobbyEntries);
 
         $prefillBirthdayValue = data_get($prefill, 'birthday');
         if ($prefillBirthdayValue instanceof \Carbon\CarbonInterface) {
@@ -192,10 +228,10 @@
                                 <label class="block text-sm font-medium text-slate-600">Birthday</label>
                                 <input type="date" name="birthday" max="{{ date('Y-m-d') }}" value="{{ old('birthday', $prefilledBirthday ?? '') }}" class="{{ $inputClasses }}">
                             </div>
-                            <div class="grid gap-6 md:grid-cols-2 md:col-span-2">
+                            <div class="grid gap-6 md:grid-cols-2 md:col-span-2" data-location-group>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-600">Country</label>
-                                    <select name="country" id="country" class="{{ $inputClasses }} appearance-none pr-10">
+                                    <select name="country" id="personal-country" class="{{ $inputClasses }} appearance-none pr-10" data-country-select>
                                         <option value="">Select country</option>
                                         @foreach ($countries as $country)
                                             <option value="{{ $country }}" @selected($initialCountry === $country)>{{ $country }}</option>
@@ -204,7 +240,7 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-600">City</label>
-                                    <select name="city" id="city" class="{{ $inputClasses }} appearance-none pr-10" data-selected-city="{{ $initialCity }}">
+                                    <select name="city" id="personal-city" class="{{ $inputClasses }} appearance-none pr-10" data-city-select data-selected-city="{{ $initialCity }}">
                                         <option value="">Select city</option>
                                         @if ($initialCity)
                                             <option value="{{ $initialCity }}" selected>{{ $initialCity }}</option>
@@ -218,72 +254,203 @@
                     <div data-step-panel="2" class="space-y-6 hidden">
                         <div>
                             <h2 class="text-2xl font-semibold text-slate-900">Education</h2>
-                            <p class="text-sm text-slate-500 mt-1">Highlight your academic background and achievements.</p>
+                            <p class="text-sm text-slate-500 mt-1">Highlight each school, qualification, and location to build your academic timeline.</p>
                         </div>
 
-                        <div class="grid gap-6 md:grid-cols-2">
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-slate-600">School / University</label>
-                                <input type="text" name="education[institution]" value="{{ old('education.institution', $prefillEducation['institution'] ?? ($prefillEducation['school'] ?? '')) }}" class="{{ $inputClasses }}" placeholder="Stanford University">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Degree</label>
-                                <input type="text" name="education[degree]" value="{{ old('education.degree', $prefillEducation['degree'] ?? '') }}" class="{{ $inputClasses }}" placeholder="MBA">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Field of study</label>
-                                <input type="text" name="education[field]" value="{{ old('education.field', $prefillEducation['field'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Business Administration">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Start year</label>
-                                <input type="text" name="education[start_year]" value="{{ old('education.start_year', $prefillEducation['start_year'] ?? '') }}" class="{{ $inputClasses }}" placeholder="2017">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Graduation year</label>
-                                <input type="text" name="education[end_year]" value="{{ old('education.end_year', $prefillEducation['end_year'] ?? '') }}" class="{{ $inputClasses }}" placeholder="2021">
-                            </div>
+                        <div class="space-y-6" data-collection="education" data-next-index="{{ $educationNextIndex }}" data-min-items="1">
+                            @foreach ($educationEntries as $index => $education)
+                                @php
+                                    $institution = $education['institution'] ?? $education['school'] ?? '';
+                                    $degree = $education['degree'] ?? '';
+                                    $field = $education['field'] ?? '';
+                                    $educationCountry = $education['country'] ?? '';
+                                    $educationCity = $education['city'] ?? '';
+                                    $startYear = $education['start_year'] ?? '';
+                                    $endYear = $education['end_year'] ?? '';
+                                @endphp
+                                <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm space-y-6" data-collection-item data-collection-index="{{ $index }}">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-lg font-semibold text-slate-900">Education {{ $loop->iteration }}</h3>
+                                        <button type="button" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition {{ count($educationEntries) === 1 ? 'hidden' : '' }}" data-action="remove">
+                                            <svg viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                                            <span>{{ __('Remove') }}</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid gap-6 md:grid-cols-2">
+                                        <div class="md:col-span-2">
+                                            <label class="block text-sm font-medium text-slate-600">School / University</label>
+                                            <input type="text" name="education[{{ $index }}][institution]" value="{{ $institution }}" class="{{ $inputClasses }} @error('education.' . $index . '.institution') {{ $errorClasses }} @enderror" placeholder="Stanford University">
+                                            <x-input-error :messages="$errors->get('education.' . $index . '.institution')" class="mt-2" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Degree</label>
+                                            <input type="text" name="education[{{ $index }}][degree]" value="{{ $degree }}" class="{{ $inputClasses }} @error('education.' . $index . '.degree') {{ $errorClasses }} @enderror" placeholder="MBA">
+                                            <x-input-error :messages="$errors->get('education.' . $index . '.degree')" class="mt-2" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Field of study</label>
+                                            <input type="text" name="education[{{ $index }}][field]" value="{{ $field }}" class="{{ $inputClasses }} @error('education.' . $index . '.field') {{ $errorClasses }} @enderror" placeholder="Business Administration">
+                                            <x-input-error :messages="$errors->get('education.' . $index . '.field')" class="mt-2" />
+                                        </div>
+                                        <div class="md:col-span-2 grid gap-6 md:grid-cols-2" data-location-group>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-600">Country</label>
+                                                <select name="education[{{ $index }}][country]" class="{{ $inputClasses }} appearance-none pr-10 @error('education.' . $index . '.country') {{ $errorClasses }} @enderror" data-country-select>
+                                                    <option value="">Select country</option>
+                                                    @foreach ($countries as $country)
+                                                        <option value="{{ $country }}" @selected($educationCountry === $country)>{{ $country }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <x-input-error :messages="$errors->get('education.' . $index . '.country')" class="mt-2" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-600">City</label>
+                                                <select name="education[{{ $index }}][city]" class="{{ $inputClasses }} appearance-none pr-10 @error('education.' . $index . '.city') {{ $errorClasses }} @enderror" data-city-select data-selected-city="{{ $educationCity }}">
+                                                    <option value="">Select city</option>
+                                                    @if ($educationCity)
+                                                        <option value="{{ $educationCity }}" selected>{{ $educationCity }}</option>
+                                                    @endif
+                                                </select>
+                                                <x-input-error :messages="$errors->get('education.' . $index . '.city')" class="mt-2" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Start year</label>
+                                            <input type="text" name="education[{{ $index }}][start_year]" value="{{ $startYear }}" class="{{ $inputClasses }} @error('education.' . $index . '.start_year') {{ $errorClasses }} @enderror" placeholder="2017">
+                                            <x-input-error :messages="$errors->get('education.' . $index . '.start_year')" class="mt-2" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Graduation year</label>
+                                            <input type="text" name="education[{{ $index }}][end_year]" value="{{ $endYear }}" class="{{ $inputClasses }} @error('education.' . $index . '.end_year') {{ $errorClasses }} @enderror" placeholder="2021">
+                                            <x-input-error :messages="$errors->get('education.' . $index . '.end_year')" class="mt-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
+
+                        <button type="button" data-add="education" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                            <span class="text-lg" aria-hidden="true">+</span>
+                            {{ __('Add another education') }}
+                        </button>
                     </div>
 
                     <div data-step-panel="3" class="space-y-6 hidden">
                         <div>
                             <h2 class="text-2xl font-semibold text-slate-900">Experience</h2>
-                            <p class="text-sm text-slate-500 mt-1">Share your most relevant role so far.</p>
+                            <p class="text-sm text-slate-500 mt-1">Share your recent roles, locations, and highlights. Add as many roles as you need.</p>
                         </div>
 
-                        <div class="grid gap-6 md:grid-cols-2">
+                        <div class="space-y-6" data-collection="experience" data-next-index="{{ $experienceNextIndex }}" data-min-items="1">
+                            @foreach ($experienceEntries as $index => $experience)
+                                @php
+                                    $position = $experience['position'] ?? '';
+                                    $company = $experience['company'] ?? '';
+                                    $experienceCountry = $experience['country'] ?? '';
+                                    $experienceCity = $experience['city'] ?? '';
+                                    $from = $experience['from'] ?? '';
+                                    $to = $experience['to'] ?? '';
+                                    $currently = !empty($experience['currently']);
+                                    $achievements = $experience['achievements'] ?? '';
+                                    $currentlyId = 'experience-currently-' . $index;
+                                @endphp
+                                <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm space-y-6" data-collection-item data-collection-index="{{ $index }}">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-lg font-semibold text-slate-900">Experience {{ $loop->iteration }}</h3>
+                                        <button type="button" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition {{ count($experienceEntries) === 1 ? 'hidden' : '' }}" data-action="remove">
+                                            <svg viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                                            <span>{{ __('Remove') }}</span>
+                                        </button>
+                                    </div>
+
+                                    <div class="grid gap-6 md:grid-cols-2">
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Role / Position</label>
+                                            <input type="text" name="experience[{{ $index }}][position]" value="{{ $position }}" class="{{ $inputClasses }} @error('experience.' . $index . '.position') {{ $errorClasses }} @enderror" placeholder="Product Manager">
+                                            <x-input-error :messages="$errors->get('experience.' . $index . '.position')" class="mt-2" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Company</label>
+                                            <input type="text" name="experience[{{ $index }}][company]" value="{{ $company }}" class="{{ $inputClasses }} @error('experience.' . $index . '.company') {{ $errorClasses }} @enderror" placeholder="Apple">
+                                            <x-input-error :messages="$errors->get('experience.' . $index . '.company')" class="mt-2" />
+                                        </div>
+                                        <div class="md:col-span-2 grid gap-6 md:grid-cols-2" data-location-group>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-600">Country</label>
+                                                <select name="experience[{{ $index }}][country]" class="{{ $inputClasses }} appearance-none pr-10 @error('experience.' . $index . '.country') {{ $errorClasses }} @enderror" data-country-select>
+                                                    <option value="">Select country</option>
+                                                    @foreach ($countries as $country)
+                                                        <option value="{{ $country }}" @selected($experienceCountry === $country)>{{ $country }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <x-input-error :messages="$errors->get('experience.' . $index . '.country')" class="mt-2" />
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-slate-600">City</label>
+                                                <select name="experience[{{ $index }}][city]" class="{{ $inputClasses }} appearance-none pr-10 @error('experience.' . $index . '.city') {{ $errorClasses }} @enderror" data-city-select data-selected-city="{{ $experienceCity }}">
+                                                    <option value="">Select city</option>
+                                                    @if ($experienceCity)
+                                                        <option value="{{ $experienceCity }}" selected>{{ $experienceCity }}</option>
+                                                    @endif
+                                                </select>
+                                                <x-input-error :messages="$errors->get('experience.' . $index . '.city')" class="mt-2" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">Start date</label>
+                                            <input type="month" name="experience[{{ $index }}][from]" value="{{ $from }}" class="{{ $inputClasses }} @error('experience.' . $index . '.from') {{ $errorClasses }} @enderror">
+                                            <x-input-error :messages="$errors->get('experience.' . $index . '.from')" class="mt-2" />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-600">End date</label>
+                                            <input type="month" name="experience[{{ $index }}][to]" value="{{ $to }}" class="{{ $inputClasses }} @error('experience.' . $index . '.to') {{ $errorClasses }} @enderror" data-end-input>
+                                            <x-input-error :messages="$errors->get('experience.' . $index . '.to')" class="mt-2" />
+                                        </div>
+                                        <div class="md:col-span-2 flex items-center gap-3">
+                                            <input type="checkbox" id="{{ $currentlyId }}" name="experience[{{ $index }}][currently]" value="1" class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" data-currently-checkbox @checked($currently)>
+                                            <label for="{{ $currentlyId }}" class="text-sm text-slate-600">I&rsquo;m currently working in this role</label>
+                                        </div>
+                                        <div class="md:col-span-2">
+                                            <label class="block text-sm font-medium text-slate-600">Key achievements</label>
+                                            <textarea name="experience[{{ $index }}][achievements]" rows="4" class="{{ $inputClasses }} @error('experience.' . $index . '.achievements') {{ $errorClasses }} @enderror" placeholder="Summarise measurable achievements">{{ $achievements }}</textarea>
+                                            <x-input-error :messages="$errors->get('experience.' . $index . '.achievements')" class="mt-2" />
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <button type="button" data-add="experience" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                            <span class="text-lg" aria-hidden="true">+</span>
+                            {{ __('Add another role') }}
+                        </button>
+
+                        <div class="space-y-4 rounded-3xl border border-slate-200 bg-slate-50/80 p-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-600">Role / Position</label>
-                                <input type="text" name="experience[position]" value="{{ old('experience.position', $prefillExperience['position'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Product Manager">
+                                <h3 class="text-lg font-semibold text-slate-900">{{ __('Hobbies & interests') }}</h3>
+                                <p class="text-sm text-slate-500 mt-1">{{ __('Share a few personal passions that show personality or balance to your resume.') }}</p>
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Company</label>
-                                <input type="text" name="experience[company]" value="{{ old('experience.company', $prefillExperience['company'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Apple">
+
+                            <div class="space-y-3" data-hobby-collection data-next-index="{{ $hobbyNextIndex }}">
+                                @foreach ($hobbyEntries as $index => $hobby)
+                                    <div class="flex items-center gap-3" data-hobby-item data-hobby-index="{{ $index }}">
+                                        <div class="flex-1">
+                                            <input type="text" name="hobbies[{{ $index }}]" value="{{ $hobby }}" class="{{ $inputClasses }} @error('hobbies.' . $index) {{ $errorClasses }} @enderror" placeholder="Photography, hiking, volunteering">
+                                            <x-input-error :messages="$errors->get('hobbies.' . $index)" class="mt-2" />
+                                        </div>
+                                        <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove-hobby">
+                                            <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                                            <span>{{ __('Remove') }}</span>
+                                        </button>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Country</label>
-                                <input type="text" name="experience[country]" value="{{ old('experience.country', $prefillExperience['country'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Latvia">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">City</label>
-                                <input type="text" name="experience[city]" value="{{ old('experience.city', $prefillExperience['city'] ?? '') }}" class="{{ $inputClasses }}" placeholder="Rīga">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">Start date</label>
-                                <input type="month" name="experience[from]" value="{{ old('experience.from', $prefillExperience['from'] ?? '') }}" class="{{ $inputClasses }}">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600">End date</label>
-                                <input type="month" id="experience-to" name="experience[to]" value="{{ old('experience.to', $prefillExperience['to'] ?? '') }}" class="{{ $inputClasses }}">
-                            </div>
-                            <div class="md:col-span-2 flex items-center gap-3">
-                                <input type="checkbox" id="experience-currently" name="experience[currently]" value="1" class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" @checked(old('experience.currently', $prefillExperience['currently'] ?? false))>
-                                <label for="experience-currently" class="text-sm text-slate-600">I&rsquo;m currently working in this role</label>
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-slate-600">Key achievements</label>
-                                <textarea name="experience[achievements]" rows="4" class="{{ $inputClasses }}" placeholder="Summarise measurable achievements">{{ old('experience.achievements', $prefillExperience['achievements'] ?? '') }}</textarea>
-                            </div>
+
+                            <button type="button" data-add-hobby class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                                <span class="text-lg" aria-hidden="true">+</span>
+                                {{ __('Add hobby or interest') }}
+                            </button>
                         </div>
                     </div>
 
@@ -357,6 +524,126 @@
             </div>
         </div>
     </div>
+
+    <template id="education-template">
+        <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm space-y-6" data-collection-item data-collection-index="__INDEX__">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-900">Education</h3>
+                <button type="button" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition" data-action="remove">
+                    <svg viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                    <span>{{ __('Remove') }}</span>
+                </button>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-600">School / University</label>
+                    <input type="text" name="education[__INDEX__][institution]" class="{{ $inputClasses }}" placeholder="Stanford University">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Degree</label>
+                    <input type="text" name="education[__INDEX__][degree]" class="{{ $inputClasses }}" placeholder="MBA">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Field of study</label>
+                    <input type="text" name="education[__INDEX__][field]" class="{{ $inputClasses }}" placeholder="Business Administration">
+                </div>
+                <div class="md:col-span-2 grid gap-6 md:grid-cols-2" data-location-group>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600">Country</label>
+                        <select name="education[__INDEX__][country]" class="{{ $inputClasses }} appearance-none pr-10" data-country-select>
+                            <option value="">Select country</option>
+                            @foreach ($countries as $country)
+                                <option value="{{ $country }}">{{ $country }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600">City</label>
+                        <select name="education[__INDEX__][city]" class="{{ $inputClasses }} appearance-none pr-10" data-city-select data-selected-city="">
+                            <option value="">Select city</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Start year</label>
+                    <input type="text" name="education[__INDEX__][start_year]" class="{{ $inputClasses }}" placeholder="2017">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Graduation year</label>
+                    <input type="text" name="education[__INDEX__][end_year]" class="{{ $inputClasses }}" placeholder="2021">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="experience-template">
+        <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm space-y-6" data-collection-item data-collection-index="__INDEX__">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-900">Experience</h3>
+                <button type="button" class="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-red-600 transition" data-action="remove">
+                    <svg viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                    <span>{{ __('Remove') }}</span>
+                </button>
+            </div>
+
+            <div class="grid gap-6 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Role / Position</label>
+                    <input type="text" name="experience[__INDEX__][position]" class="{{ $inputClasses }}" placeholder="Product Manager">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Company</label>
+                    <input type="text" name="experience[__INDEX__][company]" class="{{ $inputClasses }}" placeholder="Apple">
+                </div>
+                <div class="md:col-span-2 grid gap-6 md:grid-cols-2" data-location-group>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600">Country</label>
+                        <select name="experience[__INDEX__][country]" class="{{ $inputClasses }} appearance-none pr-10" data-country-select>
+                            <option value="">Select country</option>
+                            @foreach ($countries as $country)
+                                <option value="{{ $country }}">{{ $country }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600">City</label>
+                        <select name="experience[__INDEX__][city]" class="{{ $inputClasses }} appearance-none pr-10" data-city-select data-selected-city="">
+                            <option value="">Select city</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">Start date</label>
+                    <input type="month" name="experience[__INDEX__][from]" class="{{ $inputClasses }}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">End date</label>
+                    <input type="month" name="experience[__INDEX__][to]" class="{{ $inputClasses }}" data-end-input>
+                </div>
+                <div class="md:col-span-2 flex items-center gap-3">
+                    <input type="checkbox" name="experience[__INDEX__][currently]" value="1" class="h-5 w-5 rounded border-slate-300 text-blue-600 focus:ring-blue-500" data-currently-checkbox>
+                    <span class="text-sm text-slate-600">I&rsquo;m currently working in this role</span>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-slate-600">Key achievements</label>
+                    <textarea name="experience[__INDEX__][achievements]" rows="4" class="{{ $inputClasses }}" placeholder="Summarise measurable achievements"></textarea>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="hobby-template">
+        <div class="flex items-center gap-3" data-hobby-item data-hobby-index="__INDEX__">
+            <div class="flex-1">
+                <input type="text" name="hobbies[__INDEX__]" class="{{ $inputClasses }}" placeholder="Photography, hiking, volunteering">
+            </div>
+            <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove-hobby">
+                <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                <span>{{ __('Remove') }}</span>
+            </button>
+        </div>
+    </template>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -439,22 +726,13 @@
 
             updateStepVisuals();
 
-            // Country and city dynamic behaviour
-            const countrySelect = document.getElementById('country');
-            const citySelect = document.getElementById('city');
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? null;
             const citiesEndpoint = @json(route('cv.cities'));
-            const preselectedCountry = countrySelect ? countrySelect.value : null;
-            const preselectedCity = citySelect ? citySelect.dataset.selectedCity || null : null;
-            let rememberedCity = preselectedCity;
 
-            async function fetchCities(country, selectedCity = rememberedCity) {
-                if (!country || !citySelect) {
-                    return;
+            const fetchCitiesForCountry = async (country) => {
+                if (!country) {
+                    return [];
                 }
-
-                citySelect.disabled = true;
-                citySelect.innerHTML = '<option value="">Loading...</option>';
 
                 try {
                     const response = await fetch(citiesEndpoint, {
@@ -468,86 +746,298 @@
                     });
 
                     if (!response.ok) {
-                        throw new Error(`Failed to fetch cities for ${country}`);
+                        throw new Error('Failed to fetch cities');
                     }
 
-                    const cities = await response.json();
-                    citySelect.innerHTML = '<option value="">Select city</option>';
+                    const payload = await response.json();
+                    return Array.isArray(payload) ? payload : [];
+                } catch (error) {
+                    return [];
+                }
+            };
 
-                    if (!Array.isArray(cities) || cities.length === 0) {
-                        citySelect.innerHTML = '<option value="">No cities found</option>';
+            const initLocationGroups = (root = document) => {
+                const groups = root.matches?.('[data-location-group]') ? [root] : Array.from(root.querySelectorAll('[data-location-group]'));
+
+                groups.forEach(group => {
+                    if (!group || group.dataset.locationReady === 'true') {
                         return;
                     }
 
-                    cities.forEach(city => {
-                        const option = document.createElement('option');
-                        option.value = city;
-                        option.textContent = city;
-                        if (selectedCity && selectedCity === city) {
-                            option.selected = true;
+                    const countryField = group.querySelector('[data-country-select]');
+                    const cityField = group.querySelector('[data-city-select]');
+                    if (!countryField || !cityField) {
+                        return;
+                    }
+
+                    group.dataset.locationReady = 'true';
+                    let rememberedCity = cityField.dataset.selectedCity || '';
+
+                    const populateCities = (cities, selectedCity) => {
+                        cityField.innerHTML = '<option value="">Select city</option>';
+                        if (!Array.isArray(cities) || cities.length === 0) {
+                            return;
                         }
-                        citySelect.appendChild(option);
+
+                        cities.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city;
+                            option.textContent = city;
+                            if (selectedCity && selectedCity === city) {
+                                option.selected = true;
+                            }
+                            cityField.appendChild(option);
+                        });
+
+                        if (selectedCity && cityField.value !== selectedCity) {
+                            const fallback = document.createElement('option');
+                            fallback.value = selectedCity;
+                            fallback.textContent = selectedCity;
+                            fallback.selected = true;
+                            cityField.appendChild(fallback);
+                        }
+
+                        cityField.dataset.selectedCity = cityField.value || '';
+                    };
+
+                    const loadCities = async (country, selectedCity = '') => {
+                        if (!country) {
+                            cityField.innerHTML = '<option value="">Select city</option>';
+                            cityField.dataset.selectedCity = '';
+                            cityField.disabled = false;
+                            return;
+                        }
+
+                        cityField.disabled = true;
+                        cityField.innerHTML = '<option value="">Loading...</option>';
+
+                        const cities = await fetchCitiesForCountry(country);
+                        cityField.disabled = false;
+
+                        if (!cities.length) {
+                            cityField.innerHTML = '<option value="">No cities found</option>';
+                            return;
+                        }
+
+                        populateCities(cities, selectedCity);
+                    };
+
+                    countryField.addEventListener('change', () => {
+                        rememberedCity = '';
+                        loadCities(countryField.value, '');
                     });
 
-                    if (selectedCity && citySelect.value !== selectedCity) {
-                        const existingOption = Array.from(citySelect.options).find(option => option.value === selectedCity);
-                        if (existingOption) {
-                            existingOption.selected = true;
-                        }
-                    }
+                    cityField.addEventListener('change', () => {
+                        rememberedCity = cityField.value || '';
+                        cityField.dataset.selectedCity = rememberedCity;
+                    });
 
-                    if (citySelect.value) {
-                        citySelect.dataset.selectedCity = citySelect.value;
-                        rememberedCity = citySelect.value;
-                    }
-                } catch (error) {
-                    citySelect.innerHTML = '<option value="">Unable to load cities</option>';
-                } finally {
-                    citySelect.disabled = false;
-                }
-            }
-
-            if (countrySelect) {
-                countrySelect.addEventListener('change', () => {
-                    if (!citySelect) {
-                        return;
-                    }
-                    const selected = countrySelect.value;
-                    rememberedCity = null;
-                    citySelect.dataset.selectedCity = '';
-                    if (selected) {
-                        fetchCities(selected, null);
-                    } else if (citySelect) {
-                        citySelect.innerHTML = '<option value="">Select city</option>';
+                    if (countryField.value) {
+                        loadCities(countryField.value, rememberedCity);
                     }
                 });
+            };
 
-                if (preselectedCountry) {
-                    fetchCities(preselectedCountry, preselectedCity);
+            const initExperienceItem = (scope) => {
+                const checkbox = scope.querySelector('[data-currently-checkbox]');
+                const endInput = scope.querySelector('[data-end-input]');
+                if (!checkbox || !endInput || checkbox.dataset.ready === 'true') {
+                    return;
                 }
-            }
 
-            if (citySelect) {
-                citySelect.addEventListener('change', () => {
-                    rememberedCity = citySelect.value || null;
-                    citySelect.dataset.selectedCity = citySelect.value || '';
-                });
-            }
-
-            const currentlyCheckbox = document.getElementById('experience-currently');
-            const experienceToInput = document.getElementById('experience-to');
-            if (currentlyCheckbox && experienceToInput) {
                 const toggleEndDate = () => {
-                    const isChecked = currentlyCheckbox.checked;
-                    experienceToInput.disabled = isChecked;
-                    experienceToInput.classList.toggle('opacity-60', isChecked);
-                    if (isChecked) {
-                        experienceToInput.value = '';
+                    const active = checkbox.checked;
+                    endInput.disabled = active;
+                    endInput.classList.toggle('opacity-60', active);
+                    if (active) {
+                        endInput.value = '';
                     }
                 };
-                currentlyCheckbox.addEventListener('change', toggleEndDate);
+
+                checkbox.addEventListener('change', toggleEndDate);
+                checkbox.dataset.ready = 'true';
                 toggleEndDate();
-            }
+            };
+
+            const setupCollection = (name, { onCreate } = {}) => {
+                const container = document.querySelector(`[data-collection="${name}"]`);
+                const template = document.getElementById(`${name}-template`);
+                const addButton = document.querySelector(`[data-add="${name}"]`);
+                if (!container || !template) {
+                    return;
+                }
+
+                const initialItems = Array.from(container.querySelectorAll('[data-collection-item]'));
+                const minItems = Number(container.dataset.minItems || 1);
+                let nextIndex = Number(container.dataset.nextIndex ?? initialItems.length);
+                if (Number.isNaN(nextIndex)) {
+                    nextIndex = initialItems.length;
+                }
+                nextIndex = Math.max(nextIndex, initialItems.length);
+
+                const updateRemoveButtons = () => {
+                    const items = container.querySelectorAll('[data-collection-item]');
+                    items.forEach(item => {
+                        const removeButton = item.querySelector('[data-action="remove"]');
+                        if (!removeButton) {
+                            return;
+                        }
+                        if (items.length <= minItems) {
+                            removeButton.classList.add('hidden');
+                        } else {
+                            removeButton.classList.remove('hidden');
+                        }
+                    });
+                };
+
+                const renderTemplate = (index) => {
+                    const html = template.innerHTML.replace(/__INDEX__/g, index);
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = html.trim();
+                    return wrapper.firstElementChild;
+                };
+
+                const registerItem = (item, index) => {
+                    item.dataset.collectionIndex = index;
+                    initLocationGroups(item);
+                    if (typeof onCreate === 'function') {
+                        onCreate(item, index);
+                    }
+                };
+
+                initialItems.forEach((item, index) => {
+                    registerItem(item, index);
+                });
+
+                addButton?.addEventListener('click', () => {
+                    const item = renderTemplate(nextIndex);
+                    container.appendChild(item);
+                    registerItem(item, nextIndex);
+                    nextIndex += 1;
+                    container.dataset.nextIndex = String(nextIndex);
+                    updateRemoveButtons();
+
+                    const focusable = item.querySelector('input, select, textarea');
+                    if (focusable) {
+                        focusable.focus();
+                    }
+                });
+
+                container.addEventListener('click', event => {
+                    const removeButton = event.target.closest('[data-action="remove"]');
+                    if (!removeButton) {
+                        return;
+                    }
+
+                    const item = removeButton.closest('[data-collection-item]');
+                    if (!item) {
+                        return;
+                    }
+
+                    const items = container.querySelectorAll('[data-collection-item]');
+                    if (items.length <= minItems) {
+                        item.querySelectorAll('input, textarea, select').forEach(field => {
+                            if (field.type === 'checkbox' || field.type === 'radio') {
+                                field.checked = false;
+                            } else {
+                                field.value = '';
+                            }
+                        });
+
+                        item.querySelectorAll('[data-city-select]').forEach(select => {
+                            select.innerHTML = '<option value="">Select city</option>';
+                            select.dataset.selectedCity = '';
+                        });
+
+                        return;
+                    }
+
+                    item.remove();
+                    updateRemoveButtons();
+                });
+
+                updateRemoveButtons();
+            };
+
+            const setupHobbyCollection = () => {
+                const container = document.querySelector('[data-hobby-collection]');
+                const template = document.getElementById('hobby-template');
+                const addButton = document.querySelector('[data-add-hobby]');
+                if (!container || !template) {
+                    return;
+                }
+
+                let nextIndex = Number(container.dataset.nextIndex ?? container.querySelectorAll('[data-hobby-item]').length);
+                if (Number.isNaN(nextIndex)) {
+                    nextIndex = container.querySelectorAll('[data-hobby-item]').length;
+                }
+
+                const updateButtons = () => {
+                    const items = container.querySelectorAll('[data-hobby-item]');
+                    items.forEach(item => {
+                        const removeButton = item.querySelector('[data-action="remove-hobby"]');
+                        if (!removeButton) {
+                            return;
+                        }
+                        if (items.length <= 1) {
+                            removeButton.classList.add('hidden');
+                        } else {
+                            removeButton.classList.remove('hidden');
+                        }
+                    });
+                };
+
+                const renderTemplate = (index) => {
+                    const html = template.innerHTML.replace(/__INDEX__/g, index);
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = html.trim();
+                    return wrapper.firstElementChild;
+                };
+
+                addButton?.addEventListener('click', () => {
+                    const item = renderTemplate(nextIndex);
+                    container.appendChild(item);
+                    nextIndex += 1;
+                    container.dataset.nextIndex = String(nextIndex);
+                    updateButtons();
+                    const input = item.querySelector('input');
+                    if (input) {
+                        input.focus();
+                    }
+                });
+
+                container.addEventListener('click', event => {
+                    const removeButton = event.target.closest('[data-action="remove-hobby"]');
+                    if (!removeButton) {
+                        return;
+                    }
+
+                    const item = removeButton.closest('[data-hobby-item]');
+                    if (!item) {
+                        return;
+                    }
+
+                    const items = container.querySelectorAll('[data-hobby-item]');
+                    if (items.length <= 1) {
+                        const input = item.querySelector('input');
+                        if (input) {
+                            input.value = '';
+                            input.focus();
+                        }
+                        return;
+                    }
+
+                    item.remove();
+                    updateButtons();
+                });
+
+                updateButtons();
+            };
+
+            initLocationGroups();
+            setupCollection('education');
+            setupCollection('experience', { onCreate: initExperienceItem });
+            setupHobbyCollection();
         });
     </script>
 </x-app-layout>

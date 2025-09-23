@@ -101,6 +101,12 @@
                     $educationItems = [$educationItems];
                 }
                 $educationItems = array_values(array_filter($educationItems, fn ($edu) => is_array($edu)));
+
+                $hobbies = $cvData['hobbies'] ?? [];
+                if ($hobbies && !is_array($hobbies)) {
+                    $hobbies = (array) $hobbies;
+                }
+                $hobbies = array_values(array_filter($hobbies, fn ($hobby) => is_string($hobby) && trim($hobby) !== ''));
             @endphp
 
             <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
@@ -240,6 +246,20 @@
                             </a>
                         </div>
                     </div>
+
+                    @if (!empty($hobbies))
+                        <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm space-y-3">
+                            <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Hobbies & Interests') }}</p>
+                            <ul class="space-y-2 text-sm text-slate-600">
+                                @foreach ($hobbies as $hobby)
+                                    <li class="flex items-start gap-2">
+                                        <span class="mt-1 inline-flex h-1.5 w-1.5 flex-shrink-0 rounded-full bg-blue-500"></span>
+                                        <span>{{ $hobby }}</span>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-sm text-slate-600 shadow-sm">
                         <p class="font-semibold text-slate-900">{{ __('Tips') }}</p>

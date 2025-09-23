@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
+use App\Http\Controllers\Auth\SocialLoginController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -33,6 +34,18 @@ Route::middleware('guest')->group(function () {
 
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
+});
+
+Route::prefix('oauth')->name('oauth.')->group(function () {
+    Route::middleware('guest')->group(function () {
+        Route::get('{provider}/redirect', [SocialLoginController::class, 'redirect'])
+            ->whereIn('provider', ['google', 'apple'])
+            ->name('redirect');
+    });
+
+    Route::match(['get', 'post'], '{provider}/callback', [SocialLoginController::class, 'callback'])
+        ->whereIn('provider', ['google', 'apple'])
+        ->name('callback');
 });
 
 Route::middleware('auth')->group(function () {

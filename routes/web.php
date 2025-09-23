@@ -1,11 +1,18 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CvController;
 use Illuminate\Support\Facades\Http;
 
-Route::get('/', fn() => view('welcome'))->name('welcome');
+Route::get('/', function () {
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return view('welcome');
+})->name('welcome');
 
 Route::get('/dashboard', fn() => view('dashboard'))
     ->middleware(['auth','verified'])

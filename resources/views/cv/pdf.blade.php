@@ -108,6 +108,12 @@
     }
     $educationData = array_values(array_filter($educationData, fn ($item) => is_array($item)));
 
+    $hobbiesData = $data['hobbies'] ?? [];
+    if ($hobbiesData && !is_array($hobbiesData)) {
+        $hobbiesData = (array) $hobbiesData;
+    }
+    $hobbiesData = array_values(array_filter($hobbiesData, fn ($item) => is_string($item) && trim($item) !== ''));
+
     $templateKey = $template ?? ($data['template'] ?? 'classic');
     $templateLabel = ucfirst($templateKey);
 @endphp
@@ -208,6 +214,17 @@
                     @endif
                 </div>
             @endforeach
+        </section>
+    @endif
+
+    @if (!empty($hobbiesData))
+        <section class="section">
+            <h2>Hobbies &amp; Interests</h2>
+            <ul style="margin: 0; padding-left: 18px; list-style: disc; color: #475569;">
+                @foreach ($hobbiesData as $hobby)
+                    <li style="margin-bottom:6px;">{{ $hobby }}</li>
+                @endforeach
+            </ul>
         </section>
     @endif
 
