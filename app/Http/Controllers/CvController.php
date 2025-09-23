@@ -49,24 +49,29 @@ class CvController extends Controller
             'city' => ['nullable', 'string', 'max:255'],
             'template' => ['required', 'string', Rule::in($templates)],
             'education' => ['nullable', 'array'],
-            'education.institution' => ['nullable', 'string', 'max:255'],
-            'education.degree' => ['nullable', 'string', 'max:255'],
-            'education.field' => ['nullable', 'string', 'max:255'],
-            'education.start_year' => ['nullable', 'string', 'max:25'],
-            'education.end_year' => ['nullable', 'string', 'max:25'],
+            'education.*.institution' => ['nullable', 'string', 'max:255'],
+            'education.*.degree' => ['nullable', 'string', 'max:255'],
+            'education.*.field' => ['nullable', 'string', 'max:255'],
+            'education.*.country' => ['nullable', 'string', 'max:255'],
+            'education.*.city' => ['nullable', 'string', 'max:255'],
+            'education.*.start_year' => ['nullable', 'string', 'max:25'],
+            'education.*.end_year' => ['nullable', 'string', 'max:25'],
             'experience' => ['nullable', 'array'],
-            'experience.position' => ['nullable', 'string', 'max:255'],
-            'experience.company' => ['nullable', 'string', 'max:255'],
-            'experience.country' => ['nullable', 'string', 'max:255'],
-            'experience.city' => ['nullable', 'string', 'max:255'],
-            'experience.from' => ['nullable', 'string', 'max:25'],
-            'experience.to' => ['nullable', 'string', 'max:25'],
-            'experience.currently' => ['nullable', 'boolean'],
-            'experience.achievements' => ['nullable', 'string', 'max:2000'],
+            'experience.*.position' => ['nullable', 'string', 'max:255'],
+            'experience.*.company' => ['nullable', 'string', 'max:255'],
+            'experience.*.country' => ['nullable', 'string', 'max:255'],
+            'experience.*.city' => ['nullable', 'string', 'max:255'],
+            'experience.*.from' => ['nullable', 'string', 'max:25'],
+            'experience.*.to' => ['nullable', 'string', 'max:25'],
+            'experience.*.currently' => ['nullable', 'boolean'],
+            'experience.*.achievements' => ['nullable', 'string', 'max:2000'],
+            'hobbies' => ['nullable', 'array'],
+            'hobbies.*' => ['nullable', 'string', 'max:120'],
         ]);
 
         $education = $this->normaliseEducation($validated['education'] ?? []);
         $experience = $this->normaliseExperience($validated['experience'] ?? []);
+        $hobbies = $this->normaliseHobbies($validated['hobbies'] ?? []);
 
         $cv = Cv::create([
             'user_id' => $request->user()->id,
@@ -80,6 +85,7 @@ class CvController extends Controller
             'template' => $validated['template'],
             'education' => !empty($education) ? $education : null,
             'work_experience' => !empty($experience) ? $experience : null,
+            'hobbies' => !empty($hobbies) ? $hobbies : null,
         ]);
 
         $cvData = $this->formatCvForView($cv);
@@ -253,17 +259,37 @@ class CvController extends Controller
             return [];
         }
 
-        $clean = [];
-        foreach ($education as $key => $value) {
-            if (is_string($value)) {
-                $value = trim($value);
+        $entries = [];
+
+        foreach ($education as $entry) {
+            if (!is_array($entry)) {
+                continue;
             }
-            if ($value !== '' && $value !== null) {
-                $clean[$key] = $value;
+
+            if (!empty($entry['school']) && empty($entry['institution'])) {
+                $entry['institution'] = $entry['school'];
+            }
+
+            $fields = ['institution', 'degree', 'field', 'country', 'city', 'start_year', 'end_year'];
+            $clean = [];
+
+            foreach ($fields as $field) {
+                $value = $entry[$field] ?? null;
+                if (is_string($value)) {
+                    $value = trim($value);
+                }
+
+                if ($value !== '' && $value !== null) {
+                    $clean[$field] = $value;
+                }
+            }
+
+            if (!empty($clean)) {
+                $entries[] = $clean;
             }
         }
 
-        return $clean;
+        return $entries;
     }
 
     protected function normaliseExperience(?array $experience): array
@@ -272,53 +298,71 @@ class CvController extends Controller
             return [];
         }
 
-        $fields = ['position', 'company', 'country', 'city', 'from', 'to', 'achievements'];
-        $clean = [];
+        $entries = [];
 
-        foreach ($fields as $field) {
-            $value = $experience[$field] ?? null;
-            if (is_string($value)) {
-                $value = trim($value);
-            }
-            if ($value !== '' && $value !== null) {
-                $clean[$field] = $value;
-            }
-        }
-
-        $clean['currently'] = !empty($experience['currently']);
-        if ($clean['currently']) {
-            unset($clean['to']);
-        }
-
-        $hasContent = $clean['currently'];
-        foreach ($clean as $key => $value) {
-            if ($key === 'currently') {
+        foreach ($experience as $entry) {
+            if (!is_array($entry)) {
                 continue;
             }
-            if ($value !== null && $value !== '') {
-                $hasContent = true;
-                break;
+
+            $fields = ['position', 'company', 'country', 'city', 'from', 'to', 'achievements'];
+            $clean = [];
+
+            foreach ($fields as $field) {
+                $value = $entry[$field] ?? null;
+                if (is_string($value)) {
+                    $value = trim($value);
+                }
+
+                if ($value !== '' && $value !== null) {
+                    $clean[$field] = $value;
+                }
+            }
+
+            $clean['currently'] = !empty($entry['currently']);
+            if ($clean['currently']) {
+                unset($clean['to']);
+            }
+
+            $hasContent = $clean['currently'];
+            foreach ($clean as $key => $value) {
+                if ($key === 'currently') {
+                    continue;
+                }
+
+                if ($value !== null && $value !== '') {
+                    $hasContent = true;
+                    break;
+                }
+            }
+
+            if ($hasContent) {
+                $entries[] = $clean;
             }
         }
 
-        if (!$hasContent) {
+        return $entries;
+    }
+
+    protected function normaliseHobbies(?array $hobbies): array
+    {
+        if (!is_array($hobbies)) {
             return [];
         }
 
-        return $clean;
+        return collect($hobbies)
+            ->filter(fn ($hobby) => is_string($hobby))
+            ->map(fn ($hobby) => trim($hobby))
+            ->filter(fn ($hobby) => $hobby !== '')
+            ->values()
+            ->all();
     }
 
     protected function formatCvForView(Cv $cv): array
     {
-        $education = $cv->education ?? [];
-        if (is_array($education) && isset($education[0]) && is_array($education[0])) {
-            $education = $education[0];
-        }
-
-        $experience = $cv->work_experience ?? [];
-        if (is_array($experience) && isset($experience[0]) && is_array($experience[0])) {
-            $experience = $experience[0];
-        }
+        $education = $this->prepareCollection($cv->education ?? []);
+        $experience = $this->prepareCollection($cv->work_experience ?? []);
+        $hobbies = $this->prepareCollection($cv->hobbies ?? [], preserveKeys: false);
 
         return [
             'id' => $cv->id,
@@ -332,6 +376,7 @@ class CvController extends Controller
             'template' => $cv->template,
             'education' => $education,
             'experience' => $experience,
+            'hobbies' => $hobbies,
         ];
     }
 
@@ -345,6 +390,42 @@ class CvController extends Controller
         $cv = $request->user()?->cvs()->latest()->first();
 
         return $cv ? $this->formatCvForView($cv) : [];
+    }
+
+    protected function prepareCollection($data, bool $preserveKeys = true): array
+    {
+        if (!is_array($data)) {
+            return [];
+        }
+
+        if ($preserveKeys) {
+            if (!array_is_list($data)) {
+                $data = [$data];
+            }
+
+            $items = [];
+            foreach ($data as $item) {
+                if (is_array($item)) {
+                    $items[] = $item;
+                }
+            }
+
+            return array_values($items);
+        }
+
+        $values = [];
+        foreach ($data as $value) {
+            if (!is_string($value)) {
+                continue;
+            }
+
+            $trimmed = trim($value);
+            if ($trimmed !== '') {
+                $values[] = $trimmed;
+            }
+        }
+
+        return $values;
     }
 
     protected function renderPdf(array $data, string $template, string $filename)

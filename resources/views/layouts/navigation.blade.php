@@ -12,7 +12,9 @@
 
             {{-- Center nav --}}
             <div class="hidden md:flex space-x-8 items-center">
-                <a href="{{ route('welcome') }}" class="hover:text-black text-gray-700 transition">Home</a>
+                @guest
+                    <a href="{{ route('welcome') }}" class="hover:text-black text-gray-700 transition">Home</a>
+                @endguest
                 @auth
                     <a href="{{ route('dashboard') }}" class="hover:text-black text-gray-700 transition">Dashboard</a>
                     <a href="{{ route('cv.create') }}" class="hover:text-black text-gray-700 transition">Create CV</a>
