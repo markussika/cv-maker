@@ -54,10 +54,7 @@
             <div class="max-w-3xl">
                 <h1 class="text-4xl font-semibold tracking-tight">Choose your CV template</h1>
                 <p class="mt-4 text-lg text-slate-300">Browse our curated selection of templates. Each style is ready to showcase your story beautifully, and you can switch designs at any time during editing.</p>
-                <div class="mt-6 inline-flex items-center gap-3 rounded-full bg-white/10 px-5 py-2 text-sm text-slate-200 backdrop-blur">
-                    <span class="inline-flex h-3 w-3 rounded-full bg-emerald-400"></span>
-                    Templates render instantly when you open the CV builder.
-                </div>
+                
             </div>
             <div class="pointer-events-none absolute -right-16 -bottom-16 h-64 w-64 rounded-full bg-blue-500/40 blur-3xl"></div>
         </div>

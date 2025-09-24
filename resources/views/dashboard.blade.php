@@ -1,9 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-900 leading-tight">
-            Dashboard
-        </h2>
-    </x-slot>
+    
 
     <div class="bg-white shadow rounded-lg p-8 text-center">
         <h2 class="text-3xl font-bold mb-6">Dashboard</h2>

@@ -12,34 +12,7 @@
             </div>
         @endif
 
-        <div class="rounded-2xl border border-slate-200 bg-slate-50/80 px-5 py-4 text-sm text-slate-600 shadow-sm">
-            <p class="flex items-center gap-2 font-semibold text-slate-700">
-                <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-                    <svg viewBox="0 0 20 20" aria-hidden="true" class="h-4 w-4"><path fill="currentColor" d="M16.707 5.293a1 1 0 0 0-1.414 0L8 12.586 4.707 9.293a1 1 0 0 0-1.414 1.414l4 4a1 1 0 0 0 1.414 0l8-8a1 1 0 0 0 0-1.414Z"/></svg>
-                </span>
-                {{ __('Everything you need to launch standout applications.') }}
-            </p>
-            <ul class="mt-3 space-y-2 text-slate-500">
-                <li class="flex items-start gap-2">
-                    <span class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                        <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3 w-3"><path fill="currentColor" d="M16.707 5.293a1 1 0 0 0-1.414 0L8 12.586 4.707 9.293a1 1 0 0 0-1.414 1.414l4 4a1 1 0 0 0 1.414 0l8-8a1 1 0 0 0 0-1.414Z"/></svg>
-                    </span>
-                    <span>{{ __('Create unlimited CV versions and export them anytime.') }}</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                        <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3 w-3"><path fill="currentColor" d="M16.707 5.293a1 1 0 0 0-1.414 0L8 12.586 4.707 9.293a1 1 0 0 0-1.414 1.414l4 4a1 1 0 0 0 1.414 0l8-8a1 1 0 0 0 0-1.414Z"/></svg>
-                    </span>
-                    <span>{{ __('Swap between modern templates without re-entering information.') }}</span>
-                </li>
-                <li class="flex items-start gap-2">
-                    <span class="mt-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                        <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3 w-3"><path fill="currentColor" d="M16.707 5.293a1 1 0 0 0-1.414 0L8 12.586 4.707 9.293a1 1 0 0 0-1.414 1.414l4 4a1 1 0 0 0 1.414 0l8-8a1 1 0 0 0 0-1.414Z"/></svg>
-                    </span>
-                    <span>{{ __('Speed through sign-up by linking your Google or Apple account.') }}</span>
-                </li>
-            </ul>
-        </div>
+    
 
         <x-auth.social-providers intent="register" />
 
