@@ -1,7 +1,5 @@
 <x-app-layout>
     @php
-        use Illuminate\Support\Str;
-
         $entries = collect($entries ?? []);
         $totalCount = $entries->count();
         $subtitle = $totalCount > 0
@@ -51,7 +49,7 @@
                     @php
                         /** @var \App\Models\Cv $cv */
                         $cv = $entry['cv'];
-                        $templateName = Str::of($entry['template'] ?? 'classic')->headline();
+                        $templateName = \Illuminate\Support\Str::of($entry['template'] ?? 'classic')->headline();
                         $updatedHuman = optional($entry['updated_at'])->diffForHumans() ?? __('just now');
                         $createdDate = optional($entry['created_at'])->toFormattedDateString();
                         $educationLabel = trans_choice(':count education entry|:count education entries', $entry['education_count'], ['count' => $entry['education_count']]);
