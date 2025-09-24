@@ -14,7 +14,7 @@ use Throwable;
 
 class SocialLoginController extends Controller
 {
-    protected const PROVIDERS = ['google', 'github'];
+    protected const PROVIDERS = ['google', 'instagram'];
 
     public function redirect(Request $request, string $provider): RedirectResponse
     {
@@ -31,7 +31,7 @@ class SocialLoginController extends Controller
             return $this->redirectToGoogle($state);
         }
 
-        return $this->redirectToGithub($state);
+        return $this->redirectToInstagram($state);
     }
 
     public function callback(Request $request, string $provider)
@@ -50,7 +50,7 @@ class SocialLoginController extends Controller
             if ($provider === 'google') {
                 $userData = $this->handleGoogleCallback($request);
             } else {
-                $userData = $this->handleGithubCallback($request);
+                $userData = $this->handleInstagramCallback($request);
             }
         } catch (Throwable $exception) {
             Log::warning('Social login failed', [
@@ -95,23 +95,23 @@ class SocialLoginController extends Controller
         return redirect()->away('https://accounts.google.com/o/oauth2/v2/auth?' . $query);
     }
 
-    protected function redirectToGithub(string $state): RedirectResponse
+    protected function redirectToInstagram(string $state): RedirectResponse
     {
-        $config = config('services.github');
+        $config = config('services.instagram');
         $clientId = $config['client_id'] ?? null;
         $redirectUri = $config['redirect'] ?? null;
 
-        abort_if(empty($clientId) || empty($redirectUri), 500, 'GitHub OAuth is not configured.');
+        abort_if(empty($clientId) || empty($redirectUri), 500, 'Instagram OAuth is not configured.');
 
         $query = http_build_query([
             'client_id' => $clientId,
             'redirect_uri' => $redirectUri,
-            'scope' => 'read:user user:email',
+            'scope' => 'user_profile',
             'state' => $state,
-            'allow_signup' => 'true',
+            'response_type' => 'code',
         ]);
 
-        return redirect()->away('https://github.com/login/oauth/authorize?' . $query);
+        return redirect()->away('https://api.instagram.com/oauth/authorize?' . $query);
     }
 
     protected function handleGoogleCallback(Request $request): array
@@ -164,100 +164,66 @@ class SocialLoginController extends Controller
         ];
     }
 
-    protected function handleGithubCallback(Request $request): array
+    protected function handleInstagramCallback(Request $request): array
     {
         $code = (string) $request->query('code', '');
         if ($code === '') {
             abort(400, 'Missing authorisation code.');
         }
 
-        $config = config('services.github');
+        $config = config('services.instagram');
         $clientId = $config['client_id'] ?? null;
         $clientSecret = $config['client_secret'] ?? null;
         $redirectUri = $config['redirect'] ?? null;
 
-        abort_if(empty($clientId) || empty($clientSecret) || empty($redirectUri), 500, 'GitHub OAuth is not configured.');
+        abort_if(empty($clientId) || empty($clientSecret) || empty($redirectUri), 500, 'Instagram OAuth is not configured.');
 
         $tokenResponse = Http::asForm()
-            ->withHeaders(['Accept' => 'application/json'])
             ->timeout(10)
-            ->post('https://github.com/login/oauth/access_token', [
+            ->post('https://api.instagram.com/oauth/access_token', [
                 'client_id' => $clientId,
                 'client_secret' => $clientSecret,
                 'code' => $code,
+                'grant_type' => 'authorization_code',
                 'redirect_uri' => $redirectUri,
-                'state' => $request->query('state'),
             ]);
 
         if ($tokenResponse->failed()) {
-            abort(400, 'Failed to exchange GitHub authorisation code.');
+            abort(400, 'Failed to exchange Instagram authorisation code.');
         }
 
         $accessToken = $tokenResponse->json('access_token');
-        if (!$accessToken) {
-            abort(400, 'GitHub did not return an access token.');
+        $userId = $tokenResponse->json('user_id');
+
+        if (!$accessToken || !$userId) {
+            abort(400, 'Instagram did not return a valid access token.');
         }
 
-        $userResponse = Http::withToken($accessToken)
-            ->withHeaders(['Accept' => 'application/vnd.github+json'])
-            ->timeout(10)
-            ->get('https://api.github.com/user');
+        $userResponse = Http::timeout(10)
+            ->get('https://graph.instagram.com/me', [
+                'fields' => 'id,username,account_type',
+                'access_token' => $accessToken,
+            ]);
 
         if ($userResponse->failed()) {
-            abort(400, 'Unable to fetch GitHub profile.');
+            abort(400, 'Unable to fetch Instagram profile.');
         }
 
         $profile = $userResponse->json();
 
-        $email = isset($profile['email']) && $profile['email'] ? strtolower((string) $profile['email']) : null;
-        $emailVerified = $email !== null;
+        $username = $profile['username'] ?? null;
+        $formattedName = null;
 
-        if (!$email) {
-            $emailsResponse = Http::withToken($accessToken)
-                ->withHeaders(['Accept' => 'application/vnd.github+json'])
-                ->timeout(10)
-                ->get('https://api.github.com/user/emails');
-
-            if ($emailsResponse->ok()) {
-                $emails = $emailsResponse->json();
-                if (is_array($emails)) {
-                    foreach ($emails as $emailEntry) {
-                        if (!is_array($emailEntry) || empty($emailEntry['email'])) {
-                            continue;
-                        }
-
-                        $entryEmail = strtolower((string) $emailEntry['email']);
-                        $isPrimary = ($emailEntry['primary'] ?? false) === true;
-                        $isVerified = ($emailEntry['verified'] ?? false) === true;
-
-                        if ($isPrimary && $isVerified) {
-                            $email = $entryEmail;
-                            $emailVerified = true;
-                            break;
-                        }
-
-                        if (!$email && $isVerified) {
-                            $email = $entryEmail;
-                            $emailVerified = true;
-                        } elseif (!$email && $isPrimary) {
-                            $email = $entryEmail;
-                        }
-                    }
-                }
-            }
-        }
-
-        $name = $profile['name'] ?? null;
-        if (!$name && !empty($profile['login'])) {
-            $name = $profile['login'];
+        if (is_string($username) && $username !== '') {
+            $formattedName = ucwords(str_replace(['.', '_'], ' ', $username));
         }
 
         return [
-            'id' => $profile['id'] ?? null,
-            'email' => $email,
-            'name' => $name ? trim((string) $name) : null,
-            'avatar' => $profile['avatar_url'] ?? null,
-            'email_verified' => $emailVerified,
+            'id' => $profile['id'] ?? $userId,
+            'email' => null,
+            'name' => $formattedName,
+            'avatar' => null,
+            'email_verified' => false,
         ];
     }
 

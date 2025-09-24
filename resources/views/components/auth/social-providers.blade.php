@@ -5,7 +5,7 @@
 @php
     $intent = in_array($intent, ['login', 'register'], true) ? $intent : 'login';
     $googleLabel = $intent === 'register' ? __('Sign up with Google') : __('Continue with Google');
-    $githubLabel = $intent === 'register' ? __('Sign up with GitHub') : __('Continue with GitHub');
+    $instagramLabel = $intent === 'register' ? __('Sign up with Instagram') : __('Continue with Instagram');
 @endphp
 
 <div {{ $attributes->class(['createit-social']) }}>
@@ -25,14 +25,14 @@
     </a>
 
     <a
-        href="{{ route('oauth.redirect', ['provider' => 'github', 'intent' => $intent]) }}"
-        class="createit-social__button createit-social__button--github"
+        href="{{ route('oauth.redirect', ['provider' => 'instagram', 'intent' => $intent]) }}"
+        class="createit-social__button createit-social__button--instagram"
     >
         <span class="createit-social__icon">
             <svg viewBox="0 0 24 24" aria-hidden="true" class="h-5 w-5 fill-current">
-                <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.22.7-3.9-1.55-3.9-1.55-.53-1.35-1.28-1.71-1.28-1.71-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.11-.76.4-1.26.73-1.55-2.57-.29-5.27-1.29-5.27-5.73 0-1.27.45-2.31 1.2-3.13-.12-.3-.52-1.5.11-3.13 0 0 .97-.31 3.18 1.2a10.9 10.9 0 0 1 5.8 0c2.2-1.51 3.17-1.2 3.17-1.2.63 1.63.23 2.83.12 3.13.75.82 1.2 1.86 1.2 3.13 0 4.45-2.7 5.43-5.28 5.72.42.36.79 1.07.79 2.17 0 1.57-.01 2.83-.01 3.22 0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .5Z" />
+                <path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm0 2h10c1.654 0 3 1.346 3 3v10c0 1.654-1.346 3-3 3H7c-1.654 0-3-1.346-3-3V7c0-1.654 1.346-3 3-3zm10 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2zm-5 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z" />
             </svg>
         </span>
-        {{ $githubLabel }}
+        {{ $instagramLabel }}
     </a>
 </div>
