@@ -5,13 +5,13 @@
         </h2>
     </x-slot>
 
-    <div class="text-center py-20">
-        <h1 class="text-5xl font-extrabold tracking-tight text-gray-900">Welcome to CV Maker</h1>
-        <p class="mt-6 text-lg text-gray-600">Design, customize, and download your professional CV in minutes.</p>
+    <div class="createit-hero">
+        <h1 class="createit-hero__title">{{ __('Welcome to :name', ['name' => config('app.name', 'CreateIt')]) }}</h1>
+        <p class="createit-hero__subtitle">{{ __('Shape vibrant CVs with playful templates, easy editing, and instant downloads that impress every reviewer.') }}</p>
 
-        <div class="mt-10 flex justify-center gap-6">
-            <a href="{{ route('login') }}" class="bg-black text-white px-6 py-3 rounded-full hover:bg-gray-800 transition shadow">Login</a>
-            <a href="{{ route('register') }}" class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-full hover:opacity-90 transition shadow">Register</a>
+        <div class="createit-hero__actions">
+            <a href="{{ route('login') }}" class="createit-button--primary">{{ __('Login') }}</a>
+            <a href="{{ route('register') }}" class="createit-button--outline">{{ __('Register') }}</a>
         </div>
     </div>
 </x-app-layout>

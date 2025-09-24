@@ -1,0 +1,16 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="createit-gradient" x1="10" y1="6" x2="40" y2="42" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6" />
+      <stop offset="0.5" stop-color="#6366F1" />
+      <stop offset="1" stop-color="#14B8A6" />
+    </linearGradient>
+    <linearGradient id="createit-spark" x1="35" y1="8" x2="42" y2="15" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FDE68A" />
+      <stop offset="1" stop-color="#F97316" />
+    </linearGradient>
+  </defs>
+  <circle cx="24" cy="24" r="22" fill="url(#createit-gradient)" opacity="0.15" />
+  <path d="M34.5 14.8c-2.8-3.6-7.1-5.8-11.8-5.8-8.4 0-15.2 6.8-15.2 15.2s6.8 15.2 15.2 15.2c4.9 0 9.3-2.3 12.1-6.1l-3.5-2.4c-2 2.8-5.1 4.5-8.6 4.5-5.8 0-10.6-4.7-10.6-10.6S16.9 14 22.7 14c3.4 0 6.4 1.7 8.4 4.3l3.4-3.5z" fill="url(#createit-gradient)" />
+  <path d="M39.5 9.2l1.6 3.8 3.8 1.6-3.8 1.6-1.6 3.8-1.6-3.8-3.8-1.6 3.8-1.6 1.6-3.8z" fill="url(#createit-spark)" />
+</svg>

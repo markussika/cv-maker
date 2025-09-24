@@ -1,69 +1,67 @@
 <x-guest-layout>
-    <div class="space-y-8">
-        <div class="space-y-2">
-            <p class="text-xs uppercase tracking-[0.35em] text-slate-500">{{ __('Welcome back') }}</p>
-            <h1 class="text-3xl font-semibold text-slate-900">{{ __('Sign in to your account') }}</h1>
-            <p class="text-sm text-slate-500">{{ __('Access your saved resumes, templates, and personalised suggestions.') }}</p>
+    <div class="createit-card-stack">
+        <div class="createit-card-heading">
+            <p class="createit-eyebrow">{{ __('Welcome back') }}</p>
+            <h1 class="createit-title">{{ __('Sign in to CreateIt') }}</h1>
+            <p class="createit-subtitle">{{ __('Pick up where you left off with saved resumes, playful templates, and creative suggestions.') }}</p>
         </div>
 
         @if (session('status'))
-            <div class="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-700">
+            <div class="createit-alert createit-alert--success">
                 {{ session('status') }}
             </div>
         @endif
 
         @if (session('oauth_error'))
-            <div class="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700">
+            <div class="createit-alert createit-alert--error">
                 {{ session('oauth_error') }}
             </div>
         @endif
 
-    
-
         <x-auth.social-providers intent="login" />
 
-        <div class="flex items-center gap-4 text-xs uppercase tracking-[0.35em] text-slate-400">
-            <span class="flex-1 border-t border-slate-200"></span>
-            {{ __('or use email') }}
-            <span class="flex-1 border-t border-slate-200"></span>
+        <div class="createit-divider">
+            <span class="createit-divider__line"></span>
+            {{ __('or continue with email') }}
+            <span class="createit-divider__line"></span>
         </div>
 
-        <form method="POST" action="{{ route('login') }}" class="space-y-4">
+        <form method="POST" action="{{ route('login') }}" class="createit-form">
             @csrf
 
-            <div>
-                <label for="email" class="block text-sm font-medium text-slate-600">{{ __('Email address') }}</label>
-                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/60" placeholder="you@example.com">
-                <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <div class="createit-field">
+                <label for="email" class="createit-label">{{ __('Email address') }}</label>
+                <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username" class="createit-input" placeholder="you@example.com">
+                <x-input-error :messages="$errors->get('email')" />
             </div>
 
-            <div>
-                <label for="password" class="block text-sm font-medium text-slate-600">{{ __('Password') }}</label>
-                <input id="password" type="password" name="password" required autocomplete="current-password" class="mt-2 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/60" placeholder="••••••••">
-                <x-input-error :messages="$errors->get('password')" class="mt-2" />
+            <div class="createit-field">
+                <label for="password" class="createit-label">{{ __('Password') }}</label>
+                <input id="password" type="password" name="password" required autocomplete="current-password" class="createit-input" placeholder="••••••••">
+                <x-input-error :messages="$errors->get('password')" />
             </div>
 
-            <div class="flex items-center justify-between text-sm">
-                <label class="inline-flex items-center gap-2 text-slate-600">
-                    <input id="remember_me" type="checkbox" class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500" name="remember">
+            <div class="createit-form__meta">
+                <label class="createit-checkbox__label" for="remember_me">
+                    <input id="remember_me" type="checkbox" class="createit-checkbox" name="remember">
                     <span>{{ __('Remember me') }}</span>
                 </label>
 
                 @if (Route::has('password.request'))
-                    <a class="font-medium text-blue-600 hover:text-blue-700" href="{{ route('password.request') }}">
+                    <a class="createit-link" href="{{ route('password.request') }}">
                         {{ __('Forgot password?') }}
                     </a>
                 @endif
             </div>
 
-            <button type="submit" class="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:bg-blue-700">
+            <button type="submit" class="createit-button">
                 {{ __('Log in') }}
             </button>
         </form>
 
-        <p class="text-center text-sm text-slate-500">
-            {{ __('New to CV Maker?') }}
-            <a href="{{ route('register') }}" class="font-semibold text-blue-600 hover:text-blue-700">{{ __('Create an account') }}</a>
+        <p class="createit-text-muted">
+            {{ __('New to CreateIt?') }}
+            <a href="{{ route('register') }}" class="createit-link">{{ __('Create an account') }}</a>
         </p>
     </div>
 </x-guest-layout>

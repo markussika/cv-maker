@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -15,7 +14,7 @@ use Throwable;
 
 class SocialLoginController extends Controller
 {
-    protected const PROVIDERS = ['google', 'apple'];
+    protected const PROVIDERS = ['google', 'github'];
 
     public function redirect(Request $request, string $provider): RedirectResponse
     {
@@ -32,7 +31,7 @@ class SocialLoginController extends Controller
             return $this->redirectToGoogle($state);
         }
 
-        return $this->redirectToApple($state);
+        return $this->redirectToGithub($state);
     }
 
     public function callback(Request $request, string $provider)
@@ -51,7 +50,7 @@ class SocialLoginController extends Controller
             if ($provider === 'google') {
                 $userData = $this->handleGoogleCallback($request);
             } else {
-                $userData = $this->handleAppleCallback($request);
+                $userData = $this->handleGithubCallback($request);
             }
         } catch (Throwable $exception) {
             Log::warning('Social login failed', [
@@ -96,24 +95,23 @@ class SocialLoginController extends Controller
         return redirect()->away('https://accounts.google.com/o/oauth2/v2/auth?' . $query);
     }
 
-    protected function redirectToApple(string $state): RedirectResponse
+    protected function redirectToGithub(string $state): RedirectResponse
     {
-        $config = config('services.apple');
+        $config = config('services.github');
         $clientId = $config['client_id'] ?? null;
         $redirectUri = $config['redirect'] ?? null;
 
-        abort_if(empty($clientId) || empty($redirectUri), 500, 'Apple sign in is not configured.');
+        abort_if(empty($clientId) || empty($redirectUri), 500, 'GitHub OAuth is not configured.');
 
         $query = http_build_query([
             'client_id' => $clientId,
             'redirect_uri' => $redirectUri,
-            'response_type' => 'code',
-            'scope' => 'name email',
+            'scope' => 'read:user user:email',
             'state' => $state,
-            'response_mode' => 'query',
+            'allow_signup' => 'true',
         ]);
 
-        return redirect()->away('https://appleid.apple.com/auth/authorize?' . $query);
+        return redirect()->away('https://github.com/login/oauth/authorize?' . $query);
     }
 
     protected function handleGoogleCallback(Request $request): array
@@ -166,146 +164,101 @@ class SocialLoginController extends Controller
         ];
     }
 
-    protected function handleAppleCallback(Request $request): array
+    protected function handleGithubCallback(Request $request): array
     {
         $code = (string) $request->query('code', '');
         if ($code === '') {
             abort(400, 'Missing authorisation code.');
         }
 
-        $config = config('services.apple');
+        $config = config('services.github');
         $clientId = $config['client_id'] ?? null;
-        $teamId = $config['team_id'] ?? null;
-        $keyId = $config['key_id'] ?? null;
-        $privateKey = $config['private_key'] ?? null;
+        $clientSecret = $config['client_secret'] ?? null;
         $redirectUri = $config['redirect'] ?? null;
 
-        abort_if(empty($clientId) || empty($teamId) || empty($keyId) || empty($privateKey) || empty($redirectUri), 500, 'Apple sign in is not configured.');
+        abort_if(empty($clientId) || empty($clientSecret) || empty($redirectUri), 500, 'GitHub OAuth is not configured.');
 
-        $clientSecret = $this->generateAppleClientSecret($teamId, $clientId, $keyId, $privateKey);
-
-        $tokenResponse = Http::asForm()->timeout(10)->post('https://appleid.apple.com/auth/token', [
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-            'code' => $code,
-            'grant_type' => 'authorization_code',
-            'redirect_uri' => $redirectUri,
-        ]);
+        $tokenResponse = Http::asForm()
+            ->withHeaders(['Accept' => 'application/json'])
+            ->timeout(10)
+            ->post('https://github.com/login/oauth/access_token', [
+                'client_id' => $clientId,
+                'client_secret' => $clientSecret,
+                'code' => $code,
+                'redirect_uri' => $redirectUri,
+                'state' => $request->query('state'),
+            ]);
 
         if ($tokenResponse->failed()) {
-            abort(400, 'Failed to exchange Apple authorisation code.');
+            abort(400, 'Failed to exchange GitHub authorisation code.');
         }
 
-        $idToken = $tokenResponse->json('id_token');
-        if (!$idToken) {
-            abort(400, 'Apple did not return an ID token.');
+        $accessToken = $tokenResponse->json('access_token');
+        if (!$accessToken) {
+            abort(400, 'GitHub did not return an access token.');
         }
 
-        $claims = $this->decodeJwtClaims($idToken);
-        if (empty($claims['sub'])) {
-            abort(400, 'Apple did not return the expected user information.');
+        $userResponse = Http::withToken($accessToken)
+            ->withHeaders(['Accept' => 'application/vnd.github+json'])
+            ->timeout(10)
+            ->get('https://api.github.com/user');
+
+        if ($userResponse->failed()) {
+            abort(400, 'Unable to fetch GitHub profile.');
         }
 
-        $userPayload = $request->input('user');
-        $nameFromPayload = null;
-        if (is_string($userPayload) && $userPayload !== '') {
-            try {
-                $decoded = json_decode($userPayload, true, 512, JSON_THROW_ON_ERROR);
-                $first = Arr::get($decoded, 'name.firstName');
-                $last = Arr::get($decoded, 'name.lastName');
-                $nameFromPayload = trim(($first ? ucfirst($first) : '') . ' ' . ($last ? ucfirst($last) : ''));
-            } catch (Throwable $exception) {
-                // ignore JSON errors
+        $profile = $userResponse->json();
+
+        $email = isset($profile['email']) && $profile['email'] ? strtolower((string) $profile['email']) : null;
+        $emailVerified = $email !== null;
+
+        if (!$email) {
+            $emailsResponse = Http::withToken($accessToken)
+                ->withHeaders(['Accept' => 'application/vnd.github+json'])
+                ->timeout(10)
+                ->get('https://api.github.com/user/emails');
+
+            if ($emailsResponse->ok()) {
+                $emails = $emailsResponse->json();
+                if (is_array($emails)) {
+                    foreach ($emails as $emailEntry) {
+                        if (!is_array($emailEntry) || empty($emailEntry['email'])) {
+                            continue;
+                        }
+
+                        $entryEmail = strtolower((string) $emailEntry['email']);
+                        $isPrimary = ($emailEntry['primary'] ?? false) === true;
+                        $isVerified = ($emailEntry['verified'] ?? false) === true;
+
+                        if ($isPrimary && $isVerified) {
+                            $email = $entryEmail;
+                            $emailVerified = true;
+                            break;
+                        }
+
+                        if (!$email && $isVerified) {
+                            $email = $entryEmail;
+                            $emailVerified = true;
+                        } elseif (!$email && $isPrimary) {
+                            $email = $entryEmail;
+                        }
+                    }
+                }
             }
         }
 
+        $name = $profile['name'] ?? null;
+        if (!$name && !empty($profile['login'])) {
+            $name = $profile['login'];
+        }
+
         return [
-            'id' => $claims['sub'],
-            'email' => $claims['email'] ?? null,
-            'name' => $nameFromPayload ?: ($claims['email'] ?? 'Apple User'),
-            'avatar' => null,
-            'email_verified' => ($claims['email_verified'] ?? 'false') === 'true',
+            'id' => $profile['id'] ?? null,
+            'email' => $email,
+            'name' => $name ? trim((string) $name) : null,
+            'avatar' => $profile['avatar_url'] ?? null,
+            'email_verified' => $emailVerified,
         ];
-    }
-
-    protected function generateAppleClientSecret(string $teamId, string $clientId, string $keyId, string $privateKey): string
-    {
-        $header = [
-            'alg' => 'ES256',
-            'kid' => $keyId,
-        ];
-
-        $claims = [
-            'iss' => $teamId,
-            'iat' => time(),
-            'exp' => time() + 300,
-            'aud' => 'https://appleid.apple.com',
-            'sub' => $clientId,
-        ];
-
-        $segments = [
-            $this->base64UrlEncode(json_encode($header, JSON_THROW_ON_ERROR)),
-            $this->base64UrlEncode(json_encode($claims, JSON_THROW_ON_ERROR)),
-        ];
-
-        $privateKey = $this->formatApplePrivateKey($privateKey);
-        $signature = '';
-        $success = openssl_sign(implode('.', $segments), $signature, $privateKey, OPENSSL_ALGO_SHA256);
-
-        if (!$success) {
-            throw new \RuntimeException('Failed to sign Apple client secret.');
-        }
-
-        $segments[] = $this->base64UrlEncode($signature);
-
-        return implode('.', $segments);
-    }
-
-    protected function formatApplePrivateKey(string $key): string
-    {
-        $decoded = $key;
-        if (Str::contains($decoded, '\\n')) {
-            $decoded = str_replace('\\n', "\n", $decoded);
-        }
-
-        $decoded = trim($decoded);
-
-        if (!Str::startsWith($decoded, '-----BEGIN PRIVATE KEY-----')) {
-            $decoded = "-----BEGIN PRIVATE KEY-----\n" . $decoded;
-        }
-
-        if (!Str::endsWith($decoded, '-----END PRIVATE KEY-----')) {
-            $decoded .= "\n-----END PRIVATE KEY-----";
-        }
-
-        return $decoded;
-    }
-
-    protected function base64UrlEncode(string $value): string
-    {
-        return rtrim(strtr(base64_encode($value), '+/', '-_'), '=');
-    }
-
-    protected function decodeJwtClaims(string $token): array
-    {
-        $segments = explode('.', $token);
-        if (count($segments) < 2) {
-            throw new \RuntimeException('Invalid token provided.');
-        }
-
-        $payload = $segments[1];
-        $decoded = base64_decode(strtr($payload, '-_', '+/'), true);
-        if ($decoded === false) {
-            throw new \RuntimeException('Unable to decode token payload.');
-        }
-
-        try {
-            $claims = json_decode($decoded, true, 512, JSON_THROW_ON_ERROR);
-        } catch (Throwable $exception) {
-            throw new \RuntimeException('Invalid token payload.');
-        }
-
-        return is_array($claims) ? $claims : [];
     }
 
     protected function findOrCreateUser(string $provider, array $userData): User
