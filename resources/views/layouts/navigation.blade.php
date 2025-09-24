@@ -14,6 +14,7 @@
             @auth
                 <a href="{{ route('dashboard') }}" class="createit-navbar__link">Dashboard</a>
                 <a href="{{ route('cv.create') }}" class="createit-navbar__link">Create CV</a>
+                <a href="{{ route('cv.history') }}" class="createit-navbar__link">History</a>
                 <a href="{{ route('cv.guide') }}" class="createit-navbar__link">Guide</a>
                 <a href="{{ route('cv.templates') }}" class="createit-navbar__link">Templates</a>
                 <a href="{{ route('profile.edit') }}" class="createit-navbar__link">Profile</a>

@@ -15,12 +15,7 @@ class CvController extends Controller
         $countries = $this->fetchCountries();
         $templates = $this->templateOptions();
 
-        $prefill = $request->user()?->cvs()->latest()->first();
-
         $initialTemplate = $templates[0] ?? 'classic';
-        if ($prefill && in_array($prefill->template, $templates, true)) {
-            $initialTemplate = $prefill->template;
-        }
 
         $requestedTemplate = $request->string('template')->toString();
         if ($requestedTemplate && in_array($requestedTemplate, $templates, true)) {
@@ -31,7 +26,10 @@ class CvController extends Controller
             'countries' => $countries,
             'templates' => $templates,
             'initialTemplate' => $initialTemplate,
-            'prefill' => $prefill,
+            'prefill' => null,
+            'isEditing' => false,
+            'formAction' => route('cv.store'),
+            'formMethod' => 'POST',
         ]);
     }
 
@@ -39,60 +37,83 @@ class CvController extends Controller
     {
         $templates = $this->templateOptions();
 
-        $validated = $request->validate([
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:50'],
-            'birthday' => ['nullable', 'date'],
-            'country' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
-            'template' => ['required', 'string', Rule::in($templates)],
-            'education' => ['nullable', 'array'],
-            'education.*.institution' => ['nullable', 'string', 'max:255'],
-            'education.*.degree' => ['nullable', 'string', 'max:255'],
-            'education.*.field' => ['nullable', 'string', 'max:255'],
-            'education.*.country' => ['nullable', 'string', 'max:255'],
-            'education.*.city' => ['nullable', 'string', 'max:255'],
-            'education.*.start_year' => ['nullable', 'string', 'max:25'],
-            'education.*.end_year' => ['nullable', 'string', 'max:25'],
-            'experience' => ['nullable', 'array'],
-            'experience.*.position' => ['nullable', 'string', 'max:255'],
-            'experience.*.company' => ['nullable', 'string', 'max:255'],
-            'experience.*.country' => ['nullable', 'string', 'max:255'],
-            'experience.*.city' => ['nullable', 'string', 'max:255'],
-            'experience.*.from' => ['nullable', 'string', 'max:25'],
-            'experience.*.to' => ['nullable', 'string', 'max:25'],
-            'experience.*.currently' => ['nullable', 'boolean'],
-            'experience.*.achievements' => ['nullable', 'string', 'max:2000'],
-            'hobbies' => ['nullable', 'array'],
-            'hobbies.*' => ['nullable', 'string', 'max:120'],
-        ]);
+        $validated = $this->validateCv($request, $templates);
 
-        $education = $this->normaliseEducation($validated['education'] ?? []);
-        $experience = $this->normaliseExperience($validated['experience'] ?? []);
-        $hobbies = $this->normaliseHobbies($validated['hobbies'] ?? []);
+        $attributes = $this->buildCvAttributes($validated);
+        $attributes['user_id'] = $request->user()->id;
 
-        $cv = Cv::create([
-            'user_id' => $request->user()->id,
-            'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'email' => $validated['email'],
-            'phone' => $validated['phone'] ?? null,
-            'birthday' => $validated['birthday'] ?? null,
-            'country' => $validated['country'] ?? null,
-            'city' => $validated['city'] ?? null,
-            'template' => $validated['template'],
-            'education' => !empty($education) ? $education : null,
-            'work_experience' => !empty($experience) ? $experience : null,
-            'hobbies' => !empty($hobbies) ? $hobbies : null,
-        ]);
+        $cv = Cv::create($attributes);
 
         $cvData = $this->formatCvForView($cv);
 
         session(['cv_data' => $cvData]);
 
         return redirect()->route('cv.preview')->with('status', __('Your CV details have been saved.'));
+    }
+
+    public function history(Request $request)
+    {
+        $entries = $request->user()
+            ->cvs()
+            ->latest()
+            ->get()
+            ->map(fn (Cv $cv) => $this->summariseCv($cv))
+            ->values();
+
+        return view('cv.history', [
+            'entries' => $entries,
+        ]);
+    }
+
+    public function edit(Request $request, Cv $cv)
+    {
+        $this->ensureCvOwner($request, $cv);
+
+        $countries = $this->fetchCountries();
+        $templates = $this->templateOptions();
+
+        $initialTemplate = in_array($cv->template, $templates, true) ? $cv->template : ($templates[0] ?? 'classic');
+
+        return view('cv.form', [
+            'countries' => $countries,
+            'templates' => $templates,
+            'initialTemplate' => $initialTemplate,
+            'prefill' => $cv,
+            'isEditing' => true,
+            'formAction' => route('cv.update', $cv),
+            'formMethod' => 'PUT',
+        ]);
+    }
+
+    public function update(Request $request, Cv $cv)
+    {
+        $this->ensureCvOwner($request, $cv);
+
+        $templates = $this->templateOptions();
+        $validated = $this->validateCv($request, $templates);
+
+        $attributes = $this->buildCvAttributes($validated);
+
+        $cv->fill($attributes)->save();
+        $cv->refresh();
+
+        session(['cv_data' => $this->formatCvForView($cv)]);
+
+        return redirect()->route('cv.preview')->with('status', __('Your CV has been updated.'));
+    }
+
+    public function destroy(Request $request, Cv $cv)
+    {
+        $this->ensureCvOwner($request, $cv);
+
+        $cv->delete();
+
+        $stored = session('cv_data');
+        if (is_array($stored) && (int) ($stored['id'] ?? 0) === $cv->id) {
+            session()->forget('cv_data');
+        }
+
+        return redirect()->route('cv.history')->with('status', __('The CV has been deleted.'));
     }
 
     public function preview(Request $request)
@@ -215,6 +236,114 @@ class CvController extends Controller
     public function guide()
     {
         return view('cv.guide');
+    }
+
+    protected function validateCv(Request $request, array $templates): array
+    {
+        return $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'birthday' => ['nullable', 'date'],
+            'country' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'template' => ['required', 'string', Rule::in($templates)],
+            'education' => ['nullable', 'array'],
+            'education.*.institution' => ['nullable', 'string', 'max:255'],
+            'education.*.degree' => ['nullable', 'string', 'max:255'],
+            'education.*.field' => ['nullable', 'string', 'max:255'],
+            'education.*.country' => ['nullable', 'string', 'max:255'],
+            'education.*.city' => ['nullable', 'string', 'max:255'],
+            'education.*.start_year' => ['nullable', 'string', 'max:25'],
+            'education.*.end_year' => ['nullable', 'string', 'max:25'],
+            'experience' => ['nullable', 'array'],
+            'experience.*.position' => ['nullable', 'string', 'max:255'],
+            'experience.*.company' => ['nullable', 'string', 'max:255'],
+            'experience.*.country' => ['nullable', 'string', 'max:255'],
+            'experience.*.city' => ['nullable', 'string', 'max:255'],
+            'experience.*.from' => ['nullable', 'string', 'max:25'],
+            'experience.*.to' => ['nullable', 'string', 'max:25'],
+            'experience.*.currently' => ['nullable', 'boolean'],
+            'experience.*.achievements' => ['nullable', 'string', 'max:2000'],
+            'hobbies' => ['nullable', 'array'],
+            'hobbies.*' => ['nullable', 'string', 'max:120'],
+        ]);
+    }
+
+    protected function buildCvAttributes(array $validated): array
+    {
+        $education = $this->normaliseEducation($validated['education'] ?? []);
+        $experience = $this->normaliseExperience($validated['experience'] ?? []);
+        $hobbies = $this->normaliseHobbies($validated['hobbies'] ?? []);
+
+        return [
+            'first_name' => $validated['first_name'],
+            'last_name' => $validated['last_name'],
+            'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
+            'birthday' => $validated['birthday'] ?? null,
+            'country' => $validated['country'] ?? null,
+            'city' => $validated['city'] ?? null,
+            'template' => $validated['template'],
+            'education' => !empty($education) ? $education : null,
+            'work_experience' => !empty($experience) ? $experience : null,
+            'hobbies' => !empty($hobbies) ? $hobbies : null,
+        ];
+    }
+
+    protected function ensureCvOwner(Request $request, Cv $cv): void
+    {
+        abort_unless($cv->user_id === $request->user()->id, 403);
+    }
+
+    protected function summariseCv(Cv $cv): array
+    {
+        $fullName = collect([$cv->first_name, $cv->last_name])
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->map(fn ($value) => trim($value))
+            ->implode(' ');
+
+        return [
+            'cv' => $cv,
+            'title' => $fullName !== '' ? $fullName : __('Untitled CV'),
+            'email' => $cv->email,
+            'template' => $cv->template ?? 'classic',
+            'updated_at' => $cv->updated_at,
+            'created_at' => $cv->created_at,
+            'education_count' => $this->countCollectionItems($cv->education),
+            'experience_count' => $this->countCollectionItems($cv->work_experience),
+            'hobby_count' => $this->countCollectionItems($cv->hobbies),
+        ];
+    }
+
+    protected function countCollectionItems(mixed $data): int
+    {
+        if (!is_array($data)) {
+            return 0;
+        }
+
+        return collect($data)
+            ->filter(function ($value) {
+                if (is_array($value)) {
+                    return collect($value)
+                        ->filter(function ($item) {
+                            if (is_string($item)) {
+                                return trim($item) !== '';
+                            }
+
+                            return !empty($item);
+                        })
+                        ->isNotEmpty();
+                }
+
+                if (is_string($value)) {
+                    return trim($value) !== '';
+                }
+
+                return !empty($value);
+            })
+            ->count();
     }
 
     protected function templateOptions(): array

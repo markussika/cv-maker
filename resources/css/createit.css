@@ -120,23 +120,31 @@
     }
 
     .createit-social {
-        @apply space-y-3;
+        @apply space-y-4;
     }
 
     .createit-social__button {
-        @apply flex w-full items-center justify-center gap-3 rounded-full border px-4 py-3 text-sm font-semibold transition;
+        @apply flex w-full items-center gap-4 rounded-2xl border border-slate-200 bg-white/95 px-4 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring focus:ring-blue-200/60;
     }
 
     .createit-social__button--google {
-        @apply border-slate-200 bg-white text-slate-700 hover:-translate-y-0.5 hover:border-violet-500 hover:text-violet-600 hover:shadow-lg;
-    }
-
-    .createit-social__button--instagram {
-        @apply border-transparent bg-pink-500 text-white hover:-translate-y-0.5 hover:bg-pink-600 hover:shadow-lg;
+        @apply hover:border-blue-500;
     }
 
     .createit-social__icon {
-        @apply inline-flex h-5 w-5 items-center justify-center;
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow;
+    }
+
+    .createit-social__text {
+        @apply flex flex-col;
+    }
+
+    .createit-social__title {
+        @apply text-sm font-semibold text-slate-800;
+    }
+
+    .createit-social__subtitle {
+        @apply text-xs text-slate-500;
     }
 
     .createit-divider {
