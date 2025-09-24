@@ -5,15 +5,15 @@
 @php
     $intent = in_array($intent, ['login', 'register'], true) ? $intent : 'login';
     $googleLabel = $intent === 'register' ? __('Sign up with Google') : __('Continue with Google');
-    $appleLabel = $intent === 'register' ? __('Sign up with Apple') : __('Continue with Apple');
+    $githubLabel = $intent === 'register' ? __('Sign up with GitHub') : __('Continue with GitHub');
 @endphp
 
-<div {{ $attributes->class(['space-y-3']) }}>
+<div {{ $attributes->class(['createit-social']) }}>
     <a
         href="{{ route('oauth.redirect', ['provider' => 'google', 'intent' => $intent]) }}"
-        class="group flex w-full items-center justify-center gap-3 rounded-full border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600"
+        class="createit-social__button createit-social__button--google"
     >
-        <span class="inline-flex h-5 w-5 items-center justify-center">
+        <span class="createit-social__icon">
             <svg viewBox="0 0 24 24" aria-hidden="true" class="h-5 w-5">
                 <path fill="#EA4335" d="M12 10.8v3.84h5.34a4.624 4.624 0 0 1-2 3.03l3.23 2.51c1.88-1.73 2.96-4.28 2.96-7.31 0-.7-.06-1.37-.18-2.02z" />
                 <path fill="#34A853" d="M4.88 14.32l-.75.57-2.58 2C3.4 20.9 7.34 23.5 12 23.5c3.24 0 5.96-1.07 7.95-2.89l-3.23-2.51c-.89.6-2.03.96-3.72.96-2.86 0-5.29-1.93-6.16-4.52z" />
@@ -25,14 +25,14 @@
     </a>
 
     <a
-        href="{{ route('oauth.redirect', ['provider' => 'apple', 'intent' => $intent]) }}"
-        class="group flex w-full items-center justify-center gap-3 rounded-full border border-slate-900 bg-slate-900 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-black"
+        href="{{ route('oauth.redirect', ['provider' => 'github', 'intent' => $intent]) }}"
+        class="createit-social__button createit-social__button--github"
     >
-        <span class="inline-flex h-5 w-5 items-center justify-center">
+        <span class="createit-social__icon">
             <svg viewBox="0 0 24 24" aria-hidden="true" class="h-5 w-5 fill-current">
-                <path d="M16.365 1.43c0 1.14-.418 2.107-1.255 2.9-.753.715-1.664 1.16-2.655 1.091-.03-1.105.42-2.048 1.287-2.86.766-.74 1.7-1.164 2.623-1.22zm4.635 17.087c-.5 1.15-1.095 2.226-1.785 3.228-.964 1.373-1.838 2.353-2.624 2.94-.838.63-1.737.95-2.7.962-.69.013-1.523-.198-2.5-.632-.977-.437-1.875-.65-2.69-.65-.846 0-1.77.213-2.77.65-1 .434-1.802.656-2.404.664-.93.04-1.85-.3-2.76-1.025-.924-.736-1.744-1.87-2.46-3.405-.75-1.6-1.125-3.158-1.125-4.676 0-1.721.371-3.205 1.115-4.45.584-.995 1.362-1.79 2.333-2.384.97-.606 2.015-.92 3.136-.94.616 0 1.423.204 2.422.611.998.406 1.64.612 1.926.612.21 0 .92-.248 2.13-.743 1.143-.467 2.108-.66 2.898-.581 2.142.173 3.756.99 4.84 2.448-1.92 1.162-2.873 2.8-2.858 4.914.016 1.639.63 3 1.84 4.086.55.52 1.16.92 1.828 1.2-.146.414-.3.82-.462 1.217z" />
+                <path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.11.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.22.7-3.9-1.55-3.9-1.55-.53-1.35-1.28-1.71-1.28-1.71-1.05-.72.08-.7.08-.7 1.16.08 1.78 1.2 1.78 1.2 1.04 1.77 2.72 1.26 3.38.96.11-.76.4-1.26.73-1.55-2.57-.29-5.27-1.29-5.27-5.73 0-1.27.45-2.31 1.2-3.13-.12-.3-.52-1.5.11-3.13 0 0 .97-.31 3.18 1.2a10.9 10.9 0 0 1 5.8 0c2.2-1.51 3.17-1.2 3.17-1.2.63 1.63.23 2.83.12 3.13.75.82 1.2 1.86 1.2 3.13 0 4.45-2.7 5.43-5.28 5.72.42.36.79 1.07.79 2.17 0 1.57-.01 2.83-.01 3.22 0 .31.21.68.8.56A11.5 11.5 0 0 0 12 .5Z" />
             </svg>
         </span>
-        {{ $appleLabel }}
+        {{ $githubLabel }}
     </a>
 </div>

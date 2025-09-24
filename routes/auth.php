@@ -39,12 +39,12 @@ Route::middleware('guest')->group(function () {
 Route::prefix('oauth')->name('oauth.')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('{provider}/redirect', [SocialLoginController::class, 'redirect'])
-            ->whereIn('provider', ['google', 'apple'])
+            ->whereIn('provider', ['google', 'github'])
             ->name('redirect');
     });
 
     Route::match(['get', 'post'], '{provider}/callback', [SocialLoginController::class, 'callback'])
-        ->whereIn('provider', ['google', 'apple'])
+        ->whereIn('provider', ['google', 'github'])
         ->name('callback');
 });
 
