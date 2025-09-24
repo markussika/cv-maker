@@ -1,5 +1,28 @@
 <x-app-layout>
     @php
+        $isEditing = $isEditing ?? false;
+        $formAction = $formAction ?? route('cv.store');
+        $formMethod = strtoupper($formMethod ?? 'POST');
+        $badgeLabel = $isEditing ? __('Editing saved CV') : __('Guided builder');
+        $headline = $isEditing ? __('Update your CV') : __('Craft your CV');
+        $heroSubtitle = $isEditing
+            ? __('Refresh sections, tweak your design, and save a polished revision.')
+            : __('Follow the guided steps to build a polished resume with live templates and smart defaults.');
+        $submitLabel = $isEditing ? __('Update & preview') : __('Save & preview');
+        $editingTitle = null;
+        if ($isEditing && ($prefill ?? null)) {
+            $editingTitle = collect([
+                data_get($prefill, 'first_name'),
+                data_get($prefill, 'last_name'),
+            ])->filter(fn($value) => is_string($value) && trim($value) !== '')
+                ->map(fn($value) => trim($value))
+                ->implode(' ');
+
+            if ($editingTitle === '') {
+                $editingTitle = __('Untitled CV');
+            }
+        }
+
         $stepItems = [
             ['title' => 'Personal', 'description' => 'Tell us about yourself'],
             ['title' => 'Education', 'description' => 'Share your studies'],
@@ -152,10 +175,13 @@
             <div class="text-center text-slate-900 mb-12">
                 <div class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 shadow-sm">
                     <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
-                    {{ __('Guided builder') }}
+                    {{ $badgeLabel }}
                 </div>
-                <h1 class="mt-5 text-4xl md:text-5xl font-semibold tracking-tight">Craft your CV</h1>
-                <p class="mt-3 text-base md:text-lg text-slate-500">Follow the guided steps to build a polished resume with live templates and smart defaults.</p>
+                <h1 class="mt-5 text-4xl md:text-5xl font-semibold tracking-tight">{{ $headline }}</h1>
+                <p class="mt-3 text-base md:text-lg text-slate-500">{{ $heroSubtitle }}</p>
+                @if ($isEditing && $editingTitle)
+                    <p class="mt-2 text-sm font-medium text-slate-500">{{ __('Working on: :title', ['title' => $editingTitle]) }}</p>
+                @endif
             </div>
 
             @if ($errors->any())
@@ -189,8 +215,11 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('cv.store') }}" id="cvForm" class="space-y-10">
+                <form method="POST" action="{{ $formAction }}" id="cvForm" class="space-y-10">
                     @csrf
+                    @if ($formMethod !== 'POST')
+                        @method($formMethod)
+                    @endif
 
                     <div data-step-panel="1" class="space-y-6">
                         <div>
@@ -516,7 +545,7 @@
                                 <span>&rarr;</span>
                             </button>
                             <button type="submit" id="submitStep" class="hidden inline-flex items-center justify-center gap-2 rounded-2xl border border-transparent bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-700">
-                                <span>Save &amp; preview</span>
+                                <span>{{ $submitLabel }}</span>
                             </button>
                         </div>
                     </div>

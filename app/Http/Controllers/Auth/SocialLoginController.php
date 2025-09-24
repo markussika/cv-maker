@@ -14,7 +14,7 @@ use Throwable;
 
 class SocialLoginController extends Controller
 {
-    protected const PROVIDERS = ['google', 'instagram'];
+    protected const PROVIDERS = ['google'];
 
     public function redirect(Request $request, string $provider): RedirectResponse
     {
@@ -27,11 +27,7 @@ class SocialLoginController extends Controller
         $intent = is_string($intent) && in_array($intent, ['login', 'register'], true) ? $intent : 'login';
         $request->session()->put($this->intentSessionKey($provider), $intent);
 
-        if ($provider === 'google') {
-            return $this->redirectToGoogle($state);
-        }
-
-        return $this->redirectToInstagram($state);
+        return $this->redirectToGoogle($state);
     }
 
     public function callback(Request $request, string $provider)
@@ -47,11 +43,7 @@ class SocialLoginController extends Controller
         }
 
         try {
-            if ($provider === 'google') {
-                $userData = $this->handleGoogleCallback($request);
-            } else {
-                $userData = $this->handleInstagramCallback($request);
-            }
+            $userData = $this->handleGoogleCallback($request);
         } catch (Throwable $exception) {
             Log::warning('Social login failed', [
                 'provider' => $provider,
@@ -93,25 +85,6 @@ class SocialLoginController extends Controller
         ]);
 
         return redirect()->away('https://accounts.google.com/o/oauth2/v2/auth?' . $query);
-    }
-
-    protected function redirectToInstagram(string $state): RedirectResponse
-    {
-        $config = config('services.instagram');
-        $clientId = $config['client_id'] ?? null;
-        $redirectUri = $config['redirect'] ?? null;
-
-        abort_if(empty($clientId) || empty($redirectUri), 500, 'Instagram OAuth is not configured.');
-
-        $query = http_build_query([
-            'client_id' => $clientId,
-            'redirect_uri' => $redirectUri,
-            'scope' => 'user_profile',
-            'state' => $state,
-            'response_type' => 'code',
-        ]);
-
-        return redirect()->away('https://api.instagram.com/oauth/authorize?' . $query);
     }
 
     protected function handleGoogleCallback(Request $request): array
@@ -161,69 +134,6 @@ class SocialLoginController extends Controller
             'name' => $profile['name'] ?? trim(($profile['given_name'] ?? '') . ' ' . ($profile['family_name'] ?? '')),
             'avatar' => $profile['picture'] ?? null,
             'email_verified' => ($profile['email_verified'] ?? false) === true,
-        ];
-    }
-
-    protected function handleInstagramCallback(Request $request): array
-    {
-        $code = (string) $request->query('code', '');
-        if ($code === '') {
-            abort(400, 'Missing authorisation code.');
-        }
-
-        $config = config('services.instagram');
-        $clientId = $config['client_id'] ?? null;
-        $clientSecret = $config['client_secret'] ?? null;
-        $redirectUri = $config['redirect'] ?? null;
-
-        abort_if(empty($clientId) || empty($clientSecret) || empty($redirectUri), 500, 'Instagram OAuth is not configured.');
-
-        $tokenResponse = Http::asForm()
-            ->timeout(10)
-            ->post('https://api.instagram.com/oauth/access_token', [
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'code' => $code,
-                'grant_type' => 'authorization_code',
-                'redirect_uri' => $redirectUri,
-            ]);
-
-        if ($tokenResponse->failed()) {
-            abort(400, 'Failed to exchange Instagram authorisation code.');
-        }
-
-        $accessToken = $tokenResponse->json('access_token');
-        $userId = $tokenResponse->json('user_id');
-
-        if (!$accessToken || !$userId) {
-            abort(400, 'Instagram did not return a valid access token.');
-        }
-
-        $userResponse = Http::timeout(10)
-            ->get('https://graph.instagram.com/me', [
-                'fields' => 'id,username,account_type',
-                'access_token' => $accessToken,
-            ]);
-
-        if ($userResponse->failed()) {
-            abort(400, 'Unable to fetch Instagram profile.');
-        }
-
-        $profile = $userResponse->json();
-
-        $username = $profile['username'] ?? null;
-        $formattedName = null;
-
-        if (is_string($username) && $username !== '') {
-            $formattedName = ucwords(str_replace(['.', '_'], ' ', $username));
-        }
-
-        return [
-            'id' => $profile['id'] ?? $userId,
-            'email' => null,
-            'name' => $formattedName,
-            'avatar' => null,
-            'email_verified' => false,
         ];
     }
 

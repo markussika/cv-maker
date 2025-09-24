@@ -29,6 +29,10 @@ Route::middleware('auth')->group(function () {
     Route::prefix('cv')->controller(CvController::class)->group(function () {
         Route::get('/create','create')->name('cv.create');
         Route::post('/store','store')->name('cv.store');
+        Route::get('/history','history')->name('cv.history');
+        Route::get('/{cv}/edit','edit')->name('cv.edit');
+        Route::put('/{cv}','update')->name('cv.update');
+        Route::delete('/{cv}','destroy')->name('cv.destroy');
         Route::get('/preview','preview')->name('cv.preview');
         Route::get('/templates','templates')->name('cv.templates');
         Route::get('/download/{template}','download')->name('cv.download');
