@@ -3,263 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <title>Elegant · {{ config('app.name', 'CreateIt') }}</title>
-    <style>
-        :root {
-            --charcoal: #1f2933;
-            --taupe: #6b7280;
-            --blush: #f5e1e5;
-            --gold: #d97706;
-            --paper: #fff9f2;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Cormorant Garamond", "Georgia", serif;
-            background: linear-gradient(140deg, rgba(245, 225, 229, 0.7), rgba(255, 249, 242, 0.9));
-            color: var(--charcoal);
-            font-size: 15px;
-            line-height: 1.6;
-            padding: 40px;
-        }
-
-        .sheet {
-            background: var(--paper);
-            border-radius: 32px;
-            padding: 52px 64px;
-            max-width: 780px;
-            margin: 0 auto;
-            box-shadow: 0 25px 60px rgba(31, 41, 51, 0.12);
-            border: 1px solid rgba(217, 119, 6, 0.12);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 44px;
-            letter-spacing: 0.08em;
-        }
-
-        header p {
-            margin: 12px 0 0;
-            font-size: 18px;
-            color: var(--taupe);
-        }
-
-        .contact {
-            margin-top: 24px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            font-size: 13px;
-            color: var(--taupe);
-        }
-
-        .rule {
-            height: 1px;
-            background: linear-gradient(to right, transparent, rgba(217, 119, 6, 0.6), transparent);
-            margin: 40px 0;
-        }
-
-        h2 {
-            margin: 0 0 20px;
-            text-transform: uppercase;
-            letter-spacing: 0.4em;
-            font-size: 13px;
-            color: rgba(31, 41, 51, 0.6);
-        }
-
-        .item {
-            margin-bottom: 28px;
-        }
-
-        .item:last-child {
-            margin-bottom: 0;
-        }
-
-        .item h3 {
-            margin: 0;
-            font-size: 22px;
-            letter-spacing: 0.06em;
-        }
-
-        .meta {
-            margin-top: 6px;
-            font-size: 14px;
-            color: var(--taupe);
-            font-style: italic;
-        }
-
-        .item p {
-            margin-top: 12px;
-            color: var(--taupe);
-            font-size: 15px;
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        li {
-            margin-bottom: 10px;
-        }
-
-        .list-columns {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 16px;
-        }
-
-        .tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            border-radius: 999px;
-            border: 1px solid rgba(217, 119, 6, 0.3);
-            font-size: 13px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('templates/css/elegant.css') }}">
 </head>
-<body>
+<body class="elegant-template">
     @include('templates.partials.base-data', ['cv' => $cv])
 
     @php
         $data = $templateData;
+        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
+            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+            ->implode('');
+        $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="sheet">
-        <header>
-            <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-            @if ($data['headline'])
-                <p>{{ $data['headline'] }}</p>
-            @endif
-            @if (!empty($data['contacts']))
-                <div class="contact">
+    <div class="elegant-page">
+        <header class="elegant-header">
+            <div class="elegant-header__info">
+                <div class="elegant-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
+                    @elseif ($initials !== '')
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p>{{ $data['headline'] }}</p>
+                    @endif
+                </div>
+            </div>
+            <div class="elegant-header__details">
+                <div class="elegant-badge">{{ __('Elegant Resume') }}</div>
+                <div class="elegant-contact">
                     @foreach ($data['contacts'] as $contact)
                         <span>{{ $contact }}</span>
                     @endforeach
                 </div>
-            @endif
+            </div>
         </header>
 
-        @if ($data['summary'])
-            <section>
-                <h2>{{ __('Profile') }}</h2>
-                <p>{{ $data['summary'] }}</p>
-                <div class="rule"></div>
-            </section>
-        @endif
+        <div class="elegant-columns">
+            <aside class="elegant-sidebar">
+                @if ($data['summary'])
+                    <section>
+                        <h2>{{ __('Profile') }}</h2>
+                        <p>{{ $data['summary'] }}</p>
+                    </section>
+                @endif
 
-        @if (!empty($data['experiences']))
-            <section>
-                <h2>{{ __('Experience') }}</h2>
-                @foreach ($data['experiences'] as $experience)
-                    <article class="item">
-                        @if ($experience['role'])
-                            <h3>{{ $experience['role'] }}</h3>
-                        @endif
-                        <div class="meta">
-                            {{ $experience['company'] }}
-                            @if ($experience['company'] && $experience['location'])
-                                &bull;
-                            @endif
-                            {{ $experience['location'] }}
-                            @if ($experience['period'])
-                                &bull;
-                                {{ $experience['period'] }}
-                            @endif
-                        </div>
-                        @if ($experience['summary'])
-                            <p>{{ $experience['summary'] }}</p>
-                        @endif
-                    </article>
-                @endforeach
-                <div class="rule"></div>
-            </section>
-        @endif
+                @if (!empty($data['skills']))
+                    <section>
+                        <h2>{{ __('Core Competencies') }}</h2>
+                        <ul class="elegant-list">
+                            @foreach ($data['skills'] as $skill)
+                                <li>{{ $skill }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
 
-        @if (!empty($data['education']))
-            <section>
-                <h2>{{ __('Education') }}</h2>
-                @foreach ($data['education'] as $education)
-                    <article class="item">
-                        @if ($education['degree'])
-                            <h3>{{ $education['degree'] }}</h3>
-                        @endif
-                        <div class="meta">
-                            {{ $education['institution'] }}
-                            @if ($education['institution'] && $education['location'])
-                                &bull;
-                            @endif
-                            {{ $education['location'] }}
-                            @if ($education['period'])
-                                &bull;
-                                {{ $education['period'] }}
-                            @endif
-                        </div>
-                        @if ($education['field'])
-                            <p>{{ $education['field'] }}</p>
-                        @endif
-                    </article>
-                @endforeach
-                <div class="rule"></div>
-            </section>
-        @endif
+                @if (!empty($data['languages']))
+                    <section>
+                        <h2>{{ __('Languages') }}</h2>
+                        <ul class="elegant-language">
+                            @foreach ($data['languages'] as $language)
+                                <li>
+                                    <span>{{ $language['name'] }}</span>
+                                    @if (!empty($language['level']))
+                                        <span>{{ ucfirst($language['level']) }}</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
 
-        @if (!empty($data['skills']))
-            <section>
-                <h2>{{ __('Expertise') }}</h2>
-                <div class="list-columns">
-                    @foreach ($data['skills'] as $skill)
-                        <span class="tag">{{ $skill }}</span>
-                    @endforeach
-                </div>
-                <div class="rule"></div>
-            </section>
-        @endif
+                @if (!empty($data['hobbies']))
+                    <section>
+                        <h2>{{ __('Interests') }}</h2>
+                        <ul class="elegant-tag-list">
+                            @foreach ($data['hobbies'] as $hobby)
+                                <li>{{ $hobby }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+            </aside>
 
-        @if (!empty($data['languages']) || !empty($data['hobbies']))
-            <section>
-                <h2>{{ __('Refinements') }}</h2>
-                <div class="list-columns">
-                    <div>
-                        @if (!empty($data['languages']))
-                            <strong>{{ __('Languages') }}</strong>
-                            <ul>
-                                @foreach ($data['languages'] as $language)
-                                    <li>
-                                        {{ $language['name'] }}
-                                        @if (!empty($language['level']))
-                                            &mdash; {{ ucfirst($language['level']) }}
+            <main class="elegant-main">
+                @if (!empty($data['experiences']))
+                    <section class="elegant-section">
+                        <h2>{{ __('Experience') }}</h2>
+                        <div class="elegant-timeline">
+                            @foreach ($data['experiences'] as $experience)
+                                <article class="elegant-timeline__item">
+                                    <div class="elegant-timeline__point"></div>
+                                    <div class="elegant-timeline__body">
+                                        <header>
+                                            @if ($experience['role'])
+                                                <h3>{{ $experience['role'] }}</h3>
+                                            @endif
+                                            <div>
+                                                <span>{{ $experience['company'] }}</span>
+                                                @if ($experience['company'] && $experience['location'])
+                                                    <span>·</span>
+                                                @endif
+                                                <span>{{ $experience['location'] }}</span>
+                                            </div>
+                                            @if ($experience['period'])
+                                                <span class="elegant-period">{{ $experience['period'] }}</span>
+                                            @endif
+                                        </header>
+                                        @if ($experience['summary'])
+                                            <p>{{ $experience['summary'] }}</p>
                                         @endif
-                                    </li>
-                                @endforeach
-                            </ul>
-                        @endif
-                    </div>
-                    <div>
-                        @if (!empty($data['hobbies']))
-                            <strong>{{ __('Interests') }}</strong>
-                            <ul>
-                                @foreach ($data['hobbies'] as $hobby)
-                                    <li>{{ $hobby }}</li>
-                                @endforeach
-                            </ul>
-                        @endif
-                    </div>
-                </div>
-            </section>
-        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                @if (!empty($data['education']))
+                    <section class="elegant-section">
+                        <h2>{{ __('Education') }}</h2>
+                        <div class="elegant-education">
+                            @foreach ($data['education'] as $education)
+                                <article>
+                                    <h3>{{ $education['institution'] }}</h3>
+                                    <div class="elegant-education__meta">
+                                        @if ($education['degree'])
+                                            <span>{{ $education['degree'] }}</span>
+                                        @endif
+                                        @if ($education['field'])
+                                            <span>{{ $education['field'] }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="elegant-education__footer">
+                                        @if ($education['location'])
+                                            <span>{{ $education['location'] }}</span>
+                                        @endif
+                                        @if ($education['period'])
+                                            <span>{{ $education['period'] }}</span>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            </main>
+        </div>
     </div>
 </body>
 </html>

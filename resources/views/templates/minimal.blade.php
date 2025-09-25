@@ -3,248 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <title>Minimal · {{ config('app.name', 'CreateIt') }}</title>
-    <style>
-        :root {
-            --ink: #0f172a;
-            --muted: #64748b;
-            --border: #e2e8f0;
-            --soft: #f8fafc;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0;
-            font-family: "IBM Plex Sans", Arial, sans-serif;
-            color: var(--ink);
-            background: var(--soft);
-            padding: 48px;
-            font-size: 13px;
-            line-height: 1.7;
-        }
-
-        .page {
-            max-width: 760px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 28px;
-            border: 1px solid var(--border);
-            padding: 48px 60px;
-            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.08);
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 48px;
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 30px;
-            letter-spacing: 0.04em;
-        }
-
-        header p {
-            margin: 10px 0 0;
-            color: var(--muted);
-            font-size: 14px;
-        }
-
-        .contact {
-            margin-top: 24px;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            color: var(--muted);
-            font-size: 12px;
-        }
-
-        .section {
-            margin-bottom: 36px;
-        }
-
-        .section:last-child {
-            margin-bottom: 0;
-        }
-
-        .section h2 {
-            margin: 0 0 16px;
-            font-size: 12px;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            color: var(--muted);
-        }
-
-        .item {
-            margin-bottom: 24px;
-        }
-
-        .item:last-child {
-            margin-bottom: 0;
-        }
-
-        .item h3 {
-            margin: 0;
-            font-size: 16px;
-            letter-spacing: 0.01em;
-        }
-
-        .meta {
-            margin-top: 6px;
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        .item p {
-            margin-top: 12px;
-            color: var(--muted);
-            font-size: 13px;
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-
-        .pill-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .pill {
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            padding: 6px 14px;
-            font-size: 12px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('templates/css/minimal.css') }}">
 </head>
-<body>
+<body class="minimal-template">
     @include('templates.partials.base-data', ['cv' => $cv])
 
     @php
         $data = $templateData;
+        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
+            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+            ->implode('');
+        $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="page">
-        <header>
-            <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-            @if ($data['headline'])
-                <p>{{ $data['headline'] }}</p>
-            @endif
-            @if (!empty($data['contacts']))
-                <div class="contact">
-                    @foreach ($data['contacts'] as $contact)
-                        <span>{{ $contact }}</span>
-                    @endforeach
+    <div class="minimal-page">
+        <header class="minimal-header">
+            <div class="minimal-header__identity">
+                <div class="minimal-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
+                    @elseif ($initials !== '')
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
                 </div>
-            @endif
+                <div>
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p>{{ $data['headline'] }}</p>
+                    @endif
+                </div>
+            </div>
+            <div class="minimal-header__meta">
+                <div class="minimal-badge">{{ __('Minimal Resume') }}</div>
+                @if ($data['location'])
+                    <span>{{ $data['location'] }}</span>
+                @endif
+            </div>
         </header>
 
-        @if ($data['summary'])
-            <section class="section">
-                <h2>{{ __('Profile') }}</h2>
-                <p>{{ $data['summary'] }}</p>
-            </section>
-        @endif
+        <div class="minimal-columns">
+            <aside class="minimal-sidebar">
+                @if (!empty($data['contacts']))
+                    <section>
+                        <h2>{{ __('Contact') }}</h2>
+                        <ul>
+                            @foreach ($data['contacts'] as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
 
-        @if (!empty($data['experiences']))
-            <section class="section">
-                <h2>{{ __('Experience') }}</h2>
-                @foreach ($data['experiences'] as $experience)
-                    <article class="item">
-                        @if ($experience['role'])
-                            <h3>{{ $experience['role'] }}</h3>
-                        @endif
-                        <div class="meta">
-                            {{ $experience['company'] }}
-                            @if ($experience['company'] && $experience['location'])
-                                &middot;
-                            @endif
-                            {{ $experience['location'] }}
-                            @if ($experience['period'])
-                                &middot;
-                                {{ $experience['period'] }}
-                            @endif
+                @if ($data['summary'])
+                    <section>
+                        <h2>{{ __('Summary') }}</h2>
+                        <p>{{ $data['summary'] }}</p>
+                    </section>
+                @endif
+
+                @if (!empty($data['skills']))
+                    <section>
+                        <h2>{{ __('Skills') }}</h2>
+                        <ul class="minimal-pill-list">
+                            @foreach ($data['skills'] as $skill)
+                                <li>{{ $skill }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
+                @if (!empty($data['languages']))
+                    <section>
+                        <h2>{{ __('Languages') }}</h2>
+                        <ul class="minimal-language-list">
+                            @foreach ($data['languages'] as $language)
+                                <li>
+                                    <span>{{ $language['name'] }}</span>
+                                    @if (!empty($language['level']))
+                                        <span>{{ ucfirst($language['level']) }}</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
+                @if (!empty($data['hobbies']))
+                    <section>
+                        <h2>{{ __('Interests') }}</h2>
+                        <ul class="minimal-list">
+                            @foreach ($data['hobbies'] as $hobby)
+                                <li>{{ $hobby }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+            </aside>
+
+            <main class="minimal-main">
+                @if (!empty($data['experiences']))
+                    <section class="minimal-section">
+                        <h2>{{ __('Experience') }}</h2>
+                        <div class="minimal-timeline">
+                            @foreach ($data['experiences'] as $experience)
+                                <article class="minimal-timeline__item">
+                                    <div class="minimal-timeline__bar"></div>
+                                    <div class="minimal-timeline__content">
+                                        @if ($experience['role'])
+                                            <h3>{{ $experience['role'] }}</h3>
+                                        @endif
+                                        <p>
+                                            {{ $experience['company'] }}
+                                            @if ($experience['company'] && $experience['location'])
+                                                ·
+                                            @endif
+                                            {{ $experience['location'] }}
+                                        </p>
+                                        @if ($experience['period'])
+                                            <span>{{ $experience['period'] }}</span>
+                                        @endif
+                                        @if ($experience['summary'])
+                                            <p class="minimal-note">{{ $experience['summary'] }}</p>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
                         </div>
-                        @if ($experience['summary'])
-                            <p>{{ $experience['summary'] }}</p>
-                        @endif
-                    </article>
-                @endforeach
-            </section>
-        @endif
+                    </section>
+                @endif
 
-        @if (!empty($data['education']))
-            <section class="section">
-                <h2>{{ __('Education') }}</h2>
-                @foreach ($data['education'] as $education)
-                    <article class="item">
-                        @if ($education['institution'])
-                            <h3>{{ $education['institution'] }}</h3>
-                        @endif
-                        <div class="meta">
-                            {{ $education['degree'] }}
-                            @if ($education['degree'] && $education['location'])
-                                &middot;
-                            @endif
-                            {{ $education['location'] }}
-                            @if ($education['period'])
-                                &middot;
-                                {{ $education['period'] }}
-                            @endif
-                        </div>
-                        @if ($education['field'])
-                            <p>{{ $education['field'] }}</p>
-                        @endif
-                    </article>
-                @endforeach
-            </section>
-        @endif
-
-        @if (!empty($data['skills']))
-            <section class="section">
-                <h2>{{ __('Skills') }}</h2>
-                <div class="pill-list">
-                    @foreach ($data['skills'] as $skill)
-                        <span class="pill">{{ $skill }}</span>
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
-        @if (!empty($data['languages']))
-            <section class="section">
-                <h2>{{ __('Languages') }}</h2>
-                <ul>
-                    @foreach ($data['languages'] as $language)
-                        <li>
-                            {{ $language['name'] }}
-                            @if (!empty($language['level']))
-                                &mdash; {{ ucfirst($language['level']) }}
-                            @endif
-                        </li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
-
-        @if (!empty($data['hobbies']))
-            <section class="section">
-                <h2>{{ __('Interests') }}</h2>
-                <ul>
-                    @foreach ($data['hobbies'] as $hobby)
-                        <li>{{ $hobby }}</li>
-                    @endforeach
-                </ul>
-            </section>
-        @endif
+                @if (!empty($data['education']))
+                    <section class="minimal-section">
+                        <h2>{{ __('Education') }}</h2>
+                        <ul class="minimal-list minimal-list--spaced">
+                            @foreach ($data['education'] as $education)
+                                <li>
+                                    <div>
+                                        <h3>{{ $education['institution'] }}</h3>
+                                        @if ($education['degree'])
+                                            <span>{{ $education['degree'] }}</span>
+                                        @endif
+                                        @if ($education['field'])
+                                            <span>{{ $education['field'] }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="minimal-list__meta">
+                                        @if ($education['location'])
+                                            <span>{{ $education['location'] }}</span>
+                                        @endif
+                                        @if ($education['period'])
+                                            <span>{{ $education['period'] }}</span>
+                                        @endif
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+            </main>
+        </div>
     </div>
 </body>
 </html>

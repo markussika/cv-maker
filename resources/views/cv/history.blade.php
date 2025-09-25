@@ -55,6 +55,8 @@
                         $educationLabel = trans_choice(':count education entry|:count education entries', $entry['education_count'], ['count' => $entry['education_count']]);
                         $experienceLabel = trans_choice(':count experience entry|:count experience entries', $entry['experience_count'], ['count' => $entry['experience_count']]);
                         $hobbyLabel = trans_choice(':count hobby|:count hobbies', $entry['hobby_count'], ['count' => $entry['hobby_count']]);
+                        $skillLabel = trans_choice(':count skill|:count skills', $entry['skill_count'], ['count' => $entry['skill_count']]);
+                        $languageLabel = trans_choice(':count language|:count languages', $entry['language_count'], ['count' => $entry['language_count']]);
                     @endphp
 
                     <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -86,6 +88,14 @@
                             <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
                                 <span class="inline-flex h-2 w-2 rounded-full bg-rose-500"></span>
                                 {{ $hobbyLabel }}
+                            </span>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
+                                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                {{ $skillLabel }}
+                            </span>
+                            <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">
+                                <span class="inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
+                                {{ $languageLabel }}
                             </span>
                         </div>
 

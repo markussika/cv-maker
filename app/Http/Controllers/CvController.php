@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use PDF;
 
@@ -12,6 +13,8 @@ class CvController extends Controller
 {
     public function create(Request $request)
     {
+        session()->forget('cv_data');
+
         $countries = $this->fetchCountries();
         $templates = $this->templateOptions();
 
@@ -41,6 +44,10 @@ class CvController extends Controller
 
         $attributes = $this->buildCvAttributes($validated);
         $attributes['user_id'] = $request->user()->id;
+
+        if ($request->hasFile('profile_image')) {
+            $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
+        }
 
         $cv = Cv::create($attributes);
 
@@ -93,6 +100,14 @@ class CvController extends Controller
         $validated = $this->validateCv($request, $templates);
 
         $attributes = $this->buildCvAttributes($validated);
+
+        if ($request->hasFile('profile_image')) {
+            if ($cv->profile_image) {
+                Storage::disk('public')->delete($cv->profile_image);
+            }
+
+            $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
+        }
 
         $cv->fill($attributes)->save();
         $cv->refresh();
@@ -245,6 +260,12 @@ class CvController extends Controller
             'last_name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
+            'headline' => ['nullable', 'string', 'max:255'],
+            'summary' => ['nullable', 'string', 'max:3000'],
+            'website' => ['nullable', 'url', 'max:255'],
+            'linkedin' => ['nullable', 'url', 'max:255'],
+            'github' => ['nullable', 'url', 'max:255'],
+            'profile_image' => ['nullable', 'image', 'max:2048'],
             'birthday' => ['nullable', 'date'],
             'country' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -268,6 +289,11 @@ class CvController extends Controller
             'experience.*.achievements' => ['nullable', 'string', 'max:2000'],
             'hobbies' => ['nullable', 'array'],
             'hobbies.*' => ['nullable', 'string', 'max:120'],
+            'languages' => ['nullable', 'array'],
+            'languages.*.name' => ['nullable', 'string', 'max:120'],
+            'languages.*.level' => ['nullable', 'string', 'max:120'],
+            'skills' => ['nullable', 'array'],
+            'skills.*' => ['nullable', 'string', 'max:120'],
         ]);
     }
 
@@ -276,12 +302,19 @@ class CvController extends Controller
         $education = $this->normaliseEducation($validated['education'] ?? []);
         $experience = $this->normaliseExperience($validated['experience'] ?? []);
         $hobbies = $this->normaliseHobbies($validated['hobbies'] ?? []);
+        $languages = $this->normaliseLanguages($validated['languages'] ?? []);
+        $skills = $this->normaliseSkills($validated['skills'] ?? []);
 
         return [
             'first_name' => $validated['first_name'],
             'last_name' => $validated['last_name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'] ?? null,
+            'headline' => $validated['headline'] ?? null,
+            'summary' => $validated['summary'] ?? null,
+            'website' => $validated['website'] ?? null,
+            'linkedin' => $validated['linkedin'] ?? null,
+            'github' => $validated['github'] ?? null,
             'birthday' => $validated['birthday'] ?? null,
             'country' => $validated['country'] ?? null,
             'city' => $validated['city'] ?? null,
@@ -289,6 +322,8 @@ class CvController extends Controller
             'education' => !empty($education) ? $education : null,
             'work_experience' => !empty($experience) ? $experience : null,
             'hobbies' => !empty($hobbies) ? $hobbies : null,
+            'languages' => !empty($languages) ? $languages : null,
+            'skills' => !empty($skills) ? $skills : null,
         ];
     }
 
@@ -314,6 +349,8 @@ class CvController extends Controller
             'education_count' => $this->countCollectionItems($cv->education),
             'experience_count' => $this->countCollectionItems($cv->work_experience),
             'hobby_count' => $this->countCollectionItems($cv->hobbies),
+            'skill_count' => $this->countCollectionItems($cv->skills),
+            'language_count' => $this->countCollectionItems($cv->languages),
         ];
     }
 
@@ -487,11 +524,68 @@ class CvController extends Controller
             ->all();
     }
 
+    protected function normaliseLanguages(?array $languages): array
+    {
+        if (!is_array($languages)) {
+            return [];
+        }
+
+        $entries = [];
+
+        foreach ($languages as $language) {
+            if (!is_array($language)) {
+                if (is_string($language) && trim($language) !== '') {
+                    $entries[] = ['name' => trim($language), 'level' => null];
+                }
+
+                continue;
+            }
+
+            $name = isset($language['name']) ? trim((string) $language['name']) : null;
+            $level = isset($language['level']) ? trim((string) $language['level']) : null;
+
+            if ($name !== null && $name !== '') {
+                $entries[] = [
+                    'name' => $name,
+                    'level' => $level !== '' ? $level : null,
+                ];
+            }
+        }
+
+        return $entries;
+    }
+
+    protected function normaliseSkills(?array $skills): array
+    {
+        if (!is_array($skills)) {
+            return [];
+        }
+
+        return collect($skills)
+            ->map(function ($skill) {
+                if (is_string($skill)) {
+                    return trim($skill);
+                }
+
+                if (is_array($skill)) {
+                    $label = $skill['name'] ?? $skill['title'] ?? null;
+                    return is_string($label) ? trim($label) : null;
+                }
+
+                return null;
+            })
+            ->filter(fn ($skill) => is_string($skill) && $skill !== '')
+            ->values()
+            ->all();
+    }
+
     protected function formatCvForView(Cv $cv): array
     {
         $education = $this->prepareCollection($cv->education ?? []);
         $experience = $this->prepareCollection($cv->work_experience ?? []);
         $hobbies = $this->prepareCollection($cv->hobbies ?? [], preserveKeys: false);
+        $skills = $this->prepareCollection($cv->skills ?? [], preserveKeys: false);
+        $languages = $this->prepareCollection($cv->languages ?? []);
 
         return [
             'id' => $cv->id,
@@ -499,6 +593,11 @@ class CvController extends Controller
             'last_name' => $cv->last_name,
             'email' => $cv->email,
             'phone' => $cv->phone,
+            'headline' => $cv->headline,
+            'summary' => $cv->summary,
+            'website' => $cv->website,
+            'linkedin' => $cv->linkedin,
+            'github' => $cv->github,
             'birthday' => optional($cv->birthday)->toDateString(),
             'country' => $cv->country,
             'city' => $cv->city,
@@ -506,19 +605,28 @@ class CvController extends Controller
             'education' => $education,
             'experience' => $experience,
             'hobbies' => $hobbies,
+            'skills' => $skills,
+            'languages' => $languages,
+            'profile_image' => $cv->profile_image ? Storage::disk('public')->url($cv->profile_image) : null,
         ];
     }
 
     protected function resolveCvData(Request $request): array
     {
+        $requestedId = (int) $request->query('cv');
+        if ($requestedId > 0) {
+            $cv = $request->user()?->cvs()->find($requestedId);
+            if ($cv) {
+                return $this->formatCvForView($cv);
+            }
+        }
+
         $sessionData = session('cv_data');
         if (!empty($sessionData)) {
             return $sessionData;
         }
 
-        $cv = $request->user()?->cvs()->latest()->first();
-
-        return $cv ? $this->formatCvForView($cv) : [];
+        return [];
     }
 
     protected function prepareCollection($data, bool $preserveKeys = true): array

@@ -74,6 +74,17 @@
                 $country = $cvData['country'] ?? null;
                 $location = trim(collect([$city, $country])->filter()->join(', '));
 
+                $initials = collect([
+                    $cvData['first_name'] ?? null,
+                    $cvData['last_name'] ?? null,
+                ])
+                    ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+                    ->map(fn ($value) => mb_substr(trim($value), 0, 1))
+                    ->implode('');
+                if ($initials === '') {
+                    $initials = 'CV';
+                }
+
                 $birthday = $cvData['birthday'] ?? null;
                 $birthdayFormatted = null;
                 if (!empty($birthday)) {
@@ -107,27 +118,105 @@
                     $hobbies = (array) $hobbies;
                 }
                 $hobbies = array_values(array_filter($hobbies, fn ($hobby) => is_string($hobby) && trim($hobby) !== ''));
+
+                $skills = $cvData['skills'] ?? [];
+                if ($skills && !is_array($skills)) {
+                    $skills = (array) $skills;
+                }
+                $skills = array_values(array_filter(array_map(function ($skill) {
+                    if (is_array($skill)) {
+                        $label = $skill['name'] ?? $skill['title'] ?? null;
+                        return is_string($label) ? trim($label) : null;
+                    }
+
+                    return is_string($skill) ? trim($skill) : null;
+                }, $skills), fn ($skill) => is_string($skill) && $skill !== '')));
+
+                $languages = $cvData['languages'] ?? [];
+                if ($languages && !is_array($languages)) {
+                    $languages = (array) $languages;
+                }
+                if (is_array($languages) && array_keys($languages) !== range(0, count($languages) - 1)) {
+                    $languages = [$languages];
+                }
+                $languages = array_values(array_filter(array_map(function ($language) {
+                    if (!is_array($language)) {
+                        if (is_string($language)) {
+                            return ['name' => trim($language), 'level' => null];
+                        }
+
+                        return null;
+                    }
+
+                    $name = isset($language['name']) ? trim((string) $language['name']) : '';
+                    $level = isset($language['level']) ? trim((string) $language['level']) : '';
+
+                    if ($name === '') {
+                        return null;
+                    }
+
+                    return ['name' => $name, 'level' => $level !== '' ? $level : null];
+                }, $languages), fn ($language) => is_array($language) && ($language['name'] ?? null)));
+
+                $headline = is_string($cvData['headline'] ?? null) ? trim($cvData['headline']) : null;
+                $summaryText = is_string($cvData['summary'] ?? null) ? trim($cvData['summary']) : null;
+                $website = is_string($cvData['website'] ?? null) ? trim($cvData['website']) : null;
+                $linkedin = is_string($cvData['linkedin'] ?? null) ? trim($cvData['linkedin']) : null;
+                $github = is_string($cvData['github'] ?? null) ? trim($cvData['github']) : null;
+                $profileImage = is_string($cvData['profile_image'] ?? null) ? trim($cvData['profile_image']) : null;
+
+                $socialLinks = collect([
+                    ['label' => 'Website', 'url' => $website],
+                    ['label' => 'LinkedIn', 'url' => $linkedin],
+                    ['label' => 'GitHub', 'url' => $github],
+                ])->filter(fn ($item) => is_string($item['url']) && $item['url'] !== '')->values();
             @endphp
 
             <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
                 <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm space-y-8">
                     <div>
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Overview') }}</p>
-                        <h1 class="mt-3 text-3xl font-semibold text-slate-900">{{ $fullName ?: __('Untitled CV') }}</h1>
-
-                        <div class="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
-                            @if ($email)
-                                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $email }}</span>
-                            @endif
-                            @if ($phone)
-                                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $phone }}</span>
-                            @endif
-                            @if ($location)
-                                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $location }}</span>
-                            @endif
-                            @if ($birthdayFormatted)
-                                <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $birthdayFormatted }}</span>
-                            @endif
+                        <div class="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start">
+                            <div class="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 text-2xl font-semibold text-slate-600 shadow-sm">
+                                @if ($profileImage)
+                                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}" class="h-full w-full object-cover">
+                                @else
+                                    <span>{{ $initials }}</span>
+                                @endif
+                            </div>
+                            <div class="flex-1">
+                                <h1 class="text-3xl font-semibold text-slate-900">{{ $fullName ?: __('Untitled CV') }}</h1>
+                                @if ($headline)
+                                    <p class="mt-2 text-lg text-slate-500">{{ $headline }}</p>
+                                @endif
+                                @if ($summaryText)
+                                    <p class="mt-4 text-sm leading-relaxed text-slate-600">{{ $summaryText }}</p>
+                                @endif
+                                @if ($socialLinks->isNotEmpty())
+                                    <div class="mt-4 flex flex-wrap gap-2 text-xs">
+                                        @foreach ($socialLinks as $link)
+                                            <a href="{{ $link['url'] }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1 text-slate-600 transition hover:border-blue-500 hover:text-blue-600">
+                                                <span class="inline-flex h-1.5 w-1.5 rounded-full bg-blue-500"></span>
+                                                <span>{{ $link['label'] }}</span>
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                                <div class="mt-4 flex flex-wrap gap-3 text-sm text-slate-600">
+                                    @if ($email)
+                                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $email }}</span>
+                                    @endif
+                                    @if ($phone)
+                                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $phone }}</span>
+                                    @endif
+                                    @if ($location)
+                                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $location }}</span>
+                                    @endif
+                                    @if ($birthdayFormatted)
+                                        <span class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $birthdayFormatted }}</span>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -246,6 +335,33 @@
                             </a>
                         </div>
                     </div>
+
+                    @if (!empty($skills))
+                        <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm space-y-3">
+                            <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Skills & tools') }}</p>
+                            <ul class="flex flex-wrap gap-2 text-xs font-medium text-slate-600">
+                                @foreach ($skills as $skill)
+                                    <li class="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1">{{ $skill }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (!empty($languages))
+                        <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm space-y-3">
+                            <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Languages') }}</p>
+                            <ul class="space-y-2 text-sm text-slate-600">
+                                @foreach ($languages as $language)
+                                    <li class="flex items-center justify-between gap-4 rounded-2xl border border-slate-100 bg-slate-50 px-3 py-2">
+                                        <span>{{ $language['name'] }}</span>
+                                        @if (!empty($language['level']))
+                                            <span class="text-xs uppercase tracking-[0.3em] text-slate-400">{{ $language['level'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
 
                     @if (!empty($hobbies))
                         <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm space-y-3">
