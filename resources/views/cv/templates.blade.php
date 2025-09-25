@@ -47,6 +47,54 @@
                 'preview' => 'from-indigo-300 via-purple-300 to-slate-100',
             ],
         ];
+
+        $sampleCv = [
+            'first_name' => 'Jordan',
+            'last_name' => 'Rivera',
+            'headline' => 'Product Designer',
+            'email' => 'jordan.rivera@example.com',
+            'phone' => '+1 (555) 123-4567',
+            'city' => 'Toronto',
+            'country' => 'Canada',
+            'summary' => 'Designer blending research, motion, and storytelling to craft delightful digital experiences.',
+            'work_experience' => [
+                [
+                    'position' => 'Senior Product Designer',
+                    'company' => 'Northwind Studio',
+                    'city' => 'Toronto',
+                    'country' => 'Canada',
+                    'from' => '2021-02',
+                    'currently' => true,
+                    'achievements' => 'Led cross-functional sprints and launched a design system that lifted activation by 28%.',
+                ],
+                [
+                    'position' => 'Product Designer',
+                    'company' => 'Aurora Labs',
+                    'city' => 'Vancouver',
+                    'country' => 'Canada',
+                    'from' => '2018-05',
+                    'to' => '2021-01',
+                    'achievements' => 'Prototyped immersive flows that increased retention across mobile and web surfaces.',
+                ],
+            ],
+            'education' => [
+                [
+                    'degree' => 'B.A. Interaction Design',
+                    'institution' => 'University of British Columbia',
+                    'city' => 'Vancouver',
+                    'country' => 'Canada',
+                    'start_year' => '2014',
+                    'end_year' => '2018',
+                    'field' => 'Design & Technology',
+                ],
+            ],
+            'skills' => ['Design Systems', 'User Research', 'Prototyping', 'Motion'],
+            'languages' => [
+                ['name' => 'English', 'level' => 'native'],
+                ['name' => 'French', 'level' => 'advanced'],
+            ],
+            'hobbies' => ['Gallery hopping', 'Cycling', 'Synth music'],
+        ];
     @endphp
 
     <div class="space-y-10">
@@ -67,9 +115,13 @@
                         'description' => 'Beautiful layout ready for your details.',
                         'preview' => 'from-slate-200 via-white to-slate-100',
                     ];
+                    $previewId = 'template-preview-' . $template;
+                    $previewSource = view('templates.' . $template, [
+                        'cv' => (object) array_merge($sampleCv, ['template' => $template]),
+                    ])->render();
                 @endphp
-                <div class="group relative flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl">
-                    <div class="relative h-48 bg-gradient-to-br {{ $meta['preview'] }}">
+                <div class="group createit-template-card">
+                    <div class="createit-template-card__preview bg-gradient-to-br {{ $meta['preview'] }}">
                         <div class="absolute inset-0 flex items-center justify-center">
                             <div class="w-40 rounded-2xl bg-white/80 p-4 shadow-xl shadow-slate-300/50">
                                 <div class="h-2 w-24 rounded-full bg-slate-200"></div>
@@ -80,26 +132,78 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="absolute top-4 right-4 flex items-center gap-1 rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+                        <div class="createit-template-card__badge">
                             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                            Preview ready
+                            {{ __('Preview ready') }}
                         </div>
                     </div>
-                    <div class="flex flex-1 flex-col gap-4 p-6">
+                    <div class="createit-template-card__body">
                         <div>
-                            <h2 class="text-xl font-semibold text-slate-900">{{ $meta['title'] }}</h2>
-                            <p class="mt-2 text-sm text-slate-500">{{ $meta['description'] }}</p>
+                            <h2 class="createit-template-card__title">{{ $meta['title'] }}</h2>
+                            <p class="createit-template-card__description">{{ $meta['description'] }}</p>
                         </div>
-                        <div class="mt-auto flex flex-wrap items-center justify-between gap-3">
-                            <a href="{{ route('cv.create', ['template' => $template]) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-black">
-                                Use template
+                        <div class="createit-template-card__actions">
+                            <a href="{{ route('cv.create', ['template' => $template]) }}" class="createit-template-card__action">
+                                {{ __('Use template') }}
                                 <span aria-hidden="true">&rarr;</span>
                             </a>
-                            <span class="text-xs uppercase tracking-[0.2em] text-slate-400">{{ strtoupper($template) }}</span>
+                            <button type="button" class="createit-template-card__preview-button" data-preview-trigger="{{ $previewId }}">
+                                {{ __('Preview') }}
+                            </button>
                         </div>
                     </div>
                 </div>
+
+                <dialog id="{{ $previewId }}" class="createit-modal" aria-label="{{ $meta['title'] }} template preview">
+                    <div class="createit-modal__header">
+                        <h3 class="createit-modal__title">{{ $meta['title'] }} {{ __('template preview') }}</h3>
+                        <button type="button" class="createit-modal__close" data-preview-close>{{ __('Close') }}</button>
+                    </div>
+                    <div class="createit-modal__body">
+                        <div class="createit-modal__iframe-wrapper">
+                            <iframe class="createit-modal__iframe" srcdoc="{{ e($previewSource) }}" title="{{ $meta['title'] }} template preview"></iframe>
+                        </div>
+                    </div>
+                </dialog>
             @endforeach
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dialogs = new Map();
+
+            document.querySelectorAll('.createit-modal').forEach((dialog) => {
+                dialogs.set(dialog.id, dialog);
+                dialog.addEventListener('click', (event) => {
+                    const rect = dialog.getBoundingClientRect();
+                    const clickedOutside = event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom;
+                    if (clickedOutside) {
+                        dialog.close();
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-preview-trigger]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const targetId = button.getAttribute('data-preview-trigger');
+                    const dialog = dialogs.get(targetId);
+                    if (dialog && typeof dialog.showModal === 'function') {
+                        dialog.showModal();
+                    }
+                });
+            });
+
+            document.querySelectorAll('[data-preview-close]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const dialog = button.closest('.createit-modal');
+                    if (dialog && typeof dialog.close === 'function') {
+                        dialog.close();
+                    }
+                });
+            });
+        });
+    </script>
+@endpush

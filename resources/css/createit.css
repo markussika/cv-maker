@@ -16,7 +16,7 @@
     }
 
     .createit-auth__grid {
-        @apply relative grid min-h-screen gap-12 md:grid-cols-[1.05fr,1fr];
+        @apply relative mx-auto grid min-h-screen w-full max-w-6xl items-center justify-center gap-12 px-6 py-16 md:grid-cols-[1fr,1fr];
     }
 
     .createit-auth__info {
@@ -265,5 +265,154 @@
 
     .createit-footer {
         @apply bg-white py-6 text-center text-sm text-slate-500;
+    }
+
+    .createit-dashboard {
+        @apply space-y-12;
+    }
+
+    .createit-dashboard__hero {
+        @apply relative overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-950 via-slate-900 to-black px-10 py-14 text-white shadow-2xl;
+    }
+
+    .createit-dashboard__hero::after {
+        content: '';
+        position: absolute;
+        pointer-events: none;
+        bottom: -6rem;
+        right: -5rem;
+        height: 16rem;
+        width: 16rem;
+        border-radius: 9999px;
+        background-color: rgba(59, 130, 246, 0.4);
+        filter: blur(48px);
+    }
+
+    .createit-dashboard__badge {
+        @apply inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-white/70;
+    }
+
+    .createit-dashboard__title {
+        @apply mt-6 text-4xl font-semibold tracking-tight;
+    }
+
+    .createit-dashboard__subtitle {
+        @apply mt-4 max-w-2xl text-base text-white/80;
+    }
+
+    .createit-dashboard__actions {
+        @apply mt-8 flex flex-wrap gap-4;
+    }
+
+    .createit-dashboard__action {
+        @apply inline-flex items-center justify-center gap-2 rounded-full bg-white/90 px-5 py-3 text-sm font-semibold text-slate-900 transition hover:-translate-y-0.5 hover:bg-white;
+    }
+
+    .createit-dashboard__grid {
+        @apply grid gap-6 lg:grid-cols-12;
+    }
+
+    .createit-dashboard__card {
+        @apply relative overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl;
+    }
+
+    .createit-dashboard__card-badge {
+        @apply inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-white;
+    }
+
+    .createit-dashboard__card-title {
+        @apply mt-5 text-2xl font-semibold text-slate-900;
+    }
+
+    .createit-dashboard__card-text {
+        @apply mt-3 text-sm text-slate-500;
+    }
+
+    .createit-dashboard__card-link {
+        @apply mt-8 inline-flex items-center gap-2 text-sm font-semibold text-slate-900 transition hover:text-blue-600;
+    }
+
+    .createit-dashboard__stats {
+        @apply grid gap-4 sm:grid-cols-2;
+    }
+
+    .createit-dashboard__stat {
+        @apply rounded-3xl border border-slate-100 bg-slate-50/70 p-6 shadow-inner shadow-slate-200/60;
+    }
+
+    .createit-dashboard__stat-label {
+        @apply text-xs uppercase tracking-[0.35em] text-slate-400;
+    }
+
+    .createit-dashboard__stat-value {
+        @apply mt-4 text-3xl font-semibold text-slate-900;
+    }
+
+    .createit-dashboard__stat-meta {
+        @apply mt-1 text-xs text-slate-500;
+    }
+
+    .createit-template-card {
+        @apply relative flex h-full flex-col overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-2xl;
+    }
+
+    .createit-template-card__preview {
+        @apply relative h-48 bg-gradient-to-br;
+    }
+
+    .createit-template-card__badge {
+        @apply absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 shadow;
+    }
+
+    .createit-template-card__body {
+        @apply flex flex-1 flex-col gap-4 p-6;
+    }
+
+    .createit-template-card__title {
+        @apply text-xl font-semibold text-slate-900;
+    }
+
+    .createit-template-card__description {
+        @apply mt-2 text-sm text-slate-500;
+    }
+
+    .createit-template-card__actions {
+        @apply mt-auto flex flex-wrap items-center justify-between gap-3;
+    }
+
+    .createit-template-card__action {
+        @apply inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition group-hover:bg-black;
+    }
+
+    .createit-template-card__preview-button {
+        @apply inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-500 hover:text-blue-600;
+    }
+
+    .createit-modal {
+        @apply m-0 w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200 bg-white/95 p-0 shadow-2xl backdrop:bg-slate-900/70;
+    }
+
+    .createit-modal__header {
+        @apply flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4;
+    }
+
+    .createit-modal__title {
+        @apply text-lg font-semibold text-slate-900;
+    }
+
+    .createit-modal__body {
+        @apply bg-slate-100/60 p-6;
+    }
+
+    .createit-modal__iframe-wrapper {
+        @apply overflow-hidden rounded-2xl border border-slate-200 shadow-lg;
+    }
+
+    .createit-modal__iframe {
+        @apply h-[28rem] w-full;
+    }
+
+    .createit-modal__close {
+        @apply inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-500 hover:text-blue-600;
     }
 }
