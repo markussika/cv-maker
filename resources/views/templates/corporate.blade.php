@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('templates/css/corporate.css') }}">
 </head>
 <body class="corporate-template">
-    @include('templates.partials.base-data', ['cv' => $cv])
+    @include('templates.partials.base-data-helper', ['cv' => $cv])
 
     @php
         $data = $templateData;

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('templates/css/futuristic.css') }}">
 </head>
 <body class="futuristic-template">
-    @include('templates.partials.base-data', ['cv' => $cv])
+    @include('templates.partials.base-data-helper', ['cv' => $cv])
 
     @php
         $data = $templateData;

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('templates/css/modern.css') }}">
 </head>
 <body class="modern-template">
-    @include('templates.partials.base-data', ['cv' => $cv])
+    @include('templates.partials.base-data-helper', ['cv' => $cv])
 
     @php
         $data = $templateData;

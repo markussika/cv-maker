@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ asset('templates/css/gradient.css') }}">
 </head>
 <body class="gradient-template">
-    @include('templates.partials.base-data', ['cv' => $cv])
+    @include('templates.partials.base-data-helper', ['cv' => $cv])
 
     @php
         $data = $templateData;
