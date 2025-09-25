@@ -78,8 +78,12 @@
                     $cvData['first_name'] ?? null,
                     $cvData['last_name'] ?? null,
                 ])
-                    ->filter(fn ($value) => is_string($value) && trim($value) !== '')
-                    ->map(fn ($value) => mb_substr(trim($value), 0, 1))
+                    ->filter(function ($value) {
+                        return is_string($value) && trim($value) !== '';
+                    })
+                    ->map(function ($value) {
+                        return mb_substr(trim($value), 0, 1);
+                    })
                     ->implode('');
                 if ($initials === '') {
                     $initials = 'CV';
@@ -102,7 +106,9 @@
                 if (is_array($experiences) && array_keys($experiences) !== range(0, count($experiences) - 1)) {
                     $experiences = [$experiences];
                 }
-                $experiences = array_values(array_filter($experiences, fn ($exp) => is_array($exp)));
+                $experiences = array_values(array_filter($experiences, function ($exp) {
+                    return is_array($exp);
+                }));
 
                 $educationItems = $cvData['education'] ?? [];
                 if ($educationItems && !is_array($educationItems)) {
@@ -111,13 +117,17 @@
                 if (is_array($educationItems) && array_keys($educationItems) !== range(0, count($educationItems) - 1)) {
                     $educationItems = [$educationItems];
                 }
-                $educationItems = array_values(array_filter($educationItems, fn ($edu) => is_array($edu)));
+                $educationItems = array_values(array_filter($educationItems, function ($edu) {
+                    return is_array($edu);
+                }));
 
                 $hobbies = $cvData['hobbies'] ?? [];
                 if ($hobbies && !is_array($hobbies)) {
                     $hobbies = (array) $hobbies;
                 }
-                $hobbies = array_values(array_filter($hobbies, fn ($hobby) => is_string($hobby) && trim($hobby) !== ''));
+                $hobbies = array_values(array_filter($hobbies, function ($hobby) {
+                    return is_string($hobby) && trim($hobby) !== '';
+                }));
 
                 $skills = $cvData['skills'] ?? [];
                 if ($skills && !is_array($skills)) {
@@ -130,7 +140,9 @@
                     }
 
                     return is_string($skill) ? trim($skill) : null;
-                }, $skills), fn ($skill) => is_string($skill) && $skill !== ''));
+                }, $skills), function ($skill) {
+                    return is_string($skill) && $skill !== '';
+                }));
 
                 $languages = $cvData['languages'] ?? [];
                 if ($languages && !is_array($languages)) {
@@ -156,7 +168,9 @@
                     }
 
                     return ['name' => $name, 'level' => $level !== '' ? $level : null];
-                }, $languages), fn ($language) => is_array($language) && ($language['name'] ?? null));
+                }, $languages), function ($language) {
+                    return is_array($language) && ($language['name'] ?? null);
+                }));
 
                 $headline = is_string($cvData['headline'] ?? null) ? trim($cvData['headline']) : null;
                 $summaryText = is_string($cvData['summary'] ?? null) ? trim($cvData['summary']) : null;
@@ -169,7 +183,9 @@
                     ['label' => 'Website', 'url' => $website],
                     ['label' => 'LinkedIn', 'url' => $linkedin],
                     ['label' => 'GitHub', 'url' => $github],
-                ])->filter(fn ($item) => is_string($item['url']) && $item['url'] !== '')->values();
+                ])->filter(function ($item) {
+                    return is_string($item['url']) && $item['url'] !== '';
+                })->values();
             @endphp
 
             <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
