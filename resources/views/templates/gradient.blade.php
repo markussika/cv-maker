@@ -6,9 +6,8 @@
     <link rel="stylesheet" href="{{ asset('templates/css/gradient.css') }}">
 </head>
 <body class="gradient-template">
-    @include('templates.partials.base-data-helper', ['cv' => $cv])
-
     @php
+        $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
         $data = $templateData;
         $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
             ->filter(fn ($item) => is_string($item) && trim($item) !== '')
