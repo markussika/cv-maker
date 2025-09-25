@@ -130,7 +130,7 @@
                     }
 
                     return is_string($skill) ? trim($skill) : null;
-                }, $skills), fn ($skill) => is_string($skill) && $skill !== '')));
+                }, $skills), fn ($skill) => is_string($skill) && $skill !== ''));
 
                 $languages = $cvData['languages'] ?? [];
                 if ($languages && !is_array($languages)) {
@@ -156,7 +156,7 @@
                     }
 
                     return ['name' => $name, 'level' => $level !== '' ? $level : null];
-                }, $languages), fn ($language) => is_array($language) && ($language['name'] ?? null)));
+                }, $languages), fn ($language) => is_array($language) && ($language['name'] ?? null));
 
                 $headline = is_string($cvData['headline'] ?? null) ? trim($cvData['headline']) : null;
                 $summaryText = is_string($cvData['summary'] ?? null) ? trim($cvData['summary']) : null;
