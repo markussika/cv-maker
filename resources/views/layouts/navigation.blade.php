@@ -10,6 +10,7 @@
         <div class="createit-navbar__nav">
             @guest
                 <a href="{{ route('welcome') }}" class="createit-navbar__link">Home</a>
+                <a href="{{ route('cv.templates') }}" class="createit-navbar__link">Templates</a>
             @endguest
             @auth
                 <a href="{{ route('dashboard') }}" class="createit-navbar__link">Dashboard</a>
