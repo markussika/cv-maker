@@ -1,6 +1,6 @@
 @layer components {
     .createit-auth {
-        @apply font-sans antialiased bg-slate-950 text-slate-100;
+        @apply font-sans antialiased bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-900;
         min-height: 100vh;
         position: relative;
         overflow: hidden;
@@ -9,10 +9,10 @@
     .createit-auth__background {
         @apply absolute inset-0 pointer-events-none;
         background:
-            radial-gradient(circle at 15% 20%, rgba(139, 92, 246, 0.3), transparent 55%),
-            radial-gradient(circle at 85% 30%, rgba(59, 130, 246, 0.25), transparent 60%),
-            radial-gradient(circle at 30% 80%, rgba(14, 165, 233, 0.25), transparent 55%),
-            linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.97));
+            radial-gradient(circle at 15% 20%, rgba(79, 70, 229, 0.18), transparent 50%),
+            radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.18), transparent 55%),
+            radial-gradient(circle at 30% 80%, rgba(16, 185, 129, 0.16), transparent 55%),
+            linear-gradient(135deg, rgba(226, 232, 240, 0.6), rgba(241, 245, 249, 0.9));
     }
 
     .createit-auth__grid {
@@ -20,7 +20,7 @@
     }
 
     .createit-auth__info {
-        @apply hidden flex-col justify-between px-10 py-12 text-white md:flex lg:px-16;
+        @apply hidden flex-col justify-between rounded-3xl bg-white/80 px-10 py-12 text-slate-700 shadow-xl shadow-slate-200/80 ring-1 ring-white/70 md:flex lg:px-16;
     }
 
     .createit-logo {
@@ -36,7 +36,7 @@
     }
 
     .createit-logo--light {
-        @apply text-white/90;
+        @apply text-slate-800;
     }
 
     .createit-logo--dark {
@@ -44,7 +44,7 @@
     }
 
     .createit-auth__badge {
-        @apply inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white/80;
+        @apply inline-flex items-center gap-2 rounded-full bg-slate-900/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600;
     }
 
     .createit-dot {
@@ -52,31 +52,31 @@
     }
 
     .createit-auth__headline {
-        @apply mt-8 text-4xl font-semibold leading-tight text-white lg:text-5xl;
+        @apply mt-8 text-4xl font-semibold leading-tight text-slate-900 lg:text-5xl;
     }
 
     .createit-auth__description {
-        @apply mt-4 max-w-xl text-base leading-relaxed text-white/80;
+        @apply mt-4 max-w-xl text-base leading-relaxed text-slate-500;
     }
 
     .createit-auth__stats {
-        @apply mt-10 grid gap-6 text-sm text-white/80 sm:grid-cols-3;
+        @apply mt-10 grid gap-6 text-sm text-slate-500 sm:grid-cols-3;
     }
 
     .createit-auth__stat-label {
-        @apply text-xs uppercase tracking-[0.3em] text-white/70;
+        @apply text-xs uppercase tracking-[0.3em] text-slate-400;
     }
 
     .createit-auth__stat-value {
-        @apply mt-2 text-2xl font-semibold text-white;
+        @apply mt-2 text-2xl font-semibold text-slate-900;
     }
 
     .createit-auth__quote {
-        @apply mt-10 hidden items-center gap-4 text-sm text-white/70 lg:flex;
+        @apply mt-10 hidden items-center gap-4 text-sm text-slate-500 lg:flex;
     }
 
     .createit-quote-badge {
-        @apply inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white font-semibold;
+        @apply inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-900/5 text-slate-600 font-semibold;
     }
 
     .createit-auth__card-wrapper {
@@ -84,7 +84,7 @@
     }
 
     .createit-auth__card {
-        @apply w-full max-w-md rounded-3xl bg-white/95 p-8 text-slate-900 shadow-xl shadow-slate-900/15 ring-1 ring-white/40;
+        @apply w-full max-w-md rounded-3xl bg-white p-8 text-slate-900 shadow-xl shadow-slate-200/80 ring-1 ring-slate-100;
     }
 
     .createit-card-stack {

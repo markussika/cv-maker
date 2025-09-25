@@ -27,6 +27,7 @@
             ['title' => 'Personal', 'description' => 'Tell us about yourself'],
             ['title' => 'Education', 'description' => 'Share your studies'],
             ['title' => 'Experience', 'description' => 'Add recent roles'],
+            ['title' => 'Skills', 'description' => 'Showcase strengths & languages'],
             ['title' => 'Template', 'description' => 'Pick a visual style'],
         ];
 
@@ -146,6 +147,99 @@
         }
         $hobbyNextIndex = count($hobbyEntries);
 
+        $prefillLanguages = [];
+        if ($prefill) {
+            $rawLanguages = data_get($prefill, 'languages', []);
+            if (is_string($rawLanguages)) {
+                $decodedLanguages = json_decode($rawLanguages, true);
+                $rawLanguages = is_array($decodedLanguages) ? $decodedLanguages : [];
+            }
+            if (is_array($rawLanguages)) {
+                $prefillLanguages = array_is_list($rawLanguages) ? $rawLanguages : [$rawLanguages];
+            }
+        }
+
+        $languageEntriesRaw = old('languages', $prefillLanguages);
+        if (!is_array($languageEntriesRaw)) {
+            $languageEntriesRaw = [];
+        }
+
+        $languageEntries = [];
+        foreach ($languageEntriesRaw as $entry) {
+            if (is_array($entry)) {
+                $languageEntries[] = [
+                    'name' => isset($entry['name']) ? trim((string) $entry['name']) : '',
+                    'level' => isset($entry['level']) ? trim((string) $entry['level']) : '',
+                ];
+                continue;
+            }
+
+            if (is_string($entry)) {
+                $languageEntries[] = [
+                    'name' => trim($entry),
+                    'level' => '',
+                ];
+            }
+        }
+
+        if (empty($languageEntries)) {
+            $languageEntries[] = ['name' => '', 'level' => ''];
+        }
+
+        $languageNextIndex = count($languageEntries);
+
+        $prefillSkills = [];
+        if ($prefill) {
+            $rawSkills = data_get($prefill, 'skills', []);
+            if (is_string($rawSkills)) {
+                $decodedSkills = json_decode($rawSkills, true);
+                $rawSkills = is_array($decodedSkills) ? $decodedSkills : [];
+            }
+            if (is_array($rawSkills)) {
+                $prefillSkills = array_is_list($rawSkills) ? $rawSkills : [$rawSkills];
+            }
+        }
+
+        $skillEntriesRaw = old('skills', $prefillSkills);
+        if (!is_array($skillEntriesRaw)) {
+            $skillEntriesRaw = [];
+        }
+
+        $skillEntries = [];
+        foreach ($skillEntriesRaw as $entry) {
+            if (is_array($entry)) {
+                $label = $entry['name'] ?? $entry['title'] ?? '';
+                $skillEntries[] = is_string($label) ? trim($label) : '';
+                continue;
+            }
+
+            if (is_string($entry)) {
+                $skillEntries[] = trim($entry);
+            }
+        }
+
+        if (empty($skillEntries)) {
+            $skillEntries = [''];
+        }
+
+        $skillEntries = array_values($skillEntries);
+        $skillNextIndex = count($skillEntries);
+
+        $existingProfileImage = $prefill ? data_get($prefill, 'profile_image') : null;
+        $profileImageUrl = null;
+        if (is_string($existingProfileImage) && trim($existingProfileImage) !== '') {
+            $candidate = trim($existingProfileImage);
+            if (filter_var($candidate, FILTER_VALIDATE_URL)) {
+                $profileImageUrl = $candidate;
+            } else {
+                try {
+                    $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($candidate);
+                } catch (\Throwable $e) {
+                    $profileImageUrl = null;
+                }
+            }
+        }
+
         $prefillBirthdayValue = data_get($prefill, 'birthday');
         if ($prefillBirthdayValue instanceof \Carbon\CarbonInterface) {
             $prefilledBirthday = $prefillBirthdayValue->format('Y-m-d');
@@ -168,6 +262,7 @@
 
         $inputClasses = 'mt-1 block w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-slate-900 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200/60 focus:outline-none transition';
         $errorClasses = 'border-red-500 ring-1 ring-red-200 focus:border-red-500 focus:ring-red-200';
+        $fileInputClasses = 'mt-1 block w-full rounded-full border border-slate-300 bg-white px-4 py-2 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:font-semibold file:text-blue-600 hover:file:bg-blue-100 focus:border-blue-500 focus:ring focus:ring-blue-200/70 focus:outline-none transition';
     @endphp
 
     <div class="min-h-screen -mx-4 -mt-8 bg-gradient-to-br from-slate-100 via-white to-slate-200 px-4 py-10 sm:px-6 lg:px-8">
@@ -215,7 +310,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ $formAction }}" id="cvForm" class="space-y-10">
+                <form method="POST" action="{{ $formAction }}" id="cvForm" class="space-y-10" enctype="multipart/form-data" data-cities-endpoint="{{ route('cv.cities') }}">
                     @csrf
                     @if ($formMethod !== 'POST')
                         @method($formMethod)
@@ -242,6 +337,15 @@
                                     <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-600">Professional headline</label>
+                                <input type="text" name="headline" value="{{ old('headline', data_get($prefill, 'headline', '')) }}" class="{{ $inputClasses }} @error('headline') {{ $errorClasses }} @enderror" placeholder="Product designer, Data scientist...">
+                                @error('headline')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Email</label>
                                 <input type="email" name="email" value="{{ old('email', data_get($prefill, 'email', '')) }}" class="{{ $inputClasses }} @error('email') {{ $errorClasses }} @enderror" autocomplete="email" placeholder="you@example.com" required>
@@ -253,11 +357,13 @@
                                 <label class="block text-sm font-medium text-slate-600">Phone</label>
                                 <input type="tel" name="phone" value="{{ old('phone', data_get($prefill, 'phone', '')) }}" class="{{ $inputClasses }}" autocomplete="tel" placeholder="(+371) 20000000">
                             </div>
+
                             <div>
                                 <label class="block text-sm font-medium text-slate-600">Birthday</label>
                                 <input type="date" name="birthday" max="{{ date('Y-m-d') }}" value="{{ old('birthday', $prefilledBirthday ?? '') }}" class="{{ $inputClasses }}">
                             </div>
-                            <div class="grid gap-6 md:grid-cols-2 md:col-span-2" data-location-group>
+
+                            <div class="md:col-span-2 grid gap-6 md:grid-cols-2" data-location-group>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-600">Country</label>
                                     <select name="country" id="personal-country" class="{{ $inputClasses }} appearance-none pr-10" data-country-select>
@@ -275,6 +381,58 @@
                                             <option value="{{ $initialCity }}" selected>{{ $initialCity }}</option>
                                         @endif
                                     </select>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-600">Professional summary</label>
+                                <textarea name="summary" rows="5" class="{{ $inputClasses }} @error('summary') {{ $errorClasses }} @enderror" placeholder="Share a short intro that highlights your value.">{{ old('summary', data_get($prefill, 'summary', '')) }}</textarea>
+                                @error('summary')
+                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="md:col-span-2 grid gap-6 md:grid-cols-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600">Website</label>
+                                    <input type="url" name="website" value="{{ old('website', data_get($prefill, 'website', '')) }}" class="{{ $inputClasses }} @error('website') {{ $errorClasses }} @enderror" placeholder="https://portfolio.com">
+                                    @error('website')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600">LinkedIn</label>
+                                    <input type="url" name="linkedin" value="{{ old('linkedin', data_get($prefill, 'linkedin', '')) }}" class="{{ $inputClasses }} @error('linkedin') {{ $errorClasses }} @enderror" placeholder="https://linkedin.com/in/you">
+                                    @error('linkedin')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-600">GitHub</label>
+                                    <input type="url" name="github" value="{{ old('github', data_get($prefill, 'github', '')) }}" class="{{ $inputClasses }} @error('github') {{ $errorClasses }} @enderror" placeholder="https://github.com/you">
+                                    @error('github')
+                                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-slate-600">Profile photo</label>
+                                <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
+                                    <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
+                                        @if ($profileImageUrl)
+                                            <img src="{{ $profileImageUrl }}" alt="Current profile photo" class="h-full w-full object-cover">
+                                        @else
+                                            <span class="px-2 text-center text-xs text-slate-400">{{ __('No photo yet') }}</span>
+                                        @endif
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload a square image (JPG, PNG, or WEBP). Max 2 MB.') }}</p>
+                                        @error('profile_image')
+                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -455,20 +613,95 @@
                             {{ __('Add another role') }}
                         </button>
 
+                    </div>
+
+                    <div data-step-panel="4" class="space-y-6 hidden">
+                        <div>
+                            <h2 class="text-2xl font-semibold text-slate-900">Skills & languages</h2>
+                            <p class="text-sm text-slate-500 mt-1">Curate your strengths so templates can highlight them beautifully.</p>
+                        </div>
+
+                        <div class="grid gap-6 lg:grid-cols-2">
+                            <div class="space-y-4 rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-slate-900">{{ __('Languages') }}</h3>
+                                    <p class="text-sm text-slate-500 mt-1">{{ __('Add each language with the level you&rsquo;re comfortable with.') }}</p>
+                                </div>
+
+                                <div class="space-y-4" data-collection="languages" data-next-index="{{ $languageNextIndex }}" data-min-items="1">
+                                    @foreach ($languageEntries as $index => $language)
+                                        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4" data-collection-item data-collection-index="{{ $index }}">
+                                            <div class="flex items-center justify-between">
+                                                <h4 class="text-sm font-semibold text-slate-800">{{ __('Language') }} {{ $loop->iteration }}</h4>
+                                                <button type="button" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-red-600" data-action="remove">
+                                                    <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                                                    <span>{{ __('Remove') }}</span>
+                                                </button>
+                                            </div>
+                                            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                                                <div>
+                                                    <label class="block text-sm font-medium text-slate-600">{{ __('Language') }}</label>
+                                                    <input type="text" name="languages[{{ $index }}][name]" value="{{ $language['name'] ?? '' }}" class="{{ $inputClasses }} @error('languages.' . $index . '.name') {{ $errorClasses }} @enderror" placeholder="English">
+                                                    <x-input-error :messages="$errors->get('languages.' . $index . '.name')" class="mt-2" />
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm font-medium text-slate-600">{{ __('Level') }}</label>
+                                                    <input type="text" name="languages[{{ $index }}][level]" value="{{ $language['level'] ?? '' }}" class="{{ $inputClasses }} @error('languages.' . $index . '.level') {{ $errorClasses }} @enderror" placeholder="Native, Fluent, Intermediate...">
+                                                    <x-input-error :messages="$errors->get('languages.' . $index . '.level')" class="mt-2" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" data-add="languages" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                                    <span class="text-lg" aria-hidden="true">+</span>
+                                    {{ __('Add language') }}
+                                </button>
+                            </div>
+
+                            <div class="space-y-4 rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-slate-900">{{ __('Skills') }}</h3>
+                                    <p class="text-sm text-slate-500 mt-1">{{ __('List key strengths and tools you want recruiters to notice.') }}</p>
+                                </div>
+
+                                <div class="space-y-3" data-collection="skills" data-next-index="{{ $skillNextIndex }}" data-min-items="1">
+                                    @foreach ($skillEntries as $index => $skill)
+                                        <div class="flex items-center gap-3" data-collection-item data-collection-index="{{ $index }}">
+                                            <div class="flex-1">
+                                                <input type="text" name="skills[{{ $index }}]" value="{{ $skill }}" class="{{ $inputClasses }} @error('skills.' . $index) {{ $errorClasses }} @enderror" placeholder="UX Research, React, Budgeting">
+                                                <x-input-error :messages="$errors->get('skills.' . $index)" class="mt-2" />
+                                            </div>
+                                            <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove">
+                                                <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                                                <span>{{ __('Remove') }}</span>
+                                            </button>
+                                        </div>
+                                    @endforeach
+                                </div>
+
+                                <button type="button" data-add="skills" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                                    <span class="text-lg" aria-hidden="true">+</span>
+                                    {{ __('Add skill') }}
+                                </button>
+                            </div>
+                        </div>
+
                         <div class="space-y-4 rounded-3xl border border-slate-200 bg-slate-50/80 p-6">
                             <div>
                                 <h3 class="text-lg font-semibold text-slate-900">{{ __('Hobbies & interests') }}</h3>
                                 <p class="text-sm text-slate-500 mt-1">{{ __('Share a few personal passions that show personality or balance to your resume.') }}</p>
                             </div>
 
-                            <div class="space-y-3" data-hobby-collection data-next-index="{{ $hobbyNextIndex }}">
+                            <div class="space-y-3" data-collection="hobbies" data-next-index="{{ $hobbyNextIndex }}" data-min-items="1">
                                 @foreach ($hobbyEntries as $index => $hobby)
-                                    <div class="flex items-center gap-3" data-hobby-item data-hobby-index="{{ $index }}">
+                                    <div class="flex items-center gap-3" data-collection-item data-collection-index="{{ $index }}">
                                         <div class="flex-1">
                                             <input type="text" name="hobbies[{{ $index }}]" value="{{ $hobby }}" class="{{ $inputClasses }} @error('hobbies.' . $index) {{ $errorClasses }} @enderror" placeholder="Photography, hiking, volunteering">
                                             <x-input-error :messages="$errors->get('hobbies.' . $index)" class="mt-2" />
                                         </div>
-                                        <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove-hobby">
+                                        <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove">
                                             <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
                                             <span>{{ __('Remove') }}</span>
                                         </button>
@@ -476,14 +709,14 @@
                                 @endforeach
                             </div>
 
-                            <button type="button" data-add-hobby class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
+                            <button type="button" data-add="hobbies" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-blue-500 hover:text-blue-600">
                                 <span class="text-lg" aria-hidden="true">+</span>
                                 {{ __('Add hobby or interest') }}
                             </button>
                         </div>
                     </div>
 
-                    <div data-step-panel="4" class="space-y-8 hidden">
+                    <div data-step-panel="5" class="space-y-8 hidden">
                         <div>
                             <h2 class="text-2xl font-semibold text-slate-900">Choose your template</h2>
                             <p class="text-sm text-slate-500 mt-1">Pick a design that matches your personality. You can always come back and change it.</p>
@@ -662,411 +895,53 @@
         </div>
     </template>
 
-    <template id="hobby-template">
-        <div class="flex items-center gap-3" data-hobby-item data-hobby-index="__INDEX__">
-            <div class="flex-1">
-                <input type="text" name="hobbies[__INDEX__]" class="{{ $inputClasses }}" placeholder="Photography, hiking, volunteering">
+    <template id="languages-template">
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4" data-collection-item data-collection-index="__INDEX__">
+            <div class="flex items-center justify-between">
+                <h4 class="text-sm font-semibold text-slate-800">{{ __('Language') }}</h4>
+                <button type="button" class="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-red-600" data-action="remove">
+                    <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                    <span>{{ __('Remove') }}</span>
+                </button>
             </div>
-            <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove-hobby">
+            <div class="mt-4 grid gap-4 md:grid-cols-2">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">{{ __('Language') }}</label>
+                    <input type="text" name="languages[__INDEX__][name]" class="{{ $inputClasses }}" placeholder="Spanish">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600">{{ __('Level') }}</label>
+                    <input type="text" name="languages[__INDEX__][level]" class="{{ $inputClasses }}" placeholder="Fluent">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="skills-template">
+        <div class="flex items-center gap-3" data-collection-item data-collection-index="__INDEX__">
+            <div class="flex-1">
+                <input type="text" name="skills[__INDEX__]" class="{{ $inputClasses }}" placeholder="Leadership">
+            </div>
+            <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove">
                 <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
                 <span>{{ __('Remove') }}</span>
             </button>
         </div>
     </template>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const stepButtons = Array.from(document.querySelectorAll('[data-step-trigger]'));
-            const stepPanels = Array.from(document.querySelectorAll('[data-step-panel]'));
-            const connectors = Array.from(document.querySelectorAll('[data-step-connector]'));
-            const nextButton = document.getElementById('nextStep');
-            const prevButton = document.getElementById('prevStep');
-            const submitButton = document.getElementById('submitStep');
-            const totalSteps = stepPanels.length;
-            let currentStep = 1;
-            let maxStepVisited = 1;
+    <template id="hobbies-template">
+        <div class="flex items-center gap-3" data-collection-item data-collection-index="__INDEX__">
+            <div class="flex-1">
+                <input type="text" name="hobbies[__INDEX__]" class="{{ $inputClasses }}" placeholder="Photography, hiking, volunteering">
+            </div>
+            <button type="button" class="inline-flex items-center gap-2 rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 transition hover:border-red-400 hover:text-red-600" data-action="remove">
+                <svg viewBox="0 0 20 20" aria-hidden="true" class="h-3.5 w-3.5"><path fill="currentColor" d="M11.41 10l3.3-3.29a1 1 0 0 0-1.42-1.42L10 8.59l-3.29-3.3a1 1 0 0 0-1.42 1.42L8.59 10l-3.3 3.29a1 1 0 1 0 1.42 1.42L10 11.41l3.29 3.3a1 1 0 0 0 1.42-1.42Z"/></svg>
+                <span>{{ __('Remove') }}</span>
+            </button>
+        </div>
+    </template>
 
-            function updateStepVisuals() {
-                stepButtons.forEach(button => {
-                    const step = Number(button.dataset.stepTrigger);
-                    const circle = button.querySelector('[data-step-circle]');
-                    button.classList.toggle('text-slate-900', step === currentStep);
-                    button.classList.toggle('text-slate-400', step !== currentStep);
-                    button.classList.toggle('cursor-pointer', step <= maxStepVisited);
-                    button.classList.toggle('cursor-not-allowed', step > maxStepVisited);
-                    button.disabled = step > maxStepVisited;
-
-                    if (circle) {
-                        circle.className = 'flex h-12 w-12 items-center justify-center rounded-full border text-base font-semibold shadow-sm transition-all duration-300';
-                        if (step < currentStep) {
-                            circle.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-blue-200');
-                        } else if (step === currentStep) {
-                            circle.classList.add('bg-black', 'text-white', 'border-black', 'ring', 'ring-blue-100');
-                        } else {
-                            circle.classList.add('bg-white', 'text-slate-400', 'border-slate-200');
-                        }
-                    }
-                });
-
-                connectors.forEach(connector => {
-                    const index = Number(connector.dataset.stepConnector);
-                    connector.classList.toggle('bg-blue-500', index < currentStep);
-                    connector.classList.toggle('bg-slate-200', index >= currentStep);
-                });
-
-                stepPanels.forEach(panel => {
-                    const step = Number(panel.dataset.stepPanel);
-                    if (step === currentStep) {
-                        panel.classList.remove('hidden');
-                    } else {
-                        panel.classList.add('hidden');
-                    }
-                });
-
-                prevButton.classList.toggle('hidden', currentStep === 1);
-                nextButton.classList.toggle('hidden', currentStep === totalSteps);
-                submitButton.classList.toggle('hidden', currentStep !== totalSteps);
-            }
-
-            stepButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const targetStep = Number(button.dataset.stepTrigger);
-                    if (targetStep <= maxStepVisited) {
-                        currentStep = targetStep;
-                        updateStepVisuals();
-                    }
-                });
-            });
-
-            nextButton.addEventListener('click', () => {
-                if (currentStep < totalSteps) {
-                    currentStep += 1;
-                    maxStepVisited = Math.max(maxStepVisited, currentStep);
-                    updateStepVisuals();
-                }
-            });
-
-            prevButton.addEventListener('click', () => {
-                if (currentStep > 1) {
-                    currentStep -= 1;
-                    updateStepVisuals();
-                }
-            });
-
-            updateStepVisuals();
-
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? null;
-            const citiesEndpoint = @json(route('cv.cities'));
-
-            const fetchCitiesForCountry = async (country) => {
-                if (!country) {
-                    return [];
-                }
-
-                try {
-                    const response = await fetch(citiesEndpoint, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
-                        },
-                        body: JSON.stringify({ country })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('Failed to fetch cities');
-                    }
-
-                    const payload = await response.json();
-                    return Array.isArray(payload) ? payload : [];
-                } catch (error) {
-                    return [];
-                }
-            };
-
-            const initLocationGroups = (root = document) => {
-                const groups = root.matches?.('[data-location-group]') ? [root] : Array.from(root.querySelectorAll('[data-location-group]'));
-
-                groups.forEach(group => {
-                    if (!group || group.dataset.locationReady === 'true') {
-                        return;
-                    }
-
-                    const countryField = group.querySelector('[data-country-select]');
-                    const cityField = group.querySelector('[data-city-select]');
-                    if (!countryField || !cityField) {
-                        return;
-                    }
-
-                    group.dataset.locationReady = 'true';
-                    let rememberedCity = cityField.dataset.selectedCity || '';
-
-                    const populateCities = (cities, selectedCity) => {
-                        cityField.innerHTML = '<option value="">Select city</option>';
-                        if (!Array.isArray(cities) || cities.length === 0) {
-                            return;
-                        }
-
-                        cities.forEach(city => {
-                            const option = document.createElement('option');
-                            option.value = city;
-                            option.textContent = city;
-                            if (selectedCity && selectedCity === city) {
-                                option.selected = true;
-                            }
-                            cityField.appendChild(option);
-                        });
-
-                        if (selectedCity && cityField.value !== selectedCity) {
-                            const fallback = document.createElement('option');
-                            fallback.value = selectedCity;
-                            fallback.textContent = selectedCity;
-                            fallback.selected = true;
-                            cityField.appendChild(fallback);
-                        }
-
-                        cityField.dataset.selectedCity = cityField.value || '';
-                    };
-
-                    const loadCities = async (country, selectedCity = '') => {
-                        if (!country) {
-                            cityField.innerHTML = '<option value="">Select city</option>';
-                            cityField.dataset.selectedCity = '';
-                            cityField.disabled = false;
-                            return;
-                        }
-
-                        cityField.disabled = true;
-                        cityField.innerHTML = '<option value="">Loading...</option>';
-
-                        const cities = await fetchCitiesForCountry(country);
-                        cityField.disabled = false;
-
-                        if (!cities.length) {
-                            cityField.innerHTML = '<option value="">No cities found</option>';
-                            return;
-                        }
-
-                        populateCities(cities, selectedCity);
-                    };
-
-                    countryField.addEventListener('change', () => {
-                        rememberedCity = '';
-                        loadCities(countryField.value, '');
-                    });
-
-                    cityField.addEventListener('change', () => {
-                        rememberedCity = cityField.value || '';
-                        cityField.dataset.selectedCity = rememberedCity;
-                    });
-
-                    if (countryField.value) {
-                        loadCities(countryField.value, rememberedCity);
-                    }
-                });
-            };
-
-            const initExperienceItem = (scope) => {
-                const checkbox = scope.querySelector('[data-currently-checkbox]');
-                const endInput = scope.querySelector('[data-end-input]');
-                if (!checkbox || !endInput || checkbox.dataset.ready === 'true') {
-                    return;
-                }
-
-                const toggleEndDate = () => {
-                    const active = checkbox.checked;
-                    endInput.disabled = active;
-                    endInput.classList.toggle('opacity-60', active);
-                    if (active) {
-                        endInput.value = '';
-                    }
-                };
-
-                checkbox.addEventListener('change', toggleEndDate);
-                checkbox.dataset.ready = 'true';
-                toggleEndDate();
-            };
-
-            const setupCollection = (name, { onCreate } = {}) => {
-                const container = document.querySelector(`[data-collection="${name}"]`);
-                const template = document.getElementById(`${name}-template`);
-                const addButton = document.querySelector(`[data-add="${name}"]`);
-                if (!container || !template) {
-                    return;
-                }
-
-                const initialItems = Array.from(container.querySelectorAll('[data-collection-item]'));
-                const minItems = Number(container.dataset.minItems || 1);
-                let nextIndex = Number(container.dataset.nextIndex ?? initialItems.length);
-                if (Number.isNaN(nextIndex)) {
-                    nextIndex = initialItems.length;
-                }
-                nextIndex = Math.max(nextIndex, initialItems.length);
-
-                const updateRemoveButtons = () => {
-                    const items = container.querySelectorAll('[data-collection-item]');
-                    items.forEach(item => {
-                        const removeButton = item.querySelector('[data-action="remove"]');
-                        if (!removeButton) {
-                            return;
-                        }
-                        if (items.length <= minItems) {
-                            removeButton.classList.add('hidden');
-                        } else {
-                            removeButton.classList.remove('hidden');
-                        }
-                    });
-                };
-
-                const renderTemplate = (index) => {
-                    const html = template.innerHTML.replace(/__INDEX__/g, index);
-                    const wrapper = document.createElement('div');
-                    wrapper.innerHTML = html.trim();
-                    return wrapper.firstElementChild;
-                };
-
-                const registerItem = (item, index) => {
-                    item.dataset.collectionIndex = index;
-                    initLocationGroups(item);
-                    if (typeof onCreate === 'function') {
-                        onCreate(item, index);
-                    }
-                };
-
-                initialItems.forEach((item, index) => {
-                    registerItem(item, index);
-                });
-
-                addButton?.addEventListener('click', () => {
-                    const item = renderTemplate(nextIndex);
-                    container.appendChild(item);
-                    registerItem(item, nextIndex);
-                    nextIndex += 1;
-                    container.dataset.nextIndex = String(nextIndex);
-                    updateRemoveButtons();
-
-                    const focusable = item.querySelector('input, select, textarea');
-                    if (focusable) {
-                        focusable.focus();
-                    }
-                });
-
-                container.addEventListener('click', event => {
-                    const removeButton = event.target.closest('[data-action="remove"]');
-                    if (!removeButton) {
-                        return;
-                    }
-
-                    const item = removeButton.closest('[data-collection-item]');
-                    if (!item) {
-                        return;
-                    }
-
-                    const items = container.querySelectorAll('[data-collection-item]');
-                    if (items.length <= minItems) {
-                        item.querySelectorAll('input, textarea, select').forEach(field => {
-                            if (field.type === 'checkbox' || field.type === 'radio') {
-                                field.checked = false;
-                            } else {
-                                field.value = '';
-                            }
-                        });
-
-                        item.querySelectorAll('[data-city-select]').forEach(select => {
-                            select.innerHTML = '<option value="">Select city</option>';
-                            select.dataset.selectedCity = '';
-                        });
-
-                        return;
-                    }
-
-                    item.remove();
-                    updateRemoveButtons();
-                });
-
-                updateRemoveButtons();
-            };
-
-            const setupHobbyCollection = () => {
-                const container = document.querySelector('[data-hobby-collection]');
-                const template = document.getElementById('hobby-template');
-                const addButton = document.querySelector('[data-add-hobby]');
-                if (!container || !template) {
-                    return;
-                }
-
-                let nextIndex = Number(container.dataset.nextIndex ?? container.querySelectorAll('[data-hobby-item]').length);
-                if (Number.isNaN(nextIndex)) {
-                    nextIndex = container.querySelectorAll('[data-hobby-item]').length;
-                }
-
-                const updateButtons = () => {
-                    const items = container.querySelectorAll('[data-hobby-item]');
-                    items.forEach(item => {
-                        const removeButton = item.querySelector('[data-action="remove-hobby"]');
-                        if (!removeButton) {
-                            return;
-                        }
-                        if (items.length <= 1) {
-                            removeButton.classList.add('hidden');
-                        } else {
-                            removeButton.classList.remove('hidden');
-                        }
-                    });
-                };
-
-                const renderTemplate = (index) => {
-                    const html = template.innerHTML.replace(/__INDEX__/g, index);
-                    const wrapper = document.createElement('div');
-                    wrapper.innerHTML = html.trim();
-                    return wrapper.firstElementChild;
-                };
-
-                addButton?.addEventListener('click', () => {
-                    const item = renderTemplate(nextIndex);
-                    container.appendChild(item);
-                    nextIndex += 1;
-                    container.dataset.nextIndex = String(nextIndex);
-                    updateButtons();
-                    const input = item.querySelector('input');
-                    if (input) {
-                        input.focus();
-                    }
-                });
-
-                container.addEventListener('click', event => {
-                    const removeButton = event.target.closest('[data-action="remove-hobby"]');
-                    if (!removeButton) {
-                        return;
-                    }
-
-                    const item = removeButton.closest('[data-hobby-item]');
-                    if (!item) {
-                        return;
-                    }
-
-                    const items = container.querySelectorAll('[data-hobby-item]');
-                    if (items.length <= 1) {
-                        const input = item.querySelector('input');
-                        if (input) {
-                            input.value = '';
-                            input.focus();
-                        }
-                        return;
-                    }
-
-                    item.remove();
-                    updateButtons();
-                });
-
-                updateButtons();
-            };
-
-            initLocationGroups();
-            setupCollection('education');
-            setupCollection('experience', { onCreate: initExperienceItem });
-            setupHobbyCollection();
-        });
-    </script>
+    @push('scripts')
+        @vite('resources/js/cv-form.js')
+    @endpush
 </x-app-layout>

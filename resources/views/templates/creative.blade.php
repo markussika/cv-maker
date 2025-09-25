@@ -3,315 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <title>Creative · {{ config('app.name', 'CreateIt') }}</title>
-    <style>
-        :root {
-            --pink: #ec4899;
-            --purple: #8b5cf6;
-            --sky: #38bdf8;
-            --ink: #0f172a;
-            --slate-600: #475569;
-            --slate-400: #94a3b8;
-            --paper: #fdf4ff;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Poppins", "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(120deg, rgba(236, 72, 153, 0.1), rgba(59, 130, 246, 0.08));
-            color: var(--ink);
-            font-size: 14px;
-            line-height: 1.6;
-            padding: 36px;
-        }
-
-        .canvas {
-            background: #fff;
-            border-radius: 36px;
-            overflow: hidden;
-            box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
-            border: 1px solid rgba(148, 163, 184, 0.4);
-        }
-
-        header {
-            background: linear-gradient(135deg, rgba(236, 72, 153, 0.92), rgba(59, 130, 246, 0.92));
-            color: #fff;
-            padding: 48px 56px 56px;
-            position: relative;
-        }
-
-        header::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.35), transparent 45%);
-            pointer-events: none;
-        }
-
-        .heading {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .eyebrow {
-            font-size: 12px;
-            letter-spacing: 0.4em;
-            text-transform: uppercase;
-            color: rgba(255, 255, 255, 0.7);
-            margin: 0;
-        }
-
-        .name {
-            margin: 0;
-            font-size: 34px;
-            font-weight: 700;
-            letter-spacing: 0.03em;
-        }
-
-        .headline {
-            margin: 0;
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .contact {
-            margin-top: 18px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .body {
-            display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 40px;
-            padding: 48px 56px 56px;
-        }
-
-        .sidebar {
-            display: flex;
-            flex-direction: column;
-            gap: 28px;
-        }
-
-        .card {
-            background: var(--paper);
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid rgba(236, 72, 153, 0.15);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-        }
-
-        .card h2,
-        .section h2 {
-            margin: 0 0 16px;
-            font-size: 13px;
-            letter-spacing: 0.35em;
-            text-transform: uppercase;
-            color: var(--slate-400);
-        }
-
-        .card p {
-            margin: 0;
-            font-size: 13px;
-            color: var(--slate-600);
-        }
-
-        .badge-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .badge {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 12px;
-            font-weight: 500;
-            background: rgba(236, 72, 153, 0.12);
-            color: var(--ink);
-            border: 1px solid rgba(236, 72, 153, 0.3);
-        }
-
-        .section {
-            margin-bottom: 32px;
-        }
-
-        .section:last-child {
-            margin-bottom: 0;
-        }
-
-        .item {
-            margin-bottom: 24px;
-            padding-left: 18px;
-            border-left: 3px solid rgba(236, 72, 153, 0.35);
-        }
-
-        .item:last-child {
-            margin-bottom: 0;
-        }
-
-        .item h3 {
-            margin: 0;
-            font-size: 18px;
-            letter-spacing: 0.01em;
-        }
-
-        .meta {
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--slate-600);
-        }
-
-        .item p {
-            margin-top: 12px;
-            font-size: 13px;
-            color: var(--slate-600);
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('templates/css/creative.css') }}">
 </head>
-<body>
+<body class="creative-template">
     @include('templates.partials.base-data', ['cv' => $cv])
 
     @php
         $data = $templateData;
+        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
+            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+            ->implode('');
+        $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="canvas">
-        <header>
-            <div class="heading">
-                <p class="eyebrow">{{ __('Creative Spirit') }}</p>
-                <h1 class="name">{{ $data['name'] ?? __('Your Name') }}</h1>
-                @if ($data['headline'])
-                    <p class="headline">{{ $data['headline'] }}</p>
-                @endif
-                @if (!empty($data['contacts']))
-                    <div class="contact">
-                        @foreach ($data['contacts'] as $contact)
-                            <span>{{ $contact }}</span>
-                        @endforeach
-                    </div>
-                @endif
+    <div class="creative-page">
+        <header class="creative-hero">
+            <div class="creative-hero__badge">{{ __('Creative Resume') }}</div>
+            <div class="creative-hero__profile">
+                <div class="creative-hero__avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
+                    @elseif ($initials !== '')
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p>{{ $data['headline'] }}</p>
+                    @endif
+                </div>
             </div>
+            @if ($data['location'])
+                <div class="creative-hero__location">{{ $data['location'] }}</div>
+            @endif
         </header>
 
-        <div class="body">
-            <aside class="sidebar">
+        <div class="creative-content">
+            <aside class="creative-aside">
                 @if ($data['summary'])
-                    <div class="card">
-                        <h2>{{ __('Artist Statement') }}</h2>
+                    <section class="creative-card creative-card--accent">
+                        <h2>{{ __('Profile') }}</h2>
                         <p>{{ $data['summary'] }}</p>
-                    </div>
+                    </section>
+                @endif
+
+                @if (!empty($data['contacts']))
+                    <section class="creative-card">
+                        <h2>{{ __('Contact') }}</h2>
+                        <ul class="creative-list">
+                            @foreach ($data['contacts'] as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
                 @endif
 
                 @if (!empty($data['skills']))
-                    <div class="card">
-                        <h2>{{ __('Skill Palette') }}</h2>
-                        <div class="badge-list">
+                    <section class="creative-card">
+                        <h2>{{ __('Skills') }}</h2>
+                        <ul class="creative-tag-list">
                             @foreach ($data['skills'] as $skill)
-                                <span class="badge">{{ $skill }}</span>
-                            @endforeach
-                        </div>
-                    </div>
-                @endif
-
-                @if (!empty($data['hobbies']))
-                    <div class="card">
-                        <h2>{{ __('Playful Interests') }}</h2>
-                        <ul>
-                            @foreach ($data['hobbies'] as $hobby)
-                                <li>{{ $hobby }}</li>
+                                <li>{{ $skill }}</li>
                             @endforeach
                         </ul>
-                    </div>
+                    </section>
                 @endif
 
                 @if (!empty($data['languages']))
-                    <div class="card">
+                    <section class="creative-card creative-card--split">
                         <h2>{{ __('Languages') }}</h2>
-                        <ul>
+                        <ul class="creative-list creative-list--condensed">
                             @foreach ($data['languages'] as $language)
                                 <li>
-                                    {{ $language['name'] }}
+                                    <span class="creative-list__primary">{{ $language['name'] }}</span>
                                     @if (!empty($language['level']))
-                                        <span class="meta">&mdash; {{ ucfirst($language['level']) }}</span>
+                                        <span class="creative-list__secondary">{{ ucfirst($language['level']) }}</span>
                                     @endif
                                 </li>
                             @endforeach
                         </ul>
-                    </div>
+                    </section>
+                @endif
+
+                @if (!empty($data['hobbies']))
+                    <section class="creative-card">
+                        <h2>{{ __('Interests') }}</h2>
+                        <ul class="creative-tag-list creative-tag-list--soft">
+                            @foreach ($data['hobbies'] as $hobby)
+                                <li>{{ $hobby }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
                 @endif
             </aside>
 
-            <main>
+            <main class="creative-main">
                 @if (!empty($data['experiences']))
-                    <section class="section">
-                        <h2>{{ __('Featured Work') }}</h2>
-                        @foreach ($data['experiences'] as $experience)
-                            <article class="item">
-                                @if ($experience['role'])
-                                    <h3>{{ $experience['role'] }}</h3>
-                                @endif
-                                <div class="meta">
-                                    {{ $experience['company'] }}
-                                    @if ($experience['company'] && $experience['location'])
-                                        &middot;
+                    <section>
+                        <div class="creative-section-head">
+                            <h2>{{ __('Experience highlights') }}</h2>
+                            <p>{{ __('Selected projects and accomplishments.') }}</p>
+                        </div>
+                        <div class="creative-experience-grid">
+                            @foreach ($data['experiences'] as $experience)
+                                <article class="creative-experience-card">
+                                    <div class="creative-experience-card__header">
+                                        <span class="creative-dot"></span>
+                                        <div>
+                                            @if ($experience['role'])
+                                                <h3>{{ $experience['role'] }}</h3>
+                                            @endif
+                                            <p>
+                                                {{ $experience['company'] }}
+                                                @if ($experience['company'] && $experience['location'])
+                                                    ·
+                                                @endif
+                                                {{ $experience['location'] }}
+                                            </p>
+                                        </div>
+                                        @if ($experience['period'])
+                                            <span class="creative-chip">{{ $experience['period'] }}</span>
+                                        @endif
+                                    </div>
+                                    @if ($experience['summary'])
+                                        <p class="creative-experience-card__body">{{ $experience['summary'] }}</p>
                                     @endif
-                                    {{ $experience['location'] }}
-                                    @if ($experience['period'])
-                                        &middot;
-                                        {{ $experience['period'] }}
-                                    @endif
-                                </div>
-                                @if ($experience['summary'])
-                                    <p>{{ $experience['summary'] }}</p>
-                                @endif
-                            </article>
-                        @endforeach
+                                </article>
+                            @endforeach
+                        </div>
                     </section>
                 @endif
 
                 @if (!empty($data['education']))
-                    <section class="section">
-                        <h2>{{ __('Learning Journey') }}</h2>
-                        @foreach ($data['education'] as $education)
-                            <article class="item">
-                                @if ($education['degree'])
-                                    <h3>{{ $education['degree'] }}</h3>
-                                @endif
-                                <div class="meta">
-                                    {{ $education['institution'] }}
-                                    @if ($education['institution'] && $education['location'])
-                                        &middot;
-                                    @endif
-                                    {{ $education['location'] }}
-                                    @if ($education['period'])
-                                        &middot;
-                                        {{ $education['period'] }}
-                                    @endif
-                                </div>
-                                @if ($education['field'])
-                                    <p>{{ $education['field'] }}</p>
-                                @endif
-                            </article>
-                        @endforeach
+                    <section>
+                        <div class="creative-section-head">
+                            <h2>{{ __('Education') }}</h2>
+                            <p>{{ __('Studies, certifications, and workshops.') }}</p>
+                        </div>
+                        <div class="creative-education">
+                            @foreach ($data['education'] as $education)
+                                <article class="creative-education__item">
+                                    <div class="creative-education__timeline"></div>
+                                    <div class="creative-education__content">
+                                        <h3>{{ $education['institution'] }}</h3>
+                                        @if ($education['degree'])
+                                            <p class="creative-education__meta">{{ $education['degree'] }}</p>
+                                        @endif
+                                        @if ($education['field'])
+                                            <p class="creative-education__meta">{{ $education['field'] }}</p>
+                                        @endif
+                                        <div class="creative-education__footer">
+                                            @if ($education['location'])
+                                                <span>{{ $education['location'] }}</span>
+                                            @endif
+                                            @if ($education['period'])
+                                                <span>{{ $education['period'] }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
                     </section>
                 @endif
             </main>

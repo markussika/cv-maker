@@ -3,272 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <title>Futuristic · {{ config('app.name', 'CreateIt') }}</title>
-    <style>
-        :root {
-            --midnight: #0b1120;
-            --violet: #7c3aed;
-            --cyan: #22d3ee;
-            --magenta: #f472b6;
-            --text: #f8fafc;
-            --muted: #a5b4fc;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: "Archivo", "Inter", sans-serif;
-            background: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.28), transparent 55%),
-                radial-gradient(circle at 80% 0%, rgba(34, 211, 238, 0.24), transparent 50%),
-                var(--midnight);
-            color: var(--text);
-            font-size: 13px;
-            line-height: 1.6;
-            padding: 40px;
-        }
-
-        .grid {
-            max-width: 880px;
-            margin: 0 auto;
-            border-radius: 36px;
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            overflow: hidden;
-            background: linear-gradient(140deg, rgba(15, 23, 42, 0.92), rgba(12, 10, 43, 0.95));
-            box-shadow: 0 40px 120px rgba(15, 23, 42, 0.35);
-        }
-
-        header {
-            padding: 48px 60px;
-            border-bottom: 1px solid rgba(124, 58, 237, 0.2);
-        }
-
-        header h1 {
-            margin: 0;
-            font-size: 32px;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-        }
-
-        header p {
-            margin: 14px 0 0;
-            font-size: 15px;
-            color: var(--muted);
-        }
-
-        .contact {
-            margin-top: 18px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            font-size: 11px;
-            color: rgba(165, 180, 252, 0.85);
-        }
-
-        .body {
-            display: grid;
-            grid-template-columns: 1fr 260px;
-            gap: 40px;
-            padding: 48px 60px;
-        }
-
-        h2 {
-            margin: 0 0 18px;
-            font-size: 12px;
-            letter-spacing: 0.5em;
-            text-transform: uppercase;
-            color: rgba(165, 180, 252, 0.7);
-        }
-
-        .entry {
-            margin-bottom: 26px;
-            border-left: 3px solid rgba(124, 58, 237, 0.35);
-            padding-left: 18px;
-        }
-
-        .entry:last-child {
-            margin-bottom: 0;
-        }
-
-        .entry h3 {
-            margin: 0;
-            font-size: 18px;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .meta {
-            margin-top: 6px;
-            font-size: 11px;
-            color: rgba(165, 180, 252, 0.85);
-        }
-
-        .entry p {
-            margin-top: 12px;
-            font-size: 13px;
-            color: rgba(226, 232, 240, 0.85);
-        }
-
-        .panel {
-            background: linear-gradient(145deg, rgba(124, 58, 237, 0.18), rgba(34, 211, 238, 0.18));
-            border-radius: 24px;
-            padding: 24px;
-            border: 1px solid rgba(124, 58, 237, 0.2);
-            margin-bottom: 24px;
-        }
-
-        .panel:last-child {
-            margin-bottom: 0;
-        }
-
-        .chip-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .chip {
-            background: rgba(124, 58, 237, 0.2);
-            color: var(--text);
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.2em;
-        }
-
-        ul {
-            margin: 0;
-            padding-left: 18px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('templates/css/futuristic.css') }}">
 </head>
-<body>
+<body class="futuristic-template">
     @include('templates.partials.base-data', ['cv' => $cv])
 
     @php
         $data = $templateData;
+        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
+            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+            ->implode('');
+        $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="grid">
-        <header>
-            <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-            @if ($data['headline'])
-                <p>{{ $data['headline'] }}</p>
-            @endif
-            @if (!empty($data['contacts']))
-                <div class="contact">
-                    @foreach ($data['contacts'] as $contact)
-                        <span>{{ $contact }}</span>
-                    @endforeach
+    <div class="futuristic-shell">
+        <header class="futuristic-header">
+            <div class="futuristic-identity">
+                <div class="futuristic-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
+                    @elseif ($initials !== '')
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
                 </div>
+                <div>
+                    <p class="futuristic-badge">{{ __('Futuristic Resume') }}</p>
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p class="futuristic-headline">{{ $data['headline'] }}</p>
+                    @endif
+                </div>
+            </div>
+            @if ($data['location'])
+                <span class="futuristic-location">{{ $data['location'] }}</span>
             @endif
         </header>
 
-        <div class="body">
-            <section>
+        <div class="futuristic-grid">
+            <aside class="futuristic-sidebar">
                 @if ($data['summary'])
-                    <div class="entry" style="border-left-color: rgba(244, 114, 182, 0.45);">
+                    <section class="futuristic-panel">
                         <h2>{{ __('Profile') }}</h2>
                         <p>{{ $data['summary'] }}</p>
-                    </div>
+                    </section>
                 @endif
 
-                @if (!empty($data['experiences']))
-                    <h2>{{ __('Experience') }}</h2>
-                    @foreach ($data['experiences'] as $experience)
-                        <article class="entry">
-                            @if ($experience['role'])
-                                <h3>{{ $experience['role'] }}</h3>
-                            @endif
-                            <div class="meta">
-                                {{ $experience['company'] }}
-                                @if ($experience['company'] && $experience['location'])
-                                    &middot;
-                                @endif
-                                {{ $experience['location'] }}
-                                @if ($experience['period'])
-                                    &middot;
-                                    {{ $experience['period'] }}
-                                @endif
-                            </div>
-                            @if ($experience['summary'])
-                                <p>{{ $experience['summary'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                @endif
-
-                @if (!empty($data['education']))
-                    <h2>{{ __('Education') }}</h2>
-                    @foreach ($data['education'] as $education)
-                        <article class="entry">
-                            @if ($education['degree'])
-                                <h3>{{ $education['degree'] }}</h3>
-                            @endif
-                            <div class="meta">
-                                {{ $education['institution'] }}
-                                @if ($education['institution'] && $education['location'])
-                                    &middot;
-                                @endif
-                                {{ $education['location'] }}
-                                @if ($education['period'])
-                                    &middot;
-                                    {{ $education['period'] }}
-                                @endif
-                            </div>
-                            @if ($education['field'])
-                                <p>{{ $education['field'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                @endif
-            </section>
-
-            <aside>
-                @if (!empty($data['skills']))
-                    <div class="panel">
-                        <h2>{{ __('Skills') }}</h2>
-                        <div class="chip-list">
-                            @foreach ($data['skills'] as $skill)
-                                <span class="chip">{{ $skill }}</span>
+                @if (!empty($data['contacts']))
+                    <section class="futuristic-panel">
+                        <h2>{{ __('Contact') }}</h2>
+                        <ul>
+                            @foreach ($data['contacts'] as $contact)
+                                <li>{{ $contact }}</li>
                             @endforeach
-                        </div>
-                    </div>
+                        </ul>
+                    </section>
+                @endif
+
+                @if (!empty($data['skills']))
+                    <section class="futuristic-panel">
+                        <h2>{{ __('Skills') }}</h2>
+                        <ul class="futuristic-tag-list">
+                            @foreach ($data['skills'] as $skill)
+                                <li>{{ $skill }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
                 @endif
 
                 @if (!empty($data['languages']))
-                    <div class="panel">
+                    <section class="futuristic-panel">
                         <h2>{{ __('Languages') }}</h2>
-                        <ul>
+                        <ul class="futuristic-language">
                             @foreach ($data['languages'] as $language)
                                 <li>
-                                    {{ $language['name'] }}
+                                    <span>{{ $language['name'] }}</span>
                                     @if (!empty($language['level']))
-                                        &mdash; {{ ucfirst($language['level']) }}
+                                        <span>{{ ucfirst($language['level']) }}</span>
                                     @endif
                                 </li>
                             @endforeach
                         </ul>
-                    </div>
+                    </section>
                 @endif
 
                 @if (!empty($data['hobbies']))
-                    <div class="panel">
+                    <section class="futuristic-panel">
                         <h2>{{ __('Interests') }}</h2>
-                        <ul>
+                        <ul class="futuristic-list">
                             @foreach ($data['hobbies'] as $hobby)
                                 <li>{{ $hobby }}</li>
                             @endforeach
                         </ul>
-                    </div>
+                    </section>
                 @endif
             </aside>
+
+            <main class="futuristic-main">
+                @if (!empty($data['experiences']))
+                    <section class="futuristic-section">
+                        <h2>{{ __('Experience') }}</h2>
+                        <div class="futuristic-cards">
+                            @foreach ($data['experiences'] as $experience)
+                                <article class="futuristic-card">
+                                    <header>
+                                        <div>
+                                            <h3>{{ $experience['role'] }}</h3>
+                                            <p>{{ $experience['company'] }}</p>
+                                        </div>
+                                        @if ($experience['period'])
+                                            <span>{{ $experience['period'] }}</span>
+                                        @endif
+                                    </header>
+                                    @if ($experience['location'])
+                                        <p class="futuristic-meta">{{ $experience['location'] }}</p>
+                                    @endif
+                                    @if ($experience['summary'])
+                                        <p class="futuristic-summary">{{ $experience['summary'] }}</p>
+                                    @endif
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+
+                @if (!empty($data['education']))
+                    <section class="futuristic-section">
+                        <h2>{{ __('Education') }}</h2>
+                        <div class="futuristic-table">
+                            @foreach ($data['education'] as $education)
+                                <article class="futuristic-row">
+                                    <div>
+                                        <h3>{{ $education['institution'] }}</h3>
+                                        @if ($education['degree'])
+                                            <p>{{ $education['degree'] }}</p>
+                                        @endif
+                                        @if ($education['field'])
+                                            <p>{{ $education['field'] }}</p>
+                                        @endif
+                                    </div>
+                                    <div class="futuristic-row__meta">
+                                        @if ($education['location'])
+                                            <span>{{ $education['location'] }}</span>
+                                        @endif
+                                        @if ($education['period'])
+                                            <span>{{ $education['period'] }}</span>
+                                        @endif
+                                    </div>
+                                </article>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            </main>
         </div>
     </div>
 </body>

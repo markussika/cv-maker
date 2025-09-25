@@ -1,5 +1,6 @@
 @php
     use Illuminate\Support\Carbon;
+    use Illuminate\Support\Facades\Storage;
     use Throwable;
 
     $value = fn(string $key, $default = null) => data_get($cv, $key, $default);
@@ -18,6 +19,7 @@
     $email = $value('email');
     $phone = $value('phone');
     $website = $value('website');
+    $profileImage = $value('profile_image');
     $city = $value('city');
     $country = $value('country');
     $location = collect([$city, $country])
@@ -238,6 +240,20 @@
         ->filter(fn ($item) => is_string($item) && $item !== '')
         ->values();
 
+    if (is_string($profileImage) && trim($profileImage) !== '') {
+        $profileImage = trim($profileImage);
+
+        if (!filter_var($profileImage, FILTER_VALIDATE_URL)) {
+            try {
+                $profileImage = Storage::disk('public')->url($profileImage);
+            } catch (Throwable $exception) {
+                $profileImage = null;
+            }
+        }
+    } else {
+        $profileImage = null;
+    }
+
     $templateData = [
         'name' => $fullName,
         'first_name' => $firstName,
@@ -256,6 +272,7 @@
             $birthdayFormatted,
             $website,
         ], fn ($item) => is_string($item) && trim($item) !== '')),
+        'profile_image' => $profileImage,
         'experiences' => $experienceItems->all(),
         'education' => $educationItems->all(),
         'skills' => $skillsItems->all(),
