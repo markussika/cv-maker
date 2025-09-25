@@ -34,8 +34,6 @@ Route::middleware('auth')->group(function () {
         Route::put('/{cv}','update')->name('cv.update');
         Route::delete('/{cv}','destroy')->name('cv.destroy');
         Route::get('/preview','preview')->name('cv.preview');
-        Route::get('/templates','templates')->name('cv.templates');
-        Route::get('/download/{template}','download')->name('cv.download');
         Route::get('/guide','guide')->name('cv.guide');
 
         // API endpoints routed to controller methods
@@ -43,6 +41,11 @@ Route::middleware('auth')->group(function () {
         Route::post('/companies','getCompanies')->name('cv.companies');
     });
 
+});
+
+Route::prefix('cv')->controller(CvController::class)->group(function () {
+    Route::get('/templates','templates')->name('cv.templates');
+    Route::get('/download/{template}','download')->name('cv.download');
 });
 
 require __DIR__.'/auth.php';

@@ -6,6 +6,7 @@ use App\Models\Cv;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use PDF;
 
@@ -144,7 +145,7 @@ class CvController extends Controller
         $cvData = $this->resolveCvData($request);
         $template = $cvData['template'] ?? 'classic';
 
-        return $this->renderPdf($cvData, $template, 'cv.pdf');
+        return $this->renderPdf($cvData, $template, $this->filenameForCv($cvData));
     }
 
     public function getCities(Request $request)
@@ -245,7 +246,7 @@ class CvController extends Controller
         $cvData = $this->resolveCvData($request);
         $cvData['template'] = $template;
 
-        return $this->renderPdf($cvData, $template, "cv-{$template}.pdf");
+        return $this->renderPdf($cvData, $template, $this->filenameForCv($cvData));
     }
 
     public function guide()
@@ -672,6 +673,27 @@ class CvController extends Controller
             'template' => $template,
             'accentColor' => $this->accentColour($template),
         ])->download($filename);
+    }
+
+    protected function filenameForCv(array $cvData): string
+    {
+        $first = trim((string) ($cvData['first_name'] ?? ''));
+        $last = trim((string) ($cvData['last_name'] ?? ''));
+
+        $segments = collect([$first, $last])
+            ->filter(fn ($value) => $value !== '')
+            ->map(fn ($value) => (string) Str::of($value)
+                ->ascii()
+                ->replaceMatches('/[^A-Za-z0-9]+/', '_')
+                ->trim('_')
+                ->lower())
+            ->filter(fn ($value) => $value !== '');
+
+        if ($segments->isEmpty()) {
+            return 'cv.pdf';
+        }
+
+        return $segments->implode('_') . '_cv.pdf';
     }
 
     protected function accentColour(string $template): string
