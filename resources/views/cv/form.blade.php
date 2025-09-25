@@ -427,8 +427,9 @@
                                         @endif
                                     </div>
                                     <div class="flex-1">
-                                        <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                        <input type="file" name="profile_image" accept="image/jpeg,image/png,image/webp" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
                                         <p class="mt-2 text-xs text-slate-500">{{ __('Upload a square image (JPG, PNG, or WEBP). Max 2 MB.') }}</p>
+                                        <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
                                         @error('profile_image')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
@@ -733,7 +734,7 @@
                                     $inputId = 'template-' . $template;
                                 @endphp
                                 <label for="{{ $inputId }}" data-template-card class="group cursor-pointer">
-                                    <input type="radio" id="{{ $inputId }}" name="template" value="{{ $template }}" class="peer sr-only" @checked($selectedTemplate === $template)>
+                                    <input type="radio" id="{{ $inputId }}" name="template" value="{{ $template }}" class="peer sr-only" @checked($selectedTemplate === $template) required>
                                     <div class="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition-all duration-300 peer-checked:border-blue-500 peer-checked:shadow-xl peer-checked:shadow-blue-100">
                                         <div class="flex items-center justify-between gap-4">
                                             <div>

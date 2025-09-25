@@ -13,6 +13,46 @@ const initCvForm = () => {
     const totalSteps = stepPanels.length;
     let currentStep = 1;
     let maxStepVisited = 1;
+    const stepErrors = new Map();
+
+    const photoInput = form.querySelector('input[name="profile_image"]');
+    const photoErrorElement = form.querySelector('[data-photo-error]');
+    let photoValidationPending = false;
+    let photoValidationToken = 0;
+    const photoPendingMessage = 'Please wait while we finish checking your image.';
+
+    const applyPhotoError = (message, { display = true } = {}) => {
+        if (!photoInput) {
+            return;
+        }
+
+        const text = message ?? '';
+        photoInput.setCustomValidity(text);
+
+        if (!photoErrorElement) {
+            return;
+        }
+
+        if (!display) {
+            if (!text) {
+                photoErrorElement.textContent = '';
+            }
+            photoErrorElement.classList.add('hidden');
+            return;
+        }
+
+        if (text) {
+            photoErrorElement.textContent = text;
+            photoErrorElement.classList.remove('hidden');
+        } else {
+            photoErrorElement.textContent = '';
+            photoErrorElement.classList.add('hidden');
+        }
+    };
+
+    const clearPhotoError = () => {
+        applyPhotoError('');
+    };
 
     const updateStepVisuals = () => {
         stepButtons.forEach((button) => {
@@ -20,9 +60,11 @@ const initCvForm = () => {
             const circle = button.querySelector('[data-step-circle]');
             const isActive = step === currentStep;
             const isVisited = step <= maxStepVisited;
+            const hasError = stepErrors.get(step) === true;
 
             button.classList.toggle('text-slate-900', isActive);
-            button.classList.toggle('text-slate-400', !isActive);
+            button.classList.toggle('text-slate-400', !isActive && !hasError);
+            button.classList.toggle('text-red-600', !isActive && hasError);
             button.classList.toggle('cursor-pointer', isVisited);
             button.classList.toggle('cursor-not-allowed', !isVisited);
             button.disabled = !isVisited;
@@ -32,7 +74,9 @@ const initCvForm = () => {
             }
 
             circle.className = 'flex h-12 w-12 items-center justify-center rounded-full border text-base font-semibold shadow-sm transition-all duration-300';
-            if (step < currentStep) {
+            if (hasError) {
+                circle.classList.add('bg-white', 'text-red-600', 'border-red-400', 'ring-2', 'ring-red-200');
+            } else if (step < currentStep) {
                 circle.classList.add('bg-blue-600', 'text-white', 'border-blue-600', 'shadow-blue-200');
             } else if (isActive) {
                 circle.classList.add('bg-black', 'text-white', 'border-black', 'ring', 'ring-blue-100');
@@ -43,8 +87,11 @@ const initCvForm = () => {
 
         connectors.forEach((connector) => {
             const index = Number(connector.dataset.stepConnector);
-            connector.classList.toggle('bg-blue-500', index < currentStep);
-            connector.classList.toggle('bg-slate-200', index >= currentStep);
+            const nextStepIndex = index + 1;
+            const hasError = stepErrors.get(nextStepIndex) === true;
+            connector.classList.toggle('bg-blue-500', index < currentStep && !hasError);
+            connector.classList.toggle('bg-red-300', hasError && !Number.isNaN(nextStepIndex));
+            connector.classList.toggle('bg-slate-200', index >= currentStep && !hasError);
         });
 
         stepPanels.forEach((panel) => {
@@ -55,6 +102,150 @@ const initCvForm = () => {
         prevButton?.classList.toggle('hidden', currentStep === 1);
         nextButton?.classList.toggle('hidden', currentStep === totalSteps);
         submitButton?.classList.toggle('hidden', currentStep !== totalSteps);
+    };
+
+    const getPanelByStep = (step) => stepPanels.find((panel) => Number(panel.dataset.stepPanel) === step) ?? null;
+
+    const markStepValidity = (step, isValid) => {
+        if (isValid) {
+            stepErrors.delete(step);
+        } else {
+            stepErrors.set(step, true);
+        }
+    };
+
+    const validateStep = (step, { report = true } = {}) => {
+        const panel = getPanelByStep(step);
+        if (!panel) {
+            markStepValidity(step, true);
+            updateStepVisuals();
+            return true;
+        }
+
+        const fields = Array.from(panel.querySelectorAll('input, select, textarea')).filter((field) => {
+            if (!(field instanceof HTMLElement)) {
+                return false;
+            }
+
+            if (field.disabled) {
+                return false;
+            }
+
+            if (field.type === 'hidden') {
+                return false;
+            }
+
+            return true;
+        });
+
+        let isValid = true;
+
+        for (const field of fields) {
+            if (photoInput && field === photoInput && photoValidationPending) {
+                applyPhotoError(photoPendingMessage, { display: report });
+                if (report && typeof field.reportValidity === 'function') {
+                    field.reportValidity();
+                }
+                isValid = false;
+                break;
+            }
+
+            if (typeof field.checkValidity === 'function' && !field.checkValidity()) {
+                isValid = false;
+                if (report && typeof field.reportValidity === 'function') {
+                    field.reportValidity();
+                }
+                break;
+            }
+        }
+
+        markStepValidity(step, isValid);
+        updateStepVisuals();
+
+        return isValid;
+    };
+
+    const allowedPhotoTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxPhotoSizeBytes = 2 * 1024 * 1024;
+
+    const validatePhotoFile = (file) => {
+        if (!photoInput) {
+            return;
+        }
+
+        photoValidationToken += 1;
+        const currentToken = photoValidationToken;
+
+        if (!file) {
+            photoValidationPending = false;
+            clearPhotoError();
+            validateStep(1, { report: false });
+            return;
+        }
+
+        if (file.type && !allowedPhotoTypes.includes(file.type)) {
+            photoValidationPending = false;
+            applyPhotoError('Please upload a JPG, PNG, or WEBP image.');
+            validateStep(1, { report: false });
+            return;
+        }
+
+        if (file.size > maxPhotoSizeBytes) {
+            photoValidationPending = false;
+            applyPhotoError('Images must be 2 MB or smaller.');
+            validateStep(1, { report: false });
+            return;
+        }
+
+        photoValidationPending = true;
+        applyPhotoError(photoPendingMessage, { display: false });
+
+        const image = new Image();
+        const objectUrl = URL.createObjectURL(file);
+
+        image.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+
+            if (currentToken !== photoValidationToken) {
+                return;
+            }
+
+            const width = image.naturalWidth || image.width;
+            const height = image.naturalHeight || image.height;
+
+            if (!width || !height) {
+                photoValidationPending = false;
+                applyPhotoError('We could not read this image. Please choose a different file.');
+                validateStep(1, { report: false });
+                return;
+            }
+
+            const difference = Math.abs(width - height);
+            const tolerance = Math.max(width, height) * 0.15;
+
+            if (difference > tolerance) {
+                photoValidationPending = false;
+                applyPhotoError('Please upload an image with a roughly square aspect ratio.');
+                validateStep(1, { report: false });
+                return;
+            }
+
+            photoValidationPending = false;
+            clearPhotoError();
+            validateStep(1, { report: false });
+        };
+
+        image.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+
+            if (currentToken !== photoValidationToken) {
+                return;
+            }
+
+            photoValidationPending = false;
+            applyPhotoError('We could not read this image. Please choose a different file.');
+            validateStep(1, { report: false });
+        };
     };
 
     stepButtons.forEach((button) => {
@@ -68,11 +259,17 @@ const initCvForm = () => {
     });
 
     nextButton?.addEventListener('click', () => {
-        if (currentStep < totalSteps) {
-            currentStep += 1;
-            maxStepVisited = Math.max(maxStepVisited, currentStep);
-            updateStepVisuals();
+        if (currentStep >= totalSteps) {
+            return;
         }
+
+        if (!validateStep(currentStep)) {
+            return;
+        }
+
+        currentStep += 1;
+        maxStepVisited = Math.max(maxStepVisited, currentStep);
+        updateStepVisuals();
     });
 
     prevButton?.addEventListener('click', () => {
@@ -82,7 +279,88 @@ const initCvForm = () => {
         }
     });
 
+    form.addEventListener('submit', (event) => {
+        for (let step = 1; step <= totalSteps; step += 1) {
+            const isValid = validateStep(step);
+            if (!isValid) {
+                event.preventDefault();
+                currentStep = step;
+                maxStepVisited = Math.max(maxStepVisited, currentStep);
+                updateStepVisuals();
+                break;
+            }
+        }
+    });
+
+    form.addEventListener('input', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (photoInput && target === photoInput) {
+            return;
+        }
+
+        const panel = target.closest('[data-step-panel]');
+        if (!panel) {
+            return;
+        }
+
+        const step = Number(panel.dataset.stepPanel);
+        if (Number.isNaN(step)) {
+            return;
+        }
+
+        validateStep(step, { report: false });
+    });
+
+    form.addEventListener('change', (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) {
+            return;
+        }
+
+        if (photoInput && target === photoInput) {
+            return;
+        }
+
+        const panel = target.closest('[data-step-panel]');
+        if (!panel) {
+            return;
+        }
+
+        const step = Number(panel.dataset.stepPanel);
+        if (Number.isNaN(step)) {
+            return;
+        }
+
+        validateStep(step, { report: false });
+    });
+
+    stepPanels.forEach((panel) => {
+        const step = Number(panel.dataset.stepPanel);
+        if (Number.isNaN(step)) {
+            return;
+        }
+
+        if (panel.querySelector('.border-red-500')) {
+            stepErrors.set(step, true);
+        }
+    });
+
     updateStepVisuals();
+
+    if (photoInput) {
+        photoInput.addEventListener('change', () => {
+            const file = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
+            validatePhotoFile(file);
+        });
+
+        if (photoInput.files && photoInput.files[0]) {
+            validatePhotoFile(photoInput.files[0]);
+        }
+    }
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? null;
     const citiesEndpoint = form.dataset.citiesEndpoint ?? null;
