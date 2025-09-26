@@ -16,11 +16,10 @@
         $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="creative-page">
-        <header class="creative-hero">
-            <div class="creative-hero__badge">{{ __('Creative Resume') }}</div>
-            <div class="creative-hero__profile">
-                <div class="creative-hero__avatar">
+    <div class="creative-canvas">
+        <header class="creative-banner">
+            <div class="creative-nameplate">
+                <div class="creative-avatar">
                     @if ($profileImage)
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
                     @elseif ($initials !== '')
@@ -30,147 +29,138 @@
                     @endif
                 </div>
                 <div>
+                    <p class="creative-badge">{{ __('Creative Resume') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
                     @if ($data['headline'])
-                        <p>{{ $data['headline'] }}</p>
+                        <p class="creative-headline">{{ $data['headline'] }}</p>
                     @endif
                 </div>
             </div>
-            @if ($data['location'])
-                <div class="creative-hero__location">{{ $data['location'] }}</div>
+            @if (!empty($data['contacts']))
+                <ul class="creative-contact-list">
+                    @foreach ($data['contacts'] as $contact)
+                        <li>{{ $contact }}</li>
+                    @endforeach
+                </ul>
             @endif
         </header>
 
-        <div class="creative-content">
-            <aside class="creative-aside">
+        <main class="creative-body">
+            <section class="creative-intro">
                 @if ($data['summary'])
-                    <section class="creative-card creative-card--accent">
+                    <article class="creative-panel creative-panel--summary">
                         <h2>{{ __('Profile') }}</h2>
                         <p>{{ $data['summary'] }}</p>
-                    </section>
-                @endif
-
-                @if (!empty($data['contacts']))
-                    <section class="creative-card">
-                        <h2>{{ __('Contact') }}</h2>
-                        <ul class="creative-list">
-                            @foreach ($data['contacts'] as $contact)
-                                <li>{{ $contact }}</li>
-                            @endforeach
-                        </ul>
-                    </section>
+                    </article>
                 @endif
 
                 @if (!empty($data['skills']))
-                    <section class="creative-card">
+                    <article class="creative-panel creative-panel--skills">
                         <h2>{{ __('Skills') }}</h2>
-                        <ul class="creative-tag-list">
+                        <ul>
                             @foreach ($data['skills'] as $skill)
                                 <li>{{ $skill }}</li>
                             @endforeach
                         </ul>
-                    </section>
+                    </article>
                 @endif
 
-                @if (!empty($data['languages']))
-                    <section class="creative-card creative-card--split">
-                        <h2>{{ __('Languages') }}</h2>
-                        <ul class="creative-list creative-list--condensed">
-                            @foreach ($data['languages'] as $language)
-                                <li>
-                                    <span class="creative-list__primary">{{ $language['name'] }}</span>
-                                    @if (!empty($language['level']))
-                                        <span class="creative-list__secondary">{{ ucfirst($language['level']) }}</span>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-
-                @if (!empty($data['hobbies']))
-                    <section class="creative-card">
-                        <h2>{{ __('Interests') }}</h2>
-                        <ul class="creative-tag-list creative-tag-list--soft">
-                            @foreach ($data['hobbies'] as $hobby)
-                                <li>{{ $hobby }}</li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-            </aside>
-
-            <main class="creative-main">
-                @if (!empty($data['experiences']))
-                    <section>
-                        <div class="creative-section-head">
-                            <h2>{{ __('Experience highlights') }}</h2>
-                            <p>{{ __('Selected projects and accomplishments.') }}</p>
-                        </div>
-                        <div class="creative-experience-grid">
-                            @foreach ($data['experiences'] as $experience)
-                                <article class="creative-experience-card">
-                                    <div class="creative-experience-card__header">
-                                        <span class="creative-dot"></span>
-                                        <div>
-                                            @if ($experience['role'])
-                                                <h3>{{ $experience['role'] }}</h3>
+                @if (!empty($data['languages']) || !empty($data['hobbies']))
+                    <article class="creative-panel creative-panel--extra">
+                        @if (!empty($data['languages']))
+                            <div>
+                                <h2>{{ __('Languages') }}</h2>
+                                <ul>
+                                    @foreach ($data['languages'] as $language)
+                                        <li>
+                                            <span>{{ $language['name'] }}</span>
+                                            @if (!empty($language['level']))
+                                                <span>{{ ucfirst($language['level']) }}</span>
                                             @endif
-                                            <p>
-                                                {{ $experience['company'] }}
-                                                @if ($experience['company'] && $experience['location'])
-                                                    ·
-                                                @endif
-                                                {{ $experience['location'] }}
-                                            </p>
-                                        </div>
-                                        @if ($experience['period'])
-                                            <span class="creative-chip">{{ $experience['period'] }}</span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                        @if (!empty($data['hobbies']))
+                            <div>
+                                <h2>{{ __('Interests') }}</h2>
+                                <ul>
+                                    @foreach ($data['hobbies'] as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </article>
+                @endif
+            </section>
+
+            @if (!empty($data['experiences']))
+                <section class="creative-section creative-section--experience">
+                    <header>
+                        <h2>{{ __('Experience Highlights') }}</h2>
+                        <p>{{ __('Projects and achievements that define your craft.') }}</p>
+                    </header>
+                    <div class="creative-experience">
+                        @foreach ($data['experiences'] as $experience)
+                            <article>
+                                <div class="creative-experience__meta">
+                                    <div>
+                                        @if ($experience['role'])
+                                            <h3>{{ $experience['role'] }}</h3>
                                         @endif
+                                        <p>
+                                            {{ $experience['company'] }}
+                                            @if ($experience['company'] && $experience['location'])
+                                                ·
+                                            @endif
+                                            {{ $experience['location'] }}
+                                        </p>
                                     </div>
-                                    @if ($experience['summary'])
-                                        <p class="creative-experience-card__body">{{ $experience['summary'] }}</p>
+                                    @if ($experience['period'])
+                                        <span>{{ $experience['period'] }}</span>
                                     @endif
-                                </article>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
+                                </div>
+                                @if ($experience['summary'])
+                                    <p class="creative-experience__summary">{{ $experience['summary'] }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
-                @if (!empty($data['education']))
-                    <section>
-                        <div class="creative-section-head">
-                            <h2>{{ __('Education') }}</h2>
-                            <p>{{ __('Studies, certifications, and workshops.') }}</p>
-                        </div>
-                        <div class="creative-education">
-                            @foreach ($data['education'] as $education)
-                                <article class="creative-education__item">
-                                    <div class="creative-education__timeline"></div>
-                                    <div class="creative-education__content">
-                                        <h3>{{ $education['institution'] }}</h3>
-                                        @if ($education['degree'])
-                                            <p class="creative-education__meta">{{ $education['degree'] }}</p>
-                                        @endif
-                                        @if ($education['field'])
-                                            <p class="creative-education__meta">{{ $education['field'] }}</p>
-                                        @endif
-                                        <div class="creative-education__footer">
-                                            @if ($education['location'])
-                                                <span>{{ $education['location'] }}</span>
-                                            @endif
-                                            @if ($education['period'])
-                                                <span>{{ $education['period'] }}</span>
-                                            @endif
-                                        </div>
-                                    </div>
-                                </article>
-                            @endforeach
-                        </div>
-                    </section>
-                @endif
-            </main>
-        </div>
+            @if (!empty($data['education']))
+                <section class="creative-section creative-section--education">
+                    <header>
+                        <h2>{{ __('Education') }}</h2>
+                        <p>{{ __('Courses, certifications, and workshops.') }}</p>
+                    </header>
+                    <div class="creative-education">
+                        @foreach ($data['education'] as $education)
+                            <article>
+                                <div class="creative-education__head">
+                                    <h3>{{ $education['institution'] }}</h3>
+                                    @if ($education['period'])
+                                        <span>{{ $education['period'] }}</span>
+                                    @endif
+                                </div>
+                                @if ($education['degree'])
+                                    <p>{{ $education['degree'] }}</p>
+                                @endif
+                                @if ($education['field'])
+                                    <p>{{ $education['field'] }}</p>
+                                @endif
+                                @if ($education['location'])
+                                    <p class="creative-education__location">{{ $education['location'] }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+        </main>
     </div>
 </body>
 </html>
