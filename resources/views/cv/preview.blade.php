@@ -1,7 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        {{ __('CV Preview') }}
-    </x-slot>
+    
 
     <div class="space-y-8">
         @if (session('status'))
@@ -393,14 +391,7 @@
                         </div>
                     @endif
 
-                    <div class="rounded-3xl border border-slate-200 bg-white/80 p-6 text-sm text-slate-600 shadow-sm">
-                        <p class="font-semibold text-slate-900">{{ __('Tips') }}</p>
-                        <ul class="mt-3 space-y-2 list-disc list-inside">
-                            <li>{{ __('Return to the builder to adjust any section instantly.') }}</li>
-                            <li>{{ __('Download again after each update to keep your files in sync.') }}</li>
-                            <li>{{ __('Use the template selector to preview other layouts before exporting.') }}</li>
-                        </ul>
-                    </div>
+                    
                 </aside>
             </div>
         @else

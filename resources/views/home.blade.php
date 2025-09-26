@@ -1,7 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Home</h2>
-    </x-slot>
+    
 
     <div class="createit-hero">
         <h1 class="createit-hero__title">{{ __('Welcome to :name', ['name' => config('app.name', 'CreateIt')]) }}</h1>

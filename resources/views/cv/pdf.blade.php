@@ -228,13 +228,7 @@
         </section>
     @endif
 
-    <section class="section">
-        <h2>Summary</h2>
-        <div class="template-card">
-            <div class="template-card-title">{{ $templateLabel }} Template</div>
-            <p style="font-size:11px; color:#475569;">This PDF was generated using the {{ strtolower($templateLabel) }} layout. Return to the builder to switch styles or refresh your details before exporting again.</p>
-        </div>
-    </section>
+    
 </div>
 </body>
 </html>
