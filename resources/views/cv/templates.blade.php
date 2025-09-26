@@ -5,46 +5,55 @@
                 'title' => 'Classic',
                 'description' => 'A timeless layout for any industry.',
                 'preview' => 'from-slate-200 via-white to-slate-100',
+                'partial' => 'templates.previews.classic',
             ],
             'modern' => [
                 'title' => 'Modern',
                 'description' => 'Bold typography with confident accents.',
                 'preview' => 'from-blue-200 via-blue-100 to-slate-50',
+                'partial' => 'templates.previews.modern',
             ],
             'creative' => [
                 'title' => 'Creative',
                 'description' => 'Playful composition for imaginative roles.',
                 'preview' => 'from-pink-200 via-purple-200 to-sky-100',
+                'partial' => 'templates.previews.creative',
             ],
             'minimal' => [
                 'title' => 'Minimal',
                 'description' => 'Crisp, airy layout that lets content breathe.',
                 'preview' => 'from-white via-slate-50 to-slate-100',
+                'partial' => 'templates.previews.minimal',
             ],
             'elegant' => [
                 'title' => 'Elegant',
                 'description' => 'Serif details and refined dividers.',
                 'preview' => 'from-amber-100 via-rose-50 to-white',
+                'partial' => 'templates.previews.elegant',
             ],
             'corporate' => [
                 'title' => 'Corporate',
                 'description' => 'Structured sections for senior roles.',
                 'preview' => 'from-slate-300 via-slate-200 to-white',
+                'partial' => 'templates.previews.corporate',
             ],
             'gradient' => [
                 'title' => 'Gradient',
                 'description' => 'Colourful blend that feels dynamic.',
                 'preview' => 'from-emerald-200 via-teal-200 to-cyan-100',
+                'partial' => 'templates.previews.gradient',
             ],
             'darkmode' => [
                 'title' => 'Dark Mode',
                 'description' => 'High-contrast styling that stands out.',
                 'preview' => 'from-slate-900 via-slate-800 to-black',
+                'partial' => 'templates.previews.darkmode',
             ],
             'futuristic' => [
                 'title' => 'Futuristic',
                 'description' => 'Tech inspired shapes and glow.',
                 'preview' => 'from-indigo-300 via-purple-300 to-slate-100',
+                'partial' => 'templates.previews.futuristic',
             ],
         ];
 
@@ -114,6 +123,7 @@
                         'title' => ucfirst($template),
                         'description' => 'Beautiful layout ready for your details.',
                         'preview' => 'from-slate-200 via-white to-slate-100',
+                        'partial' => 'templates.previews.classic',
                     ];
                     $previewId = 'template-preview-' . $template;
                     $previewSource = view('templates.' . $template, [
@@ -122,16 +132,9 @@
                 @endphp
                 <div class="group createit-template-card">
                     <div class="createit-template-card__preview bg-gradient-to-br {{ $meta['preview'] }}">
-                        <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="w-40 rounded-2xl bg-white/80 p-4 shadow-xl shadow-slate-300/50">
-                                <div class="h-2 w-24 rounded-full bg-slate-200"></div>
-                                <div class="mt-3 space-y-2">
-                                    <div class="h-2 w-28 rounded-full bg-slate-300"></div>
-                                    <div class="h-2 w-32 rounded-full bg-slate-200"></div>
-                                    <div class="h-16 rounded-2xl border border-slate-100 bg-slate-50"></div>
-                                </div>
-                            </div>
-                        </div>
+                        @isset($meta['partial'])
+                            @include($meta['partial'])
+                        @endisset
                         <div class="createit-template-card__badge">
                             <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
                             {{ __('Preview ready') }}
