@@ -16,8 +16,8 @@
         $profileImage = $data['profile_image'] ?? null;
     @endphp
 
-    <div class="darkmode-page">
-        <header class="darkmode-hero">
+    <div class="darkmode-shell">
+        <header class="darkmode-header">
             <div class="darkmode-identity">
                 <div class="darkmode-avatar">
                     @if ($profileImage)
@@ -36,35 +36,28 @@
                     @endif
                 </div>
             </div>
-            @if ($data['location'])
-                <div class="darkmode-location">{{ $data['location'] }}</div>
+            @if (!empty($data['contacts']))
+                <ul class="darkmode-contact">
+                    @foreach ($data['contacts'] as $contact)
+                        <li>{{ $contact }}</li>
+                    @endforeach
+                </ul>
             @endif
         </header>
 
-        <div class="darkmode-layout">
-            <aside class="darkmode-sidebar">
+        <div class="darkmode-body">
+            <aside class="darkmode-aside">
                 @if ($data['summary'])
-                    <section class="darkmode-card">
+                    <section>
                         <h2>{{ __('Profile') }}</h2>
                         <p>{{ $data['summary'] }}</p>
                     </section>
                 @endif
 
-                @if (!empty($data['contacts']))
-                    <section class="darkmode-card">
-                        <h2>{{ __('Contact') }}</h2>
-                        <ul>
-                            @foreach ($data['contacts'] as $contact)
-                                <li>{{ $contact }}</li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-
                 @if (!empty($data['skills']))
-                    <section class="darkmode-card">
+                    <section>
                         <h2>{{ __('Skills') }}</h2>
-                        <ul class="darkmode-tag-list">
+                        <ul>
                             @foreach ($data['skills'] as $skill)
                                 <li>{{ $skill }}</li>
                             @endforeach
@@ -73,9 +66,9 @@
                 @endif
 
                 @if (!empty($data['languages']))
-                    <section class="darkmode-card">
+                    <section>
                         <h2>{{ __('Languages') }}</h2>
-                        <ul class="darkmode-language">
+                        <ul>
                             @foreach ($data['languages'] as $language)
                                 <li>
                                     <span>{{ $language['name'] }}</span>
@@ -89,9 +82,9 @@
                 @endif
 
                 @if (!empty($data['hobbies']))
-                    <section class="darkmode-card">
+                    <section>
                         <h2>{{ __('Interests') }}</h2>
-                        <ul class="darkmode-list">
+                        <ul>
                             @foreach ($data['hobbies'] as $hobby)
                                 <li>{{ $hobby }}</li>
                             @endforeach
@@ -106,24 +99,28 @@
                         <h2>{{ __('Experience') }}</h2>
                         <div class="darkmode-timeline">
                             @foreach ($data['experiences'] as $experience)
-                                <article class="darkmode-timeline__item">
+                                <article>
                                     <div class="darkmode-timeline__line"></div>
                                     <div class="darkmode-timeline__content">
                                         <header>
-                                            <h3>{{ $experience['role'] }}</h3>
+                                            <div>
+                                                @if ($experience['role'])
+                                                    <h3>{{ $experience['role'] }}</h3>
+                                                @endif
+                                                <p>
+                                                    {{ $experience['company'] }}
+                                                    @if ($experience['company'] && $experience['location'])
+                                                        ·
+                                                    @endif
+                                                    {{ $experience['location'] }}
+                                                </p>
+                                            </div>
                                             @if ($experience['period'])
                                                 <span>{{ $experience['period'] }}</span>
                                             @endif
                                         </header>
-                                        <p class="darkmode-meta">
-                                            {{ $experience['company'] }}
-                                            @if ($experience['company'] && $experience['location'])
-                                                ·
-                                            @endif
-                                            {{ $experience['location'] }}
-                                        </p>
                                         @if ($experience['summary'])
-                                            <p class="darkmode-summary">{{ $experience['summary'] }}</p>
+                                            <p>{{ $experience['summary'] }}</p>
                                         @endif
                                     </div>
                                 </article>
@@ -144,9 +141,11 @@
                                             <span>{{ $education['period'] }}</span>
                                         @endif
                                     </header>
-                                    <p class="darkmode-meta">{{ $education['degree'] ?? '' }}</p>
+                                    @if ($education['degree'])
+                                        <p>{{ $education['degree'] }}</p>
+                                    @endif
                                     @if ($education['field'])
-                                        <p class="darkmode-meta">{{ $education['field'] }}</p>
+                                        <p>{{ $education['field'] }}</p>
                                     @endif
                                     @if ($education['location'])
                                         <p class="darkmode-meta">{{ $education['location'] }}</p>

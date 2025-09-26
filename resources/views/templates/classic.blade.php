@@ -9,16 +9,32 @@
     @php
         $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
         $data = $templateData;
+        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
+            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+            ->implode('');
+        $profileImage = $data['profile_image'] ?? null;
     @endphp
 
     <div class="page">
         <header>
-            <div>
-                <span class="badge">{{ __('Classic Resume') }}</span>
-                <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-                @if ($data['headline'])
-                    <p>{{ $data['headline'] }}</p>
-                @endif
+            <div class="identity">
+                <div class="portrait">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
+                    @elseif ($initials !== '')
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
+                </div>
+                <div>
+                    <span class="badge">{{ __('Classic Resume') }}</span>
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p>{{ $data['headline'] }}</p>
+                    @endif
+                </div>
             </div>
             <div class="contact">
                 @foreach ($data['contacts'] as $contact)
