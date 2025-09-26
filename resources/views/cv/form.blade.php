@@ -419,16 +419,13 @@
                             <div class="md:col-span-2">
                                 <label class="block text-sm font-medium text-slate-600">Profile photo</label>
                                 <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
-                                    <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50">
-                                        @if ($profileImageUrl)
-                                            <img src="{{ $profileImageUrl }}" alt="Current profile photo" class="h-full w-full object-cover">
-                                        @else
-                                            <span class="px-2 text-center text-xs text-slate-400">{{ __('No photo yet') }}</span>
-                                        @endif
+                                    <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50" data-photo-preview>
+                                        <img src="{{ $profileImageUrl }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover {{ $profileImageUrl ? '' : 'hidden' }}" data-photo-preview-image>
+                                        <span class="px-2 text-center text-xs text-slate-400 {{ $profileImageUrl ? 'hidden' : '' }}" data-photo-preview-placeholder>{{ __('No photo yet') }}</span>
                                     </div>
                                     <div class="flex-1">
                                         <input type="file" name="profile_image" accept="image/jpeg,image/png,image/webp" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
-                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload a square image (JPG, PNG, or WEBP). Max 2 MB.') }}</p>
+                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload a JPG, PNG, or WEBP image. Max 2 MB.') }}</p>
                                         <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
                                         @error('profile_image')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

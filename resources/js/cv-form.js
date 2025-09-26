@@ -17,9 +17,12 @@ const initCvForm = () => {
 
     const photoInput = form.querySelector('input[name="profile_image"]');
     const photoErrorElement = form.querySelector('[data-photo-error]');
-    let photoValidationPending = false;
-    let photoValidationToken = 0;
-    const photoPendingMessage = 'Please wait while we finish checking your image.';
+    const photoPreviewContainer = form.querySelector('[data-photo-preview]');
+    const photoPreviewImage = photoPreviewContainer?.querySelector('[data-photo-preview-image]') ?? null;
+    const photoPreviewPlaceholder = photoPreviewContainer?.querySelector('[data-photo-preview-placeholder]') ?? null;
+    const initialPhotoSrc = photoPreviewImage?.getAttribute('src')?.trim() || null;
+    const hasInitialPhoto = Boolean(initialPhotoSrc);
+    let currentPhotoObjectUrl = null;
 
     const applyPhotoError = (message, { display = true } = {}) => {
         if (!photoInput) {
@@ -141,15 +144,6 @@ const initCvForm = () => {
         let isValid = true;
 
         for (const field of fields) {
-            if (photoInput && field === photoInput && photoValidationPending) {
-                applyPhotoError(photoPendingMessage, { display: report });
-                if (report && typeof field.reportValidity === 'function') {
-                    field.reportValidity();
-                }
-                isValid = false;
-                break;
-            }
-
             if (typeof field.checkValidity === 'function' && !field.checkValidity()) {
                 isValid = false;
                 if (report && typeof field.reportValidity === 'function') {
@@ -168,84 +162,78 @@ const initCvForm = () => {
     const allowedPhotoTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxPhotoSizeBytes = 2 * 1024 * 1024;
 
-    const validatePhotoFile = (file) => {
-        if (!photoInput) {
+    const revokeCurrentPhotoObjectUrl = () => {
+        if (currentPhotoObjectUrl) {
+            URL.revokeObjectURL(currentPhotoObjectUrl);
+            currentPhotoObjectUrl = null;
+        }
+    };
+
+    const showInitialPhoto = () => {
+        revokeCurrentPhotoObjectUrl();
+        if (photoPreviewImage && hasInitialPhoto && initialPhotoSrc) {
+            photoPreviewImage.src = initialPhotoSrc;
+            photoPreviewImage.classList.remove('hidden');
+        } else if (photoPreviewImage) {
+            photoPreviewImage.classList.add('hidden');
+            photoPreviewImage.removeAttribute('src');
+        }
+
+        if (photoPreviewPlaceholder) {
+            photoPreviewPlaceholder.classList.toggle('hidden', Boolean(hasInitialPhoto && initialPhotoSrc));
+        }
+    };
+
+    const updatePhotoPreview = (file) => {
+        if (!photoPreviewContainer) {
             return;
         }
 
-        photoValidationToken += 1;
-        const currentToken = photoValidationToken;
+        if (!file) {
+            showInitialPhoto();
+            return;
+        }
+
+        const objectUrl = URL.createObjectURL(file);
+        revokeCurrentPhotoObjectUrl();
+        currentPhotoObjectUrl = objectUrl;
+
+        if (photoPreviewImage) {
+            photoPreviewImage.src = objectUrl;
+            photoPreviewImage.classList.remove('hidden');
+        }
+
+        if (photoPreviewPlaceholder) {
+            photoPreviewPlaceholder.classList.add('hidden');
+        }
+    };
+
+    const validatePhotoFile = (file) => {
+        if (!photoInput) {
+            return false;
+        }
 
         if (!file) {
-            photoValidationPending = false;
             clearPhotoError();
             validateStep(1, { report: false });
-            return;
+            return true;
         }
 
         if (file.type && !allowedPhotoTypes.includes(file.type)) {
-            photoValidationPending = false;
             applyPhotoError('Please upload a JPG, PNG, or WEBP image.');
             validateStep(1, { report: false });
-            return;
+            return false;
         }
 
         if (file.size > maxPhotoSizeBytes) {
-            photoValidationPending = false;
             applyPhotoError('Images must be 2 MB or smaller.');
             validateStep(1, { report: false });
-            return;
+            return false;
         }
 
-        photoValidationPending = true;
-        applyPhotoError(photoPendingMessage, { display: false });
-
-        const image = new Image();
-        const objectUrl = URL.createObjectURL(file);
-
-        image.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-
-            if (currentToken !== photoValidationToken) {
-                return;
-            }
-
-            const width = image.naturalWidth || image.width;
-            const height = image.naturalHeight || image.height;
-
-            if (!width || !height) {
-                photoValidationPending = false;
-                applyPhotoError('We could not read this image. Please choose a different file.');
-                validateStep(1, { report: false });
-                return;
-            }
-
-            const difference = Math.abs(width - height);
-            const tolerance = Math.max(width, height) * 0.15;
-
-            if (difference > tolerance) {
-                photoValidationPending = false;
-                applyPhotoError('Please upload an image with a roughly square aspect ratio.');
-                validateStep(1, { report: false });
-                return;
-            }
-
-            photoValidationPending = false;
-            clearPhotoError();
-            validateStep(1, { report: false });
-        };
-
-        image.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-
-            if (currentToken !== photoValidationToken) {
-                return;
-            }
-
-            photoValidationPending = false;
-            applyPhotoError('We could not read this image. Please choose a different file.');
-            validateStep(1, { report: false });
-        };
+        clearPhotoError();
+        validateStep(1, { report: false });
+        return true;
     };
 
     stepButtons.forEach((button) => {
@@ -351,14 +339,27 @@ const initCvForm = () => {
 
     updateStepVisuals();
 
+    if (photoPreviewContainer) {
+        showInitialPhoto();
+        window.addEventListener('beforeunload', revokeCurrentPhotoObjectUrl);
+    }
+
     if (photoInput) {
         photoInput.addEventListener('change', () => {
             const file = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
-            validatePhotoFile(file);
+            const isValidPhoto = validatePhotoFile(file);
+            if (isValidPhoto) {
+                updatePhotoPreview(file);
+            } else {
+                updatePhotoPreview(null);
+            }
         });
 
         if (photoInput.files && photoInput.files[0]) {
-            validatePhotoFile(photoInput.files[0]);
+            const isValidPhoto = validatePhotoFile(photoInput.files[0]);
+            if (isValidPhoto) {
+                updatePhotoPreview(photoInput.files[0]);
+            }
         }
     }
 
