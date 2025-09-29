@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 
 test('reset password link screen can be rendered', function () {
     $response = $this->get('/forgot-password');
@@ -57,4 +58,18 @@ test('password can be reset with valid token', function () {
 
         return true;
     });
+});
+
+test('password reset notification bypasses the queue', function () {
+    config(['queue.default' => 'database']);
+
+    Notification::fake();
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    $user->sendPasswordResetNotification('example-token');
+
+    Notification::assertSentTo($user, ResetPassword::class);
+    Queue::assertNothingPushed();
 });
