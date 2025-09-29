@@ -137,6 +137,11 @@ class CvController extends Controller
         $templates = $this->templateOptions();
         $cvData = $this->resolveCvData($request);
 
+        $requestedTemplate = $request->query('template');
+        if (is_string($requestedTemplate) && in_array($requestedTemplate, $templates, true)) {
+            $cvData['template'] = $requestedTemplate;
+        }
+
         return view('cv.preview', compact('cvData', 'templates'));
     }
 
@@ -668,10 +673,11 @@ class CvController extends Controller
 
     protected function renderPdf(array $data, string $template, string $filename)
     {
-        return PDF::loadView('cv.pdf', [
+        return PDF::loadView('cv.pdf.layout', [
             'data' => $data,
             'template' => $template,
             'accentColor' => $this->accentColour($template),
+            'availableTemplates' => $this->templateOptions(),
         ])->download($filename);
     }
 

@@ -150,9 +150,9 @@
                                 {{ __('Use template') }}
                                 <span aria-hidden="true">&rarr;</span>
                             </a>
-                            <button type="button" class="createit-template-card__preview-button" data-preview-trigger="{{ $previewId }}">
+                            <a href="{{ route('cv.preview', ['template' => $template]) }}" class="createit-template-card__preview-button" data-preview-trigger="{{ $previewId }}">
                                 {{ __('Preview') }}
-                            </button>
+                            </a>
                         </div>
                     </div>
                 </div>
