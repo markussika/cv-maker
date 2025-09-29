@@ -32,6 +32,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/history','history')->name('cv.history');
         Route::get('/{cv}/edit','edit')->name('cv.edit');
         Route::put('/{cv}','update')->name('cv.update');
+        Route::patch('/{cv}/template','updateTemplate')->name('cv.update-template');
         Route::delete('/{cv}','destroy')->name('cv.destroy');
         Route::get('/preview','preview')->name('cv.preview');
         Route::get('/guide','guide')->name('cv.guide');
@@ -45,7 +46,7 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('cv')->controller(CvController::class)->group(function () {
     Route::get('/templates','templates')->name('cv.templates');
-    Route::get('/download/{template}','download')->name('cv.download');
+    Route::get('/download','download')->name('cv.download');
 });
 
 require __DIR__.'/auth.php';

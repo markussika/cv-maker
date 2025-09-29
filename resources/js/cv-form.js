@@ -162,6 +162,34 @@ const initCvForm = () => {
     const allowedPhotoTypes = ['image/jpeg', 'image/png', 'image/webp'];
     const maxPhotoSizeBytes = 2 * 1024 * 1024;
 
+    const matchesImageExtension = (fileName) => {
+        if (!fileName || typeof fileName !== 'string') {
+            return false;
+        }
+
+        return /\.(jpe?g|png|webp|gif|bmp|tiff?|heic|heif|svg)$/i.test(fileName);
+    };
+
+    const isAllowedPhotoType = (file) => {
+        if (!file) {
+            return false;
+        }
+
+        if (file.type && file.type.startsWith('image/')) {
+            return true;
+        }
+
+        if (file.type && allowedPhotoTypes.includes(file.type)) {
+            return true;
+        }
+
+        if (file.name && matchesImageExtension(file.name)) {
+            return true;
+        }
+
+        return false;
+    };
+
     const revokeCurrentPhotoObjectUrl = () => {
         if (currentPhotoObjectUrl) {
             URL.revokeObjectURL(currentPhotoObjectUrl);
@@ -219,8 +247,8 @@ const initCvForm = () => {
             return true;
         }
 
-        if (file.type && !allowedPhotoTypes.includes(file.type)) {
-            applyPhotoError('Please upload a JPG, PNG, or WEBP image.');
+        if (!isAllowedPhotoType(file)) {
+            applyPhotoError('Please upload an image file (JPG, PNG, WebP, HEIC, GIF, etc.).');
             validateStep(1, { report: false });
             return false;
         }
