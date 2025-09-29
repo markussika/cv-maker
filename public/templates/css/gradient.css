@@ -1,10 +1,9 @@
 :root {
-    --gradient-deep: #111827;
-    --gradient-purple: #6d28d9;
     --gradient-blue: #2563eb;
-    --gradient-pink: #db2777;
-    --gradient-soft: #f5f3ff;
-    --gradient-muted: #e2e8f0;
+    --gradient-pink: #ec4899;
+    --gradient-orange: #fb923c;
+    --gradient-deep: #0f172a;
+    --gradient-light: #f8fafc;
 }
 
 * {
@@ -13,54 +12,54 @@
 
 body.gradient-template {
     margin: 0;
-    font-family: "Poppins", "Inter", sans-serif;
-    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.3), transparent 55%),
-        radial-gradient(circle at bottom left, rgba(219, 39, 119, 0.25), transparent 50%),
-        #0f172a;
-    color: #f8fafc;
+    font-family: "Manrope", "Inter", sans-serif;
+    background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.25), transparent 45%),
+        radial-gradient(circle at bottom left, rgba(236, 72, 153, 0.25), transparent 50%),
+        linear-gradient(135deg, #0f172a, #1e293b);
+    color: var(--gradient-light);
     font-size: 13px;
-    line-height: 1.7;
-    padding: 56px;
+    line-height: 1.75;
+    padding: 70px;
 }
 
 .gradient-wrapper {
-    max-width: 980px;
+    max-width: 1040px;
     margin: 0 auto;
-    border-radius: 36px;
+    border-radius: 40px;
+    background: rgba(15, 23, 42, 0.9);
+    border: 1px solid rgba(148, 163, 184, 0.24);
     overflow: hidden;
-    background: rgba(15, 23, 42, 0.92);
-    border: 1px solid rgba(99, 102, 241, 0.35);
-    box-shadow: 0 60px 90px rgba(15, 23, 42, 0.45);
+    box-shadow: 0 60px 120px rgba(15, 23, 42, 0.6);
 }
 
 .gradient-hero {
-    padding: 48px 56px;
-    display: flex;
-    justify-content: space-between;
-    gap: 36px;
+    padding: 56px 70px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.75), rgba(236, 72, 153, 0.65), rgba(251, 146, 60, 0.55));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 42px;
     align-items: center;
-    background: linear-gradient(135deg, rgba(109, 40, 217, 0.75), rgba(37, 99, 235, 0.55));
 }
 
 .gradient-profile {
     display: flex;
+    gap: 32px;
     align-items: center;
-    gap: 24px;
 }
 
 .gradient-avatar {
-    width: 96px;
-    height: 96px;
-    border-radius: 28px;
-    background: rgba(15, 23, 42, 0.35);
+    width: 108px;
+    height: 108px;
+    border-radius: 32px;
     border: 3px solid rgba(248, 250, 252, 0.45);
+    background: rgba(15, 23, 42, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 36px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #f8fafc;
+    color: var(--gradient-light);
     overflow: hidden;
 }
 
@@ -71,26 +70,32 @@ body.gradient-template {
 }
 
 .gradient-badge {
-    display: inline-block;
-    text-transform: uppercase;
-    letter-spacing: 0.4em;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-size: 11px;
-    color: rgba(248, 250, 252, 0.75);
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: rgba(248, 250, 252, 0.7);
 }
 
 .gradient-hero h1 {
-    margin: 8px 0 0;
-    font-size: 36px;
+    margin: 12px 0 0;
+    font-size: 38px;
+    letter-spacing: 0.05em;
 }
 
 .gradient-hero p {
-    margin: 6px 0 0;
+    margin: 8px 0 0;
     font-size: 15px;
-    color: rgba(248, 250, 252, 0.78);
+    color: rgba(248, 250, 252, 0.82);
 }
 
 .gradient-location {
-    color: rgba(248, 250, 252, 0.65);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.24em;
+    color: rgba(248, 250, 252, 0.72);
 }
 
 .gradient-contact {
@@ -98,76 +103,71 @@ body.gradient-template {
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 6px;
+    gap: 8px;
     font-size: 12px;
-    color: rgba(248, 250, 252, 0.78);
+    color: rgba(248, 250, 252, 0.8);
     text-align: right;
 }
 
 .gradient-columns {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 40px;
-    padding: 48px 56px 56px;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 48px;
+    padding: 48px 70px 72px;
 }
 
 .gradient-main {
-    display: flex;
-    flex-direction: column;
-    gap: 36px;
+    display: grid;
+    gap: 44px;
 }
 
 .gradient-section {
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 24px;
 }
 
 .gradient-section h2 {
     margin: 0;
-    font-size: 24px;
-    letter-spacing: 0.1em;
+    font-size: 22px;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
+    color: rgba(248, 250, 252, 0.85);
 }
 
 .gradient-grid {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 24px;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .gradient-grid article {
     border-radius: 28px;
+    background: linear-gradient(150deg, rgba(37, 99, 235, 0.15), rgba(15, 23, 42, 0.95));
+    border: 1px solid rgba(37, 99, 235, 0.35);
     padding: 28px;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.18), rgba(219, 39, 119, 0.28));
-    border: 1px solid rgba(99, 102, 241, 0.4);
-    display: flex;
-    flex-direction: column;
+    display: grid;
     gap: 14px;
+    box-shadow: 0 24px 40px rgba(15, 23, 42, 0.45);
 }
 
-.gradient-grid header {
+.gradient-grid article header {
     display: flex;
     justify-content: space-between;
-    gap: 14px;
+    gap: 16px;
     align-items: flex-start;
 }
 
-.gradient-grid h3 {
+.gradient-grid article h3 {
     margin: 0;
     font-size: 20px;
+    color: var(--gradient-light);
 }
 
-.gradient-grid p {
-    margin: 8px 0 0;
-    color: rgba(226, 232, 240, 0.78);
-}
-
-.gradient-grid span {
-    font-size: 12px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: rgba(226, 232, 240, 0.72);
+.gradient-grid article p,
+.gradient-grid article span {
+    margin: 0;
+    color: rgba(248, 250, 252, 0.7);
+    font-size: 13px;
 }
 
 .gradient-education {
@@ -177,18 +177,17 @@ body.gradient-template {
 
 .gradient-education article {
     border-radius: 24px;
-    padding: 24px;
-    background: rgba(15, 23, 42, 0.65);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+    background: linear-gradient(150deg, rgba(236, 72, 153, 0.18), rgba(15, 23, 42, 0.9));
+    border: 1px solid rgba(236, 72, 153, 0.35);
+    padding: 24px 26px;
+    display: grid;
+    gap: 12px;
 }
 
 .gradient-education header {
     display: flex;
     justify-content: space-between;
-    gap: 12px;
+    gap: 18px;
     align-items: baseline;
 }
 
@@ -197,49 +196,37 @@ body.gradient-template {
     font-size: 18px;
 }
 
-.gradient-education span {
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(226, 232, 240, 0.65);
-}
-
-.gradient-education p {
-    margin: 0;
-    color: rgba(226, 232, 240, 0.85);
-}
-
 .gradient-meta {
-    color: rgba(148, 163, 184, 0.78);
+    font-size: 12px;
+    color: rgba(248, 250, 252, 0.68);
 }
 
 .gradient-aside {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
+    display: grid;
+    gap: 24px;
 }
 
 .gradient-card {
-    border-radius: 24px;
-    padding: 24px;
-    background: linear-gradient(160deg, rgba(109, 40, 217, 0.24), rgba(37, 99, 235, 0.18));
-    border: 1px solid rgba(99, 102, 241, 0.28);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    border-radius: 26px;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+    background: rgba(15, 23, 42, 0.85);
+    padding: 26px 28px;
+    display: grid;
+    gap: 14px;
 }
 
 .gradient-card h2 {
     margin: 0;
     font-size: 12px;
-    letter-spacing: 0.4em;
     text-transform: uppercase;
-    color: rgba(248, 250, 252, 0.75);
+    letter-spacing: 0.32em;
+    color: rgba(248, 250, 252, 0.7);
 }
 
 .gradient-card p {
     margin: 0;
-    color: rgba(248, 250, 252, 0.85);
+    font-size: 14px;
+    color: rgba(248, 250, 252, 0.78);
 }
 
 .gradient-card ul {
@@ -247,27 +234,37 @@ body.gradient-template {
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 8px;
+    gap: 10px;
     font-size: 13px;
-    color: rgba(248, 250, 252, 0.85);
+    color: rgba(248, 250, 252, 0.8);
 }
 
 .gradient-card li {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 1024px) {
     body.gradient-template {
-        padding: 28px;
+        padding: 32px 16px;
+    }
+
+    .gradient-hero {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .gradient-profile {
+        justify-content: center;
+    }
+
+    .gradient-contact {
+        text-align: center;
     }
 
     .gradient-columns {
         grid-template-columns: 1fr;
-    }
-
-    .gradient-contact {
-        text-align: left;
+        padding: 40px 32px 56px;
     }
 }

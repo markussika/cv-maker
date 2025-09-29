@@ -1,10 +1,10 @@
 :root {
-    --futuristic-bg: #020617;
-    --futuristic-surface: rgba(2, 6, 23, 0.92);
-    --futuristic-border: rgba(94, 234, 212, 0.4);
-    --futuristic-accent: #38bdf8;
-    --futuristic-accent-2: #a855f7;
-    --futuristic-muted: rgba(148, 163, 184, 0.78);
+    --future-bg: #050b16;
+    --future-surface: rgba(10, 20, 34, 0.92);
+    --future-cyan: #00f5d4;
+    --future-purple: #6366f1;
+    --future-magenta: #ff4d8d;
+    --future-muted: rgba(226, 232, 240, 0.7);
 }
 
 * {
@@ -13,54 +13,68 @@
 
 body.futuristic-template {
     margin: 0;
-    font-family: "Sora", "Inter", sans-serif;
-    background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.25), transparent 55%),
-        radial-gradient(circle at bottom left, rgba(168, 85, 247, 0.25), transparent 50%),
-        var(--futuristic-bg);
-    color: #ecfeff;
-    font-size: 13px;
-    line-height: 1.7;
-    padding: 60px;
+    font-family: "Orbitron", "Rajdhani", sans-serif;
+    background: radial-gradient(circle at top left, rgba(0, 245, 212, 0.2), transparent 55%),
+        radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.25), transparent 60%),
+        var(--future-bg);
+    color: #f8fafc;
+    font-size: 12px;
+    letter-spacing: 0.03em;
+    line-height: 1.6;
+    padding: 68px;
+    position: relative;
+}
+
+body.futuristic-template::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
 }
 
 .futuristic-frame {
-    max-width: 980px;
+    max-width: 1020px;
     margin: 0 auto;
-    background: var(--futuristic-surface);
-    border-radius: 36px;
+    border-radius: 40px;
+    background: var(--future-surface);
+    border: 1px solid rgba(148, 163, 184, 0.25);
     overflow: hidden;
-    border: 1px solid rgba(56, 189, 248, 0.35);
-    box-shadow: 0 60px 90px rgba(15, 23, 42, 0.45);
+    box-shadow: 0 60px 110px rgba(5, 11, 22, 0.65);
+    position: relative;
 }
 
 .futuristic-header {
-    padding: 48px 56px;
-    background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(168, 85, 247, 0.35));
-    display: flex;
-    justify-content: space-between;
+    padding: 56px 72px;
+    background: linear-gradient(135deg, rgba(0, 245, 212, 0.25), rgba(99, 102, 241, 0.25), rgba(255, 77, 141, 0.25));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 42px;
     align-items: center;
-    gap: 36px;
+    position: relative;
+    z-index: 1;
 }
 
 .futuristic-identity {
     display: flex;
+    gap: 32px;
     align-items: center;
-    gap: 24px;
 }
 
 .futuristic-avatar {
-    width: 96px;
-    height: 96px;
-    border-radius: 30px;
-    background: rgba(15, 23, 42, 0.4);
-    border: 3px solid rgba(236, 254, 255, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 36px;
+    width: 108px;
+    height: 108px;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 245, 212, 0.45);
+    background: rgba(5, 11, 22, 0.6);
+    display: grid;
+    place-items: center;
+    font-size: 34px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #ecfeff;
+    color: #f8fafc;
     overflow: hidden;
 }
 
@@ -72,25 +86,29 @@ body.futuristic-template {
 
 .futuristic-badge {
     margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.4em;
     font-size: 11px;
-    color: rgba(236, 254, 255, 0.7);
+    text-transform: uppercase;
+    letter-spacing: 0.48em;
+    color: rgba(248, 250, 252, 0.65);
 }
 
 .futuristic-header h1 {
-    margin: 8px 0 0;
-    font-size: 36px;
+    margin: 12px 0 0;
+    font-size: 34px;
 }
 
 .futuristic-header p {
-    margin: 6px 0 0;
-    font-size: 15px;
-    color: rgba(236, 254, 255, 0.75);
+    margin: 8px 0 0;
+    font-size: 14px;
+    color: rgba(248, 250, 252, 0.75);
 }
 
 .futuristic-location {
-    color: rgba(148, 163, 184, 0.75);
+    margin-top: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.32em;
+    color: rgba(248, 250, 252, 0.68);
 }
 
 .futuristic-contact {
@@ -99,205 +117,197 @@ body.futuristic-template {
     list-style: none;
     display: grid;
     gap: 6px;
-    font-size: 12px;
-    color: rgba(236, 254, 255, 0.78);
+    font-size: 11px;
+    color: rgba(248, 250, 252, 0.75);
     text-align: right;
 }
 
 .futuristic-body {
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-    padding: 48px 56px 60px;
+    padding: 48px 72px 72px;
+    display: grid;
+    gap: 44px;
 }
 
 .futuristic-grid {
     display: grid;
-    gap: 24px;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
 }
 
 .futuristic-panel {
-    border-radius: 26px;
-    padding: 24px;
-    background: linear-gradient(150deg, rgba(56, 189, 248, 0.22), rgba(2, 6, 23, 0.65));
-    border: 1px solid rgba(56, 189, 248, 0.32);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    border-radius: 24px;
+    border: 1px solid rgba(0, 245, 212, 0.35);
+    background: rgba(5, 11, 22, 0.7);
+    padding: 22px 24px;
+    display: grid;
+    gap: 14px;
 }
 
 .futuristic-panel h2 {
     margin: 0;
-    font-size: 12px;
-    letter-spacing: 0.36em;
+    font-size: 11px;
+    letter-spacing: 0.42em;
     text-transform: uppercase;
-    color: rgba(236, 254, 255, 0.78);
+    color: rgba(248, 250, 252, 0.68);
 }
 
-.futuristic-panel p {
+.futuristic-panel p,
+.futuristic-panel ul {
     margin: 0;
-    color: rgba(236, 254, 255, 0.88);
+    font-size: 13px;
+    color: rgba(248, 250, 252, 0.78);
 }
 
 .futuristic-panel ul {
-    margin: 0;
     padding: 0;
     list-style: none;
     display: grid;
     gap: 8px;
-    font-size: 13px;
-    color: rgba(236, 254, 255, 0.85);
 }
 
 .futuristic-panel li {
     display: flex;
     justify-content: space-between;
-    gap: 10px;
+    gap: 12px;
 }
 
 .futuristic-section {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+    display: grid;
+    gap: 26px;
 }
 
 .futuristic-section h2 {
     margin: 0;
-    font-size: 24px;
-    letter-spacing: 0.16em;
+    font-size: 18px;
+    letter-spacing: 0.32em;
     text-transform: uppercase;
-    color: rgba(236, 254, 255, 0.85);
+    color: rgba(248, 250, 252, 0.82);
 }
 
 .futuristic-timeline {
-    display: grid;
-    gap: 26px;
     position: relative;
-    padding-left: 36px;
+    padding-left: 48px;
+    display: grid;
+    gap: 28px;
 }
 
 .futuristic-timeline::before {
     content: "";
     position: absolute;
-    left: 14px;
+    left: 18px;
     top: 0;
     bottom: 0;
     width: 2px;
-    background: linear-gradient(to bottom, rgba(56, 189, 248, 0.4), rgba(168, 85, 247, 0.4));
+    background: linear-gradient(to bottom, rgba(0, 245, 212, 0.4), rgba(99, 102, 241, 0.25));
 }
 
 .futuristic-timeline article {
     position: relative;
+    display: grid;
+    gap: 14px;
 }
 
 .futuristic-timeline__marker {
     position: absolute;
-    left: -32px;
-    top: 6px;
-    width: 18px;
-    height: 18px;
+    left: -7px;
+    top: 0;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
-    border: 4px solid rgba(56, 189, 248, 0.9);
-    background: var(--futuristic-bg);
+    border: 3px solid rgba(5, 11, 22, 0.9);
+    background: var(--future-magenta);
+    box-shadow: 0 0 12px rgba(255, 77, 141, 0.6);
 }
 
 .futuristic-timeline__card {
-    border-radius: 26px;
-    border: 1px solid rgba(56, 189, 248, 0.32);
-    background: rgba(2, 6, 23, 0.85);
-    padding: 24px 26px;
-    display: flex;
-    flex-direction: column;
+    border-radius: 24px;
+    border: 1px solid rgba(99, 102, 241, 0.35);
+    background: rgba(5, 11, 22, 0.75);
+    padding: 26px 28px;
+    display: grid;
     gap: 12px;
-    box-shadow: 0 25px 40px rgba(15, 23, 42, 0.45);
 }
 
 .futuristic-timeline__card header {
     display: flex;
     justify-content: space-between;
+    gap: 18px;
     align-items: flex-start;
-    gap: 16px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: normal;
 }
 
 .futuristic-timeline__card h3 {
     margin: 0;
-    font-size: 20px;
-    color: #ecfeff;
+    font-size: 18px;
 }
 
-.futuristic-timeline__card p {
-    margin: 8px 0 0;
-    color: var(--futuristic-muted);
-}
-
+.futuristic-timeline__card p,
 .futuristic-timeline__card span {
+    margin: 0;
+    color: var(--future-muted);
     font-size: 12px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(236, 254, 255, 0.65);
+    letter-spacing: normal;
 }
 
-.futuristic-timeline__card > p {
-    margin: 0;
-    color: rgba(236, 254, 255, 0.9);
+.futuristic-timeline__card p:last-child {
+    color: rgba(248, 250, 252, 0.8);
+    font-size: 13px;
 }
 
 .futuristic-education {
     display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 22px;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
 .futuristic-education article {
-    border-radius: 24px;
-    border: 1px solid rgba(168, 85, 247, 0.32);
-    background: rgba(2, 6, 23, 0.8);
-    padding: 22px;
-    display: flex;
-    flex-direction: column;
+    border-radius: 22px;
+    border: 1px solid rgba(0, 245, 212, 0.28);
+    background: rgba(5, 11, 22, 0.7);
+    padding: 22px 24px;
+    display: grid;
     gap: 10px;
+    font-family: "Inter", sans-serif;
+    letter-spacing: normal;
 }
 
 .futuristic-education__head {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    gap: 12px;
+    gap: 16px;
 }
 
 .futuristic-education__head h3 {
     margin: 0;
-    font-size: 18px;
-}
-
-.futuristic-education__head span {
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: rgba(236, 254, 255, 0.6);
-}
-
-.futuristic-education p {
-    margin: 0;
-    color: rgba(236, 254, 255, 0.85);
+    font-size: 16px;
 }
 
 .futuristic-education__meta {
-    color: var(--futuristic-muted);
+    font-size: 11px;
+    color: var(--future-muted);
 }
 
-@media (max-width: 860px) {
+@media (max-width: 980px) {
     body.futuristic-template {
-        padding: 32px;
+        padding: 32px 16px;
     }
 
     .futuristic-header {
-        flex-direction: column;
-        align-items: flex-start;
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .futuristic-identity {
+        justify-content: center;
     }
 
     .futuristic-contact {
-        text-align: left;
+        text-align: center;
+    }
+
+    .futuristic-body {
+        padding: 40px 32px 56px;
     }
 }
