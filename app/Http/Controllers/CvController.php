@@ -14,12 +14,21 @@ class CvController extends Controller
 {
     public function create(Request $request)
     {
-        session()->forget('cv_data');
-
         $countries = $this->fetchCountries();
         $templates = $this->templateOptions();
 
-        $initialTemplate = $templates[0] ?? 'classic';
+        $prefill = null;
+        $latestCv = $request->user()?->cvs()->latest()->first();
+        if ($latestCv) {
+            $prefill = $this->formatCvForView($latestCv);
+        } else {
+            $sessionPrefill = session('cv_data');
+            if (is_array($sessionPrefill) && !empty($sessionPrefill)) {
+                $prefill = $sessionPrefill;
+            }
+        }
+
+        $initialTemplate = $prefill['template'] ?? ($templates[0] ?? 'classic');
 
         $requestedTemplate = $request->string('template')->toString();
         if ($requestedTemplate && in_array($requestedTemplate, $templates, true)) {
@@ -30,7 +39,7 @@ class CvController extends Controller
             'countries' => $countries,
             'templates' => $templates,
             'initialTemplate' => $initialTemplate,
-            'prefill' => null,
+            'prefill' => $prefill,
             'isEditing' => false,
             'formAction' => route('cv.store'),
             'formMethod' => 'POST',
@@ -70,6 +79,7 @@ class CvController extends Controller
 
         return view('cv.history', [
             'entries' => $entries,
+            'templates' => $this->templateOptions(),
         ]);
     }
 
@@ -116,6 +126,30 @@ class CvController extends Controller
         session(['cv_data' => $this->formatCvForView($cv)]);
 
         return redirect()->route('cv.preview')->with('status', __('Your CV has been updated.'));
+    }
+
+    public function updateTemplate(Request $request, Cv $cv)
+    {
+        $this->ensureCvOwner($request, $cv);
+
+        $templates = $this->templateOptions();
+
+        $validated = $request->validate([
+            'template' => ['required', 'string', Rule::in($templates)],
+            'cv_id' => ['nullable'],
+        ]);
+
+        $cv->template = $validated['template'];
+        $cv->save();
+
+        $stored = session('cv_data');
+        if (is_array($stored) && (int) ($stored['id'] ?? 0) === $cv->id) {
+            session(['cv_data' => $this->formatCvForView($cv)]);
+        }
+
+        return redirect()
+            ->route('cv.history')
+            ->with('status', __('Template updated to :template.', ['template' => Str::headline($cv->template)]));
     }
 
     public function destroy(Request $request, Cv $cv)
@@ -241,15 +275,19 @@ class CvController extends Controller
         return view('cv.templates', ['templates' => $this->templateOptions()]);
     }
 
-    public function download(Request $request, string $template)
+    public function download(Request $request)
     {
         $templates = $this->templateOptions();
-        if (!in_array($template, $templates, true)) {
-            $template = $templates[0] ?? 'classic';
-        }
+        $requestedTemplate = $request->string('template')->toString();
+
+        $template = in_array($requestedTemplate, $templates, true)
+            ? $requestedTemplate
+            : ($templates[0] ?? 'classic');
 
         $cvData = $this->resolveCvData($request);
-        $cvData['template'] = $template;
+        if (!empty($cvData)) {
+            $cvData['template'] = $template;
+        }
 
         return $this->renderPdf($cvData, $template, $this->filenameForCv($cvData));
     }

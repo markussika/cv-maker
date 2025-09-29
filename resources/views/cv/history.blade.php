@@ -5,6 +5,7 @@
         $subtitle = $totalCount > 0
             ? trans_choice('Keep track of :count saved CV|Keep track of :count saved CVs', $totalCount, ['count' => $totalCount])
             : __('Start by crafting a CV and every version you save will appear here.');
+        $templateOptions = collect($templates ?? []);
     @endphp
 
     <div class="space-y-10">
@@ -57,6 +58,12 @@
                         $hobbyLabel = trans_choice(':count hobby|:count hobbies', $entry['hobby_count'], ['count' => $entry['hobby_count']]);
                         $skillLabel = trans_choice(':count skill|:count skills', $entry['skill_count'], ['count' => $entry['skill_count']]);
                         $languageLabel = trans_choice(':count language|:count languages', $entry['language_count'], ['count' => $entry['language_count']]);
+                        $templateSelectValue = old('cv_id') == (string) $cv->id
+                            ? old('template', $entry['template'])
+                            : ($entry['template'] ?? 'classic');
+                        if (!in_array($templateSelectValue, $templateOptions->all(), true)) {
+                            $templateSelectValue = $entry['template'] ?? 'classic';
+                        }
                     @endphp
 
                     <div class="rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
@@ -99,16 +106,42 @@
                             </span>
                         </div>
 
-                        <div class="mt-6 flex flex-wrap gap-3">
-                            <a href="{{ route('cv.edit', $cv) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-700">
-                                {{ __('Edit CV') }}
-                            </a>
-                            <form method="POST" action="{{ route('cv.destroy', $cv) }}" class="inline-flex" onsubmit="return confirm('{{ __('Are you sure you want to delete this CV?') }}');">
+                        <div class="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                            <div class="flex flex-wrap gap-3">
+                                <a href="{{ route('cv.edit', $cv) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-700">
+                                    {{ __('Edit CV') }}
+                                </a>
+                                <form method="POST" action="{{ route('cv.destroy', $cv) }}" class="inline-flex" onsubmit="return confirm('{{ __('Are you sure you want to delete this CV?') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-red-400 hover:text-red-600">
+                                        {{ __('Delete') }}
+                                    </button>
+                                </form>
+                            </div>
+
+                            <form method="POST" action="{{ route('cv.update-template', $cv) }}" class="flex flex-wrap items-center gap-3">
                                 @csrf
-                                @method('DELETE')
-                                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-red-400 hover:text-red-600">
-                                    {{ __('Delete') }}
+                                @method('PATCH')
+                                <input type="hidden" name="cv_id" value="{{ $cv->id }}">
+                                <input type="hidden" name="cv" value="{{ $cv->id }}">
+                                <label for="template-{{ $cv->id }}" class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
+                                    {{ __('Template') }}
+                                </label>
+                                <select id="template-{{ $cv->id }}" name="template" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                                    @foreach ($templateOptions as $option)
+                                        <option value="{{ $option }}" @selected($templateSelectValue === $option)>{{ \Illuminate\Support\Str::of($option)->headline() }}</option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-black">
+                                    {{ __('Apply template') }}
                                 </button>
+                                <button type="submit" formmethod="GET" formaction="{{ route('cv.download') }}" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50">
+                                    {{ __('Download PDF') }}
+                                </button>
+                                @if ($errors->has('template') && old('cv_id') == (string) $cv->id)
+                                    <p class="basis-full text-sm text-red-600">{{ $errors->first('template') }}</p>
+                                @endif
                             </form>
                         </div>
                     </div>

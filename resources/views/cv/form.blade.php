@@ -424,8 +424,8 @@
                                         <span class="px-2 text-center text-xs text-slate-400 {{ $profileImageUrl ? 'hidden' : '' }}" data-photo-preview-placeholder>{{ __('No photo yet') }}</span>
                                     </div>
                                     <div class="flex-1">
-                                        <input type="file" name="profile_image" accept="image/jpeg,image/png,image/webp" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
-                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload a JPG, PNG, or WEBP image. Max 2 MB.') }}</p>
+                                        <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload any image file (JPG, PNG, WebP, HEIC, etc.). Max 2 MB.') }}</p>
                                         <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
                                         @error('profile_image')
                                             <p class="mt-2 text-sm text-red-600">{{ $message }}</p>

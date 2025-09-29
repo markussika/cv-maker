@@ -340,7 +340,7 @@
                             </div>
                         </div>
                         <div class="flex flex-col gap-3 pt-2">
-                            <a href="{{ route('cv.download', $templateKey) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-400/40 transition hover:-translate-y-0.5 hover:bg-black">
+                            <a href="{{ route('cv.download', array_filter(['template' => $templateKey, 'cv' => request('cv')])) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-400/40 transition hover:-translate-y-0.5 hover:bg-black">
                                 {{ __('Download PDF') }}
                                 <span aria-hidden="true">&darr;</span>
                             </a>
