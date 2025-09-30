@@ -3,7 +3,8 @@
         @apply font-sans antialiased bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-900;
         min-height: 100vh;
         position: relative;
-        overflow: hidden;
+        overflow-x: hidden;
+        overflow-y: auto;
     }
 
     .createit-auth__background {
