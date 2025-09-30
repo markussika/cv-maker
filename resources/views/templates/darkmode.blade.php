@@ -6,70 +6,60 @@
     <link rel="stylesheet" href="{{ asset('templates/css/darkmode.css') }}">
 </head>
 <body class="darkmode-template">
-    @php
-        $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
-        $data = $templateData;
-        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
-            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
-            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
-            ->implode('');
-        $profileImage = $data['profile_image'] ?? null;
-    @endphp
-
     <div class="darkmode-shell">
         <header class="darkmode-header">
             <div class="darkmode-identity">
                 <div class="darkmode-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
+                    @if (!empty($templateData['profile_image']))
+                        <img src="{{ $templateData['profile_image'] }}" alt="{{ $templateData['name'] ?? __('Profile photo') }}">
+                    @elseif (!empty($templateData['initials']))
+                        <span>{{ $templateData['initials'] }}</span>
                     @else
                         <span>{{ __('CV') }}</span>
                     @endif
                 </div>
                 <div>
                     <p class="darkmode-badge">{{ __('Dark Mode Resume') }}</p>
-                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-                    @if ($data['headline'])
-                        <p class="darkmode-headline">{{ $data['headline'] }}</p>
+                    <h1>{{ $templateData['name'] ?? __('Your Name') }}</h1>
+                    @if (!empty($templateData['headline']))
+                        <p class="darkmode-headline">{{ $templateData['headline'] }}</p>
                     @endif
                 </div>
             </div>
-            @if (!empty($data['contacts']))
+            @if (!empty($templateData['contacts']))
                 <ul class="darkmode-contact">
-                    @foreach ($data['contacts'] as $contact)
+                    @foreach ($templateData['contacts'] as $contact)
                         <li>{{ $contact }}</li>
                     @endforeach
                 </ul>
             @endif
         </header>
 
-        <div class="darkmode-body">
-            <aside class="darkmode-aside">
-                @if ($data['summary'])
+        <div class="darkmode-layout">
+            <aside class="darkmode-sidebar">
+                @if (!empty($templateData['summary']))
                     <section>
                         <h2>{{ __('Profile') }}</h2>
-                        <p>{{ $data['summary'] }}</p>
+                        <p>{{ $templateData['summary'] }}</p>
                     </section>
                 @endif
 
-                @if (!empty($data['skills']))
+                @if (!empty($templateData['skills']))
                     <section>
                         <h2>{{ __('Skills') }}</h2>
                         <ul>
-                            @foreach ($data['skills'] as $skill)
+                            @foreach ($templateData['skills'] as $skill)
                                 <li>{{ $skill }}</li>
                             @endforeach
                         </ul>
                     </section>
                 @endif
 
-                @if (!empty($data['languages']))
+                @if (!empty($templateData['languages']))
                     <section>
                         <h2>{{ __('Languages') }}</h2>
                         <ul>
-                            @foreach ($data['languages'] as $language)
+                            @foreach ($templateData['languages'] as $language)
                                 <li>
                                     <span>{{ $language['name'] }}</span>
                                     @if (!empty($language['level']))
@@ -81,11 +71,11 @@
                     </section>
                 @endif
 
-                @if (!empty($data['hobbies']))
+                @if (!empty($templateData['hobbies']))
                     <section>
                         <h2>{{ __('Interests') }}</h2>
                         <ul>
-                            @foreach ($data['hobbies'] as $hobby)
+                            @foreach ($templateData['hobbies'] as $hobby)
                                 <li>{{ $hobby }}</li>
                             @endforeach
                         </ul>
@@ -94,46 +84,43 @@
             </aside>
 
             <main class="darkmode-main">
-                @if (!empty($data['experiences']))
+                @if (!empty($templateData['experiences']))
                     <section class="darkmode-section">
                         <h2>{{ __('Experience') }}</h2>
                         <div class="darkmode-timeline">
-                            @foreach ($data['experiences'] as $experience)
+                            @foreach ($templateData['experiences'] as $experience)
                                 <article>
-                                    <div class="darkmode-timeline__line"></div>
-                                    <div class="darkmode-timeline__content">
-                                        <header>
-                                            <div>
-                                                @if ($experience['role'])
-                                                    <h3>{{ $experience['role'] }}</h3>
-                                                @endif
-                                                <p>
-                                                    {{ $experience['company'] }}
-                                                    @if ($experience['company'] && $experience['location'])
-                                                        ·
-                                                    @endif
-                                                    {{ $experience['location'] }}
-                                                </p>
-                                            </div>
-                                            @if ($experience['period'])
-                                                <span>{{ $experience['period'] }}</span>
+                                    <header>
+                                        <div>
+                                            @if ($experience['role'])
+                                                <h3>{{ $experience['role'] }}</h3>
                                             @endif
-                                        </header>
-                                        @if ($experience['summary'])
-                                            <p>{{ $experience['summary'] }}</p>
+                                            <p>
+                                                {{ $experience['company'] }}
+                                                @if ($experience['company'] && $experience['location'])
+                                                    ·
+                                                @endif
+                                                {{ $experience['location'] }}
+                                            </p>
+                                        </div>
+                                        @if ($experience['period'])
+                                            <span>{{ $experience['period'] }}</span>
                                         @endif
-                                    </div>
+                                    </header>
+                                    @if ($experience['summary'])
+                                        <p>{{ $experience['summary'] }}</p>
+                                    @endif
                                 </article>
                             @endforeach
                         </div>
                     </section>
                 @endif
 
-                @if (!empty($data['education']))
+                @if (!empty($templateData['education']))
                     <section class="darkmode-section">
                         <h2>{{ __('Education') }}</h2>
                         <div class="darkmode-education">
-                            @foreach ($data['education'] as $education)
+                            @foreach ($templateData['education'] as $education)
                                 <article>
                                     <header>
                                         <h3>{{ $education['institution'] }}</h3>

@@ -6,70 +6,60 @@
     <link rel="stylesheet" href="{{ asset('templates/css/modern.css') }}">
 </head>
 <body class="modern-template">
-    @php
-        $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
-        $data = $templateData;
-        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
-            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
-            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
-            ->implode('');
-        $profileImage = $data['profile_image'] ?? null;
-    @endphp
-
     <div class="modern-page">
         <aside class="modern-sidebar">
             <div class="modern-profile-card">
                 <div class="modern-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
+                    @if (!empty($templateData['profile_image']))
+                        <img src="{{ $templateData['profile_image'] }}" alt="{{ $templateData['name'] ?? __('Profile photo') }}">
+                    @elseif (!empty($templateData['initials']))
+                        <span>{{ $templateData['initials'] }}</span>
                     @else
                         <span>{{ __('CV') }}</span>
                     @endif
                 </div>
                 <div class="modern-profile-text">
-                    <h1 class="modern-name">{{ $data['name'] ?? __('Your Name') }}</h1>
-                    @if ($data['headline'])
-                        <p class="modern-headline">{{ $data['headline'] }}</p>
+                    <h1 class="modern-name">{{ $templateData['name'] ?? __('Your Name') }}</h1>
+                    @if (!empty($templateData['headline']))
+                        <p class="modern-headline">{{ $templateData['headline'] }}</p>
                     @endif
                 </div>
             </div>
 
-            @if (!empty($data['contacts']))
+            @if (!empty($templateData['contacts']))
                 <div class="modern-section">
                     <h2 class="modern-section__title">{{ __('Contact') }}</h2>
                     <ul class="modern-contact-list">
-                        @foreach ($data['contacts'] as $contact)
+                        @foreach ($templateData['contacts'] as $contact)
                             <li>{{ $contact }}</li>
                         @endforeach
                     </ul>
                 </div>
             @endif
 
-            @if ($data['summary'])
+            @if (!empty($templateData['summary']))
                 <div class="modern-section">
                     <h2 class="modern-section__title">{{ __('Profile') }}</h2>
-                    <p class="modern-summary">{{ $data['summary'] }}</p>
+                    <p class="modern-summary">{{ $templateData['summary'] }}</p>
                 </div>
             @endif
 
-            @if (!empty($data['skills']))
+            @if (!empty($templateData['skills']))
                 <div class="modern-section">
                     <h2 class="modern-section__title">{{ __('Skills') }}</h2>
                     <ul class="modern-pill-list">
-                        @foreach ($data['skills'] as $skill)
+                        @foreach ($templateData['skills'] as $skill)
                             <li>{{ $skill }}</li>
                         @endforeach
                     </ul>
                 </div>
             @endif
 
-            @if (!empty($data['languages']))
+            @if (!empty($templateData['languages']))
                 <div class="modern-section">
                     <h2 class="modern-section__title">{{ __('Languages') }}</h2>
                     <ul class="modern-language-list">
-                        @foreach ($data['languages'] as $language)
+                        @foreach ($templateData['languages'] as $language)
                             <li>
                                 <span class="modern-language-name">{{ $language['name'] }}</span>
                                 @if (!empty($language['level']))
@@ -81,11 +71,11 @@
                 </div>
             @endif
 
-            @if (!empty($data['hobbies']))
+            @if (!empty($templateData['hobbies']))
                 <div class="modern-section">
                     <h2 class="modern-section__title">{{ __('Interests') }}</h2>
                     <ul class="modern-pill-list modern-pill-list--light">
-                        @foreach ($data['hobbies'] as $hobby)
+                        @foreach ($templateData['hobbies'] as $hobby)
                             <li>{{ $hobby }}</li>
                         @endforeach
                     </ul>
@@ -97,18 +87,18 @@
             <header class="modern-main__header">
                 <div>
                     <p class="modern-badge">{{ __('Modern Resume') }}</p>
-                    <h2>{{ $data['headline'] ?: __('Career Timeline') }}</h2>
+                    <h2>{{ $templateData['headline'] ?: __('Career Timeline') }}</h2>
                 </div>
-                @if ($data['location'])
-                    <p class="modern-location">{{ $data['location'] }}</p>
+                @if (!empty($templateData['location']))
+                    <p class="modern-location">{{ $templateData['location'] }}</p>
                 @endif
             </header>
 
-            @if (!empty($data['experiences']))
+            @if (!empty($templateData['experiences']))
                 <section class="modern-timeline">
                     <h3 class="modern-timeline__title">{{ __('Experience') }}</h3>
                     <div class="modern-timeline__items">
-                        @foreach ($data['experiences'] as $experience)
+                        @foreach ($templateData['experiences'] as $experience)
                             <article class="modern-timeline__item">
                                 <div class="modern-timeline__marker"></div>
                                 <div class="modern-timeline__content">
@@ -135,14 +125,14 @@
                 </section>
             @endif
 
-            @if (!empty($data['education']))
+            @if (!empty($templateData['education']))
                 <section class="modern-grid">
                     <div class="modern-grid__header">
                         <h3>{{ __('Education') }}</h3>
                         <p>{{ __('Academic achievements and credentials.') }}</p>
                     </div>
                     <div class="modern-grid__items">
-                        @foreach ($data['education'] as $education)
+                        @foreach ($templateData['education'] as $education)
                             <article class="modern-card">
                                 @if ($education['degree'])
                                     <h4>{{ $education['degree'] }}</h4>

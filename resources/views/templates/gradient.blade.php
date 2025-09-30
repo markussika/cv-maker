@@ -6,42 +6,32 @@
     <link rel="stylesheet" href="{{ asset('templates/css/gradient.css') }}">
 </head>
 <body class="gradient-template">
-    @php
-        $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
-        $data = $templateData;
-        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
-            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
-            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
-            ->implode('');
-        $profileImage = $data['profile_image'] ?? null;
-    @endphp
-
     <div class="gradient-wrapper">
         <header class="gradient-hero">
             <div class="gradient-profile">
                 <div class="gradient-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
+                    @if (!empty($templateData['profile_image']))
+                        <img src="{{ $templateData['profile_image'] }}" alt="{{ $templateData['name'] ?? __('Profile photo') }}">
+                    @elseif (!empty($templateData['initials']))
+                        <span>{{ $templateData['initials'] }}</span>
                     @else
                         <span>{{ __('CV') }}</span>
                     @endif
                 </div>
                 <div>
                     <span class="gradient-badge">{{ __('Gradient Resume') }}</span>
-                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-                    @if ($data['headline'])
-                        <p>{{ $data['headline'] }}</p>
+                    <h1>{{ $templateData['name'] ?? __('Your Name') }}</h1>
+                    @if (!empty($templateData['headline']))
+                        <p>{{ $templateData['headline'] }}</p>
                     @endif
-                    @if ($data['location'])
-                        <p class="gradient-location">{{ $data['location'] }}</p>
+                    @if (!empty($templateData['location']))
+                        <p class="gradient-location">{{ $templateData['location'] }}</p>
                     @endif
                 </div>
             </div>
-            @if (!empty($data['contacts']))
+            @if (!empty($templateData['contacts']))
                 <ul class="gradient-contact">
-                    @foreach ($data['contacts'] as $contact)
+                    @foreach ($templateData['contacts'] as $contact)
                         <li>{{ $contact }}</li>
                     @endforeach
                 </ul>
@@ -50,11 +40,11 @@
 
         <div class="gradient-columns">
             <main class="gradient-main">
-                @if (!empty($data['experiences']))
+                @if (!empty($templateData['experiences']))
                     <section class="gradient-section">
                         <h2>{{ __('Experience') }}</h2>
                         <div class="gradient-grid">
-                            @foreach ($data['experiences'] as $experience)
+                            @foreach ($templateData['experiences'] as $experience)
                                 <article>
                                     <header>
                                         <div>
@@ -82,11 +72,11 @@
                     </section>
                 @endif
 
-                @if (!empty($data['education']))
+                @if (!empty($templateData['education']))
                     <section class="gradient-section">
                         <h2>{{ __('Education') }}</h2>
                         <div class="gradient-education">
-                            @foreach ($data['education'] as $education)
+                            @foreach ($templateData['education'] as $education)
                                 <article>
                                     <header>
                                         <h3>{{ $education['institution'] }}</h3>
@@ -111,29 +101,29 @@
             </main>
 
             <aside class="gradient-aside">
-                @if ($data['summary'])
+                @if (!empty($templateData['summary']))
                     <section class="gradient-card">
                         <h2>{{ __('Profile') }}</h2>
-                        <p>{{ $data['summary'] }}</p>
+                        <p>{{ $templateData['summary'] }}</p>
                     </section>
                 @endif
 
-                @if (!empty($data['skills']))
+                @if (!empty($templateData['skills']))
                     <section class="gradient-card">
                         <h2>{{ __('Skills') }}</h2>
                         <ul>
-                            @foreach ($data['skills'] as $skill)
+                            @foreach ($templateData['skills'] as $skill)
                                 <li>{{ $skill }}</li>
                             @endforeach
                         </ul>
                     </section>
                 @endif
 
-                @if (!empty($data['languages']))
+                @if (!empty($templateData['languages']))
                     <section class="gradient-card">
                         <h2>{{ __('Languages') }}</h2>
                         <ul>
-                            @foreach ($data['languages'] as $language)
+                            @foreach ($templateData['languages'] as $language)
                                 <li>
                                     <span>{{ $language['name'] }}</span>
                                     @if (!empty($language['level']))
@@ -145,11 +135,11 @@
                     </section>
                 @endif
 
-                @if (!empty($data['hobbies']))
+                @if (!empty($templateData['hobbies']))
                     <section class="gradient-card">
                         <h2>{{ __('Interests') }}</h2>
                         <ul>
-                            @foreach ($data['hobbies'] as $hobby)
+                            @foreach ($templateData['hobbies'] as $hobby)
                                 <li>{{ $hobby }}</li>
                             @endforeach
                         </ul>

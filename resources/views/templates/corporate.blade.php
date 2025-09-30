@@ -6,39 +6,29 @@
     <link rel="stylesheet" href="{{ asset('templates/css/corporate.css') }}">
 </head>
 <body class="corporate-template">
-    @php
-        $templateData = \App\View\TemplateDataBuilder::fromCv($cv ?? null);
-        $data = $templateData;
-        $initials = collect([$data['first_name'] ?? null, $data['last_name'] ?? null])
-            ->filter(fn ($item) => is_string($item) && trim($item) !== '')
-            ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
-            ->implode('');
-        $profileImage = $data['profile_image'] ?? null;
-    @endphp
-
     <div class="corporate-wrapper">
         <header class="corporate-topbar">
             <div class="corporate-brand">
                 <div class="corporate-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
+                    @if (!empty($templateData['profile_image']))
+                        <img src="{{ $templateData['profile_image'] }}" alt="{{ $templateData['name'] ?? __('Profile photo') }}">
+                    @elseif (!empty($templateData['initials']))
+                        <span>{{ $templateData['initials'] }}</span>
                     @else
                         <span>{{ __('CV') }}</span>
                     @endif
                 </div>
                 <div>
                     <p class="corporate-badge">{{ __('Corporate Resume') }}</p>
-                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-                    @if ($data['headline'])
-                        <p>{{ $data['headline'] }}</p>
+                    <h1>{{ $templateData['name'] ?? __('Your Name') }}</h1>
+                    @if (!empty($templateData['headline']))
+                        <p>{{ $templateData['headline'] }}</p>
                     @endif
                 </div>
             </div>
-            @if (!empty($data['contacts']))
+            @if (!empty($templateData['contacts']))
                 <ul class="corporate-contact">
-                    @foreach ($data['contacts'] as $contact)
+                    @foreach ($templateData['contacts'] as $contact)
                         <li>{{ $contact }}</li>
                     @endforeach
                 </ul>
@@ -47,21 +37,21 @@
 
         <div class="corporate-body">
             <main class="corporate-main">
-                @if ($data['summary'])
+                @if (!empty($templateData['summary']))
                     <section class="corporate-section corporate-section--summary">
                         <h2>{{ __('Profile') }}</h2>
-                        <p>{{ $data['summary'] }}</p>
+                        <p>{{ $templateData['summary'] }}</p>
                     </section>
                 @endif
 
-                @if (!empty($data['experiences']))
+                @if (!empty($templateData['experiences']))
                     <section class="corporate-section">
                         <header>
                             <h2>{{ __('Experience') }}</h2>
                             <p>{{ __('Leadership, strategy, and measurable outcomes.') }}</p>
                         </header>
                         <div class="corporate-timeline">
-                            @foreach ($data['experiences'] as $experience)
+                            @foreach ($templateData['experiences'] as $experience)
                                 <article>
                                     <div class="corporate-timeline__marker"></div>
                                     <div class="corporate-timeline__body">
@@ -92,14 +82,14 @@
                     </section>
                 @endif
 
-                @if (!empty($data['education']))
+                @if (!empty($templateData['education']))
                     <section class="corporate-section">
                         <header>
                             <h2>{{ __('Education') }}</h2>
                             <p>{{ __('Degrees, certifications, and executive programs.') }}</p>
                         </header>
                         <div class="corporate-education">
-                            @foreach ($data['education'] as $education)
+                            @foreach ($templateData['education'] as $education)
                                 <article>
                                     <div class="corporate-education__head">
                                         <h3>{{ $education['institution'] }}</h3>
@@ -124,22 +114,22 @@
             </main>
 
             <aside class="corporate-aside">
-                @if (!empty($data['skills']))
+                @if (!empty($templateData['skills']))
                     <section>
                         <h2>{{ __('Core Skills') }}</h2>
                         <ul>
-                            @foreach ($data['skills'] as $skill)
+                            @foreach ($templateData['skills'] as $skill)
                                 <li>{{ $skill }}</li>
                             @endforeach
                         </ul>
                     </section>
                 @endif
 
-                @if (!empty($data['languages']))
+                @if (!empty($templateData['languages']))
                     <section>
                         <h2>{{ __('Languages') }}</h2>
                         <ul>
-                            @foreach ($data['languages'] as $language)
+                            @foreach ($templateData['languages'] as $language)
                                 <li>
                                     <span>{{ $language['name'] }}</span>
                                     @if (!empty($language['level']))
@@ -151,11 +141,11 @@
                     </section>
                 @endif
 
-                @if (!empty($data['hobbies']))
+                @if (!empty($templateData['hobbies']))
                     <section>
                         <h2>{{ __('Interests') }}</h2>
                         <ul>
-                            @foreach ($data['hobbies'] as $hobby)
+                            @foreach ($templateData['hobbies'] as $hobby)
                                 <li>{{ $hobby }}</li>
                             @endforeach
                         </ul>
