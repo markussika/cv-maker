@@ -20,6 +20,28 @@
         display: grid;
         gap: 24px;
     }
+    .template-elegant .elegant-portrait {
+        width: 92px;
+        height: 92px;
+        border-radius: 30px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 3px solid rgba(255, 255, 255, 0.45);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 18px;
+        color: #fdf4ff;
+    }
+    .template-elegant .elegant-portrait img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-elegant .elegant-portrait-initials {
+        font-size: 22px;
+        letter-spacing: 0.4em;
+    }
     .template-elegant .elegant-name {
         font-size: 26px;
         letter-spacing: 0.08em;
@@ -84,6 +106,15 @@
 <div class="elegant-wrapper">
     <aside class="elegant-sidebar">
         <div>
+            @if ($profileImage || $initials)
+                <div class="elegant-portrait">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="elegant-portrait-initials">{{ $initials }}</span>
+                    @endif
+                </div>
+            @endif
             <div class="elegant-badge">Profile</div>
             <h1 class="elegant-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
             @if ($headline)

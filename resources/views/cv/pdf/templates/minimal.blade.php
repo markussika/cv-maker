@@ -9,6 +9,33 @@
     .template-minimal .minimal-header {
         margin-bottom: 26px;
     }
+    .template-minimal .minimal-header-main {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .template-minimal .minimal-avatar {
+        width: 74px;
+        height: 74px;
+        border-radius: 999px;
+        border: 2px solid rgba(100, 116, 139, 0.3);
+        background: rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f172a;
+    }
+    .template-minimal .minimal-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-minimal .minimal-avatar-initials {
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: 0.22em;
+    }
     .template-minimal .minimal-name {
         font-size: 28px;
         font-weight: 500;
@@ -83,10 +110,23 @@
 </style>
 <div class="minimal-wrapper">
     <header class="minimal-header">
-        <h1 class="minimal-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-        @if ($headline)
-            <p class="minimal-headline">{{ strtoupper($headline) }}</p>
-        @endif
+        <div class="minimal-header-main">
+            @if ($profileImage || $initials)
+                <div class="minimal-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="minimal-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
+            @endif
+            <div>
+                <h1 class="minimal-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="minimal-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
+        </div>
         @if (!empty($contactItems))
             <div class="minimal-contact">
                 @foreach ($contactItems as $contact)

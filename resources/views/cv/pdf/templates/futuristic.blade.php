@@ -16,6 +16,33 @@
         align-items: flex-start;
         margin-bottom: 30px;
     }
+    .template-futuristic .futuristic-header-main {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .template-futuristic .futuristic-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 28px;
+        border: 3px solid rgba(124, 58, 237, 0.6);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(circle at center, rgba(168, 85, 247, 0.3), rgba(30, 64, 175, 0.35));
+        color: #f5f3ff;
+    }
+    .template-futuristic .futuristic-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-futuristic .futuristic-avatar-initials {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.35em;
+    }
     .template-futuristic .futuristic-name {
         font-size: 30px;
         font-weight: 600;
@@ -104,11 +131,22 @@
 </style>
 <div class="futuristic-wrapper">
     <header class="futuristic-header">
-        <div>
-            <h1 class="futuristic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-            @if ($headline)
-                <p class="futuristic-headline">{{ strtoupper($headline) }}</p>
+        <div class="futuristic-header-main">
+            @if ($profileImage || $initials)
+                <div class="futuristic-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="futuristic-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
             @endif
+            <div>
+                <h1 class="futuristic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="futuristic-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
         </div>
         @if (!empty($contactItems))
             <div class="futuristic-contact">

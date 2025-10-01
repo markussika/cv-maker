@@ -14,6 +14,33 @@
         padding-bottom: 18px;
         margin-bottom: 22px;
     }
+    .template-classic .classic-header-main {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    .template-classic .classic-avatar {
+        width: 78px;
+        height: 78px;
+        border-radius: 999px;
+        border: 3px solid {{ $accentColor }};
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.05);
+        color: {{ $accentColor }};
+    }
+    .template-classic .classic-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-classic .classic-avatar-initials {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+    }
     .template-classic .classic-name {
         font-size: 26px;
         font-weight: 600;
@@ -85,10 +112,23 @@
 </style>
 <div class="classic-wrapper">
     <header class="classic-header">
-        <h1 class="classic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-        @if ($headline)
-            <p class="classic-headline">{{ strtoupper($headline) }}</p>
-        @endif
+        <div class="classic-header-main">
+            @if ($profileImage || $initials)
+                <div class="classic-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="classic-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
+            @endif
+            <div>
+                <h1 class="classic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="classic-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
+        </div>
     </header>
     <div class="classic-layout">
         <main>

@@ -14,6 +14,33 @@
         color: #ffffff;
         padding: 28px 32px;
     }
+    .template-modern .modern-header-top {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .template-modern .modern-avatar {
+        width: 84px;
+        height: 84px;
+        border-radius: 999px;
+        border: 3px solid rgba(255, 255, 255, 0.55);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.2);
+        color: #ffffff;
+    }
+    .template-modern .modern-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-modern .modern-avatar-initials {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+    }
     .template-modern .modern-name {
         font-size: 28px;
         font-weight: 600;
@@ -99,10 +126,23 @@
 </style>
 <div class="modern-wrapper">
     <header class="modern-header">
-        <h1 class="modern-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-        @if ($headline)
-            <p class="modern-headline">{{ strtoupper($headline) }}</p>
-        @endif
+        <div class="modern-header-top">
+            @if ($profileImage || $initials)
+                <div class="modern-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="modern-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
+            @endif
+            <div>
+                <h1 class="modern-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="modern-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
+        </div>
         @if (!empty($contactItems))
             <div class="modern-contact">
                 @foreach ($contactItems as $contact)
