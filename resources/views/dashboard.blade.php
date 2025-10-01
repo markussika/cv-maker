@@ -30,10 +30,7 @@
     <div class="createit-dashboard">
         <section class="createit-dashboard__hero">
             <div class="relative z-10 max-w-3xl">
-                <span class="createit-dashboard__badge">
-                    <span class="createit-dot"></span>
-                    {{ __('Your creative workspace') }}
-                </span>
+                
                 <h1 class="createit-dashboard__title">{{ $userGreeting }}</h1>
                 <p class="createit-dashboard__subtitle">
                     {{ __('Keep iterating on your resumes, explore bold templates, and export polished PDFs whenever you are ready.') }}
@@ -46,9 +43,7 @@
                     <a href="{{ route('cv.templates') }}" class="createit-navbar__primary">
                         {{ __('Browse templates') }}
                     </a>
-                    <a href="{{ route('cv.history') }}" class="createit-navbar__link text-white/80 hover:text-white">
-                        {{ __('View history') }}
-                    </a>
+                    
                 </div>
             </div>
         </section>

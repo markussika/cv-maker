@@ -4,10 +4,7 @@
         <div class="pointer-events-none absolute bottom-[-10rem] right-0 h-96 w-96 rounded-full bg-blue-500/20 blur-3xl"></div>
 
         <section class="relative mx-auto max-w-6xl px-6 py-20">
-            <p class="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-200">
-                <span class="h-2 w-2 rounded-full bg-indigo-400"></span>
-                Account hub
-            </p>
+            
             <div class="mt-8 grid gap-8 lg:grid-cols-[1.25fr,0.75fr] lg:items-end">
                 <div class="space-y-5">
                     <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">Manage your profile with confidence</h1>

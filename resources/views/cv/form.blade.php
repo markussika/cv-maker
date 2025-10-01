@@ -268,10 +268,7 @@
     <div class="min-h-screen -mx-4 -mt-8 bg-gradient-to-br from-slate-100 via-white to-slate-200 px-4 py-10 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto">
             <div class="text-center text-slate-900 mb-12">
-                <div class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 shadow-sm">
-                    <span class="inline-flex h-2 w-2 rounded-full bg-emerald-400"></span>
-                    {{ $badgeLabel }}
-                </div>
+                
                 <h1 class="mt-5 text-4xl md:text-5xl font-semibold tracking-tight">{{ $headline }}</h1>
                 <p class="mt-3 text-base md:text-lg text-slate-500">{{ $heroSubtitle }}</p>
                 @if ($isEditing && $editingTitle)
