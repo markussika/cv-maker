@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600&family=Rubik:wght@300;400;500;600&display=swap');
+
 :root {
-    --future-bg: #050b16;
-    --future-surface: rgba(10, 20, 34, 0.92);
-    --future-cyan: #00f5d4;
-    --future-purple: #6366f1;
-    --future-magenta: #ff4d8d;
-    --future-muted: rgba(226, 232, 240, 0.7);
+    --future-bg: #050718;
+    --future-panel: rgba(12, 16, 40, 0.92);
+    --future-highlight: #4de1ff;
+    --future-accent: #8f5bff;
+    --future-ink: #f6f9ff;
+    --future-muted: #7e88a4;
 }
 
 * {
@@ -13,69 +15,65 @@
 
 body.futuristic-template {
     margin: 0;
-    font-family: "Orbitron", "Rajdhani", sans-serif;
-    background: radial-gradient(circle at top left, rgba(0, 245, 212, 0.2), transparent 55%),
-        radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.25), transparent 60%),
-        var(--future-bg);
-    color: #f8fafc;
-    font-size: 12px;
-    letter-spacing: 0.03em;
-    line-height: 1.6;
-    padding: 68px;
+    font-family: 'Rubik', 'Inter', system-ui, sans-serif;
+    background: linear-gradient(140deg, rgba(79, 225, 255, 0.12), transparent),
+        linear-gradient(220deg, rgba(143, 91, 255, 0.18), transparent),
+        #030515;
+    color: var(--future-ink);
+    font-size: 13px;
+    line-height: 1.75;
+    padding: 56px;
+}
+
+.futuristic-grid {
+    max-width: 1040px;
+    margin: 0 auto;
+    border-radius: 28px;
+    overflow: hidden;
+    background: rgba(7, 10, 28, 0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 60px 130px rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(77, 225, 255, 0.18);
+    display: grid;
+    grid-template-columns: 320px minmax(0, 1fr);
+    min-height: 1120px;
     position: relative;
 }
 
-body.futuristic-template::before {
-    content: "";
-    position: fixed;
+.futuristic-grid::after {
+    content: '';
+    position: absolute;
     inset: 0;
-    background-image: linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
+    background-image: linear-gradient(90deg, rgba(77, 225, 255, 0.12) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(77, 225, 255, 0.12) 1px, transparent 1px);
+    background-size: 80px 80px;
+    opacity: 0.2;
     pointer-events: none;
 }
 
-.futuristic-frame {
-    max-width: 1020px;
-    margin: 0 auto;
-    border-radius: 40px;
-    background: var(--future-surface);
-    border: 1px solid rgba(148, 163, 184, 0.25);
-    overflow: hidden;
-    box-shadow: 0 60px 110px rgba(5, 11, 22, 0.65);
-    position: relative;
-}
-
-.futuristic-header {
-    padding: 56px 72px;
-    background: linear-gradient(135deg, rgba(0, 245, 212, 0.25), rgba(99, 102, 241, 0.25), rgba(255, 77, 141, 0.25));
+.futuristic-sidebar {
+    padding: 72px 56px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 42px;
-    align-items: center;
+    gap: 36px;
+    border-right: 1px solid rgba(77, 225, 255, 0.16);
     position: relative;
     z-index: 1;
 }
 
-.futuristic-identity {
-    display: flex;
-    gap: 32px;
-    align-items: center;
-}
-
 .futuristic-avatar {
-    width: 108px;
-    height: 108px;
-    border-radius: 50%;
-    border: 2px solid rgba(0, 245, 212, 0.45);
-    background: rgba(5, 11, 22, 0.6);
+    width: 200px;
+    height: 200px;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid rgba(77, 225, 255, 0.35);
     display: grid;
     place-items: center;
-    font-size: 34px;
-    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 42px;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: #f8fafc;
-    overflow: hidden;
+    background: rgba(77, 225, 255, 0.08);
+    box-shadow: 0 30px 40px rgba(77, 225, 255, 0.2);
 }
 
 .futuristic-avatar img {
@@ -84,63 +82,50 @@ body.futuristic-template::before {
     object-fit: cover;
 }
 
-.futuristic-badge {
+.futuristic-id {
+    display: grid;
+    gap: 12px;
+}
+
+.futuristic-id h1 {
     margin: 0;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.48em;
-    color: rgba(248, 250, 252, 0.65);
-}
-
-.futuristic-header h1 {
-    margin: 12px 0 0;
+    font-family: 'Orbitron', sans-serif;
     font-size: 34px;
+    letter-spacing: 0.24em;
 }
 
-.futuristic-header p {
-    margin: 8px 0 0;
-    font-size: 14px;
-    color: rgba(248, 250, 252, 0.75);
-}
-
-.futuristic-location {
-    margin-top: 6px;
-    font-size: 11px;
+.futuristic-id p {
+    margin: 0;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
-    letter-spacing: 0.32em;
-    color: rgba(248, 250, 252, 0.68);
+    font-size: 11px;
+    color: rgba(246, 249, 255, 0.58);
 }
 
 .futuristic-contact {
-    margin: 0;
-    padding: 0;
     list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
     display: grid;
-    gap: 6px;
+    gap: 12px;
     font-size: 11px;
-    color: rgba(248, 250, 252, 0.75);
-    text-align: right;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(246, 249, 255, 0.68);
 }
 
-.futuristic-body {
-    padding: 48px 72px 72px;
+.futuristic-panels {
     display: grid;
-    gap: 44px;
-}
-
-.futuristic-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 24px;
+    gap: 28px;
 }
 
 .futuristic-panel {
-    border-radius: 24px;
-    border: 1px solid rgba(0, 245, 212, 0.35);
-    background: rgba(5, 11, 22, 0.7);
-    padding: 22px 24px;
+    border: 1px solid rgba(77, 225, 255, 0.18);
+    border-radius: 18px;
+    padding: 24px;
     display: grid;
-    gap: 14px;
+    gap: 16px;
+    background: rgba(7, 12, 34, 0.85);
 }
 
 .futuristic-panel h2 {
@@ -148,166 +133,165 @@ body.futuristic-template::before {
     font-size: 11px;
     letter-spacing: 0.42em;
     text-transform: uppercase;
-    color: rgba(248, 250, 252, 0.68);
+    color: rgba(246, 249, 255, 0.6);
 }
 
-.futuristic-panel p,
 .futuristic-panel ul {
     margin: 0;
-    font-size: 13px;
-    color: rgba(248, 250, 252, 0.78);
-}
-
-.futuristic-panel ul {
     padding: 0;
     list-style: none;
     display: grid;
-    gap: 8px;
+    gap: 10px;
+    color: var(--future-muted);
+    font-size: 12px;
 }
 
-.futuristic-panel li {
+.futuristic-main {
+    padding: 72px 78px 68px;
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
+    flex-direction: column;
+    gap: 48px;
+    position: relative;
+    z-index: 1;
+}
+
+.futuristic-summary {
+    padding: 32px 36px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(79, 225, 255, 0.1), rgba(143, 91, 255, 0.1));
+    border: 1px solid rgba(77, 225, 255, 0.24);
+    display: grid;
+    gap: 14px;
+    color: var(--future-muted);
 }
 
 .futuristic-section {
     display: grid;
-    gap: 26px;
+    gap: 24px;
+}
+
+.futuristic-section header {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .futuristic-section h2 {
     margin: 0;
-    font-size: 18px;
-    letter-spacing: 0.32em;
+    font-size: 12px;
+    letter-spacing: 0.36em;
     text-transform: uppercase;
-    color: rgba(248, 250, 252, 0.82);
+    color: rgba(246, 249, 255, 0.65);
+}
+
+.futuristic-section header p {
+    margin: 0;
+    color: var(--future-muted);
+    font-size: 12px;
 }
 
 .futuristic-timeline {
-    position: relative;
-    padding-left: 48px;
     display: grid;
-    gap: 28px;
-}
-
-.futuristic-timeline::before {
-    content: "";
-    position: absolute;
-    left: 18px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, rgba(0, 245, 212, 0.4), rgba(99, 102, 241, 0.25));
+    gap: 24px;
 }
 
 .futuristic-timeline article {
     position: relative;
-    display: grid;
-    gap: 14px;
-}
-
-.futuristic-timeline__marker {
-    position: absolute;
-    left: -7px;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    border: 3px solid rgba(5, 11, 22, 0.9);
-    background: var(--future-magenta);
-    box-shadow: 0 0 12px rgba(255, 77, 141, 0.6);
-}
-
-.futuristic-timeline__card {
-    border-radius: 24px;
-    border: 1px solid rgba(99, 102, 241, 0.35);
-    background: rgba(5, 11, 22, 0.75);
-    padding: 26px 28px;
+    padding-left: 28px;
     display: grid;
     gap: 12px;
 }
 
-.futuristic-timeline__card header {
+.futuristic-timeline article::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 6px;
+    bottom: -12px;
+    width: 2px;
+    background: linear-gradient(180deg, rgba(77, 225, 255, 0.5), rgba(143, 91, 255, 0.5));
+}
+
+.futuristic-timeline article::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--future-highlight);
+    box-shadow: 0 0 12px rgba(77, 225, 255, 0.6);
+}
+
+.futuristic-entry__meta {
     display: flex;
     justify-content: space-between;
-    gap: 18px;
+    gap: 16px;
     align-items: flex-start;
-    font-family: "Inter", sans-serif;
-    letter-spacing: normal;
 }
 
-.futuristic-timeline__card h3 {
+.futuristic-entry__meta h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 20px;
+    color: var(--future-ink);
 }
 
-.futuristic-timeline__card p,
-.futuristic-timeline__card span {
+.futuristic-entry__meta span {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(246, 249, 255, 0.55);
+}
+
+.futuristic-entry__summary {
     margin: 0;
     color: var(--future-muted);
     font-size: 12px;
-    letter-spacing: normal;
-}
-
-.futuristic-timeline__card p:last-child {
-    color: rgba(248, 250, 252, 0.8);
-    font-size: 13px;
 }
 
 .futuristic-education {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 22px;
+    gap: 20px;
 }
 
 .futuristic-education article {
-    border-radius: 22px;
-    border: 1px solid rgba(0, 245, 212, 0.28);
-    background: rgba(5, 11, 22, 0.7);
-    padding: 22px 24px;
+    border: 1px solid rgba(143, 91, 255, 0.22);
+    border-radius: 20px;
+    padding: 24px 26px;
+    background: rgba(8, 11, 28, 0.9);
     display: grid;
     gap: 10px;
-    font-family: "Inter", sans-serif;
-    letter-spacing: normal;
 }
 
-.futuristic-education__head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 16px;
-}
-
-.futuristic-education__head h3 {
+.futuristic-education h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .futuristic-education__meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
     font-size: 11px;
-    color: var(--future-muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(246, 249, 255, 0.5);
 }
 
-@media (max-width: 980px) {
+@media print {
     body.futuristic-template {
-        padding: 32px 16px;
+        padding: 0;
+        background: #000000;
     }
 
-    .futuristic-header {
-        grid-template-columns: 1fr;
-        text-align: center;
+    .futuristic-grid {
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
     }
 
-    .futuristic-identity {
-        justify-content: center;
-    }
-
-    .futuristic-contact {
-        text-align: center;
-    }
-
-    .futuristic-body {
-        padding: 40px 32px 56px;
+    .futuristic-grid::after {
+        display: none;
     }
 }
