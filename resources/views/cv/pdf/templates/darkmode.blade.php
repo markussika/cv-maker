@@ -17,6 +17,33 @@
         align-items: flex-start;
         margin-bottom: 28px;
     }
+    .template-darkmode .dark-header-main {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+    }
+    .template-darkmode .dark-avatar {
+        width: 86px;
+        height: 86px;
+        border-radius: 999px;
+        border: 3px solid rgba(56, 189, 248, 0.6);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 118, 110, 0.35);
+        color: #e2e8f0;
+    }
+    .template-darkmode .dark-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-darkmode .dark-avatar-initials {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
+    }
     .template-darkmode .dark-name {
         font-size: 28px;
         font-weight: 600;
@@ -94,11 +121,22 @@
 </style>
 <div class="dark-wrapper">
     <header class="dark-header">
-        <div>
-            <h1 class="dark-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-            @if ($headline)
-                <p class="dark-headline">{{ strtoupper($headline) }}</p>
+        <div class="dark-header-main">
+            @if ($profileImage || $initials)
+                <div class="dark-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="dark-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
             @endif
+            <div>
+                <h1 class="dark-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="dark-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
         </div>
         @if (!empty($contactItems))
             <div class="dark-contact">

@@ -34,6 +34,23 @@
     $templateKey = in_array($template ?? '', $availableTemplates, true) ? $template : 'classic';
 
     $fullName = trim((string) (($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')));
+    $initials = collect([
+            $data['first_name'] ?? null,
+            $data['last_name'] ?? null,
+        ])
+        ->filter(fn ($item) => is_string($item) && trim($item) !== '')
+        ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
+        ->implode('');
+
+    if ($initials === '' && $fullName !== '') {
+        $initials = collect(preg_split('/\s+/u', $fullName))
+            ->filter(fn ($segment) => is_string($segment) && trim($segment) !== '')
+            ->map(fn ($segment) => mb_strtoupper(mb_substr(trim($segment), 0, 1)))
+            ->take(2)
+            ->implode('');
+    }
+
+    $initials = $initials !== '' ? $initials : null;
     $headline = trim((string) ($data['headline'] ?? '')) ?: null;
     $summary = trim((string) ($data['summary'] ?? '')) ?: null;
 
@@ -193,6 +210,7 @@
     'languages' => $languages,
     'hobbies' => $hobbies,
     'profileImage' => $profileImage,
+    'initials' => $initials,
     'accentColor' => $accentColor ?? '#1e293b',
     'templateKey' => $templateKey,
 ])

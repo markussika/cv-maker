@@ -19,6 +19,29 @@
         display: grid;
         gap: 24px;
     }
+    .template-corporate .corporate-avatar {
+        width: 86px;
+        height: 86px;
+        border-radius: 999px;
+        border: 3px solid rgba(148, 163, 184, 0.4);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(15, 23, 42, 0.6);
+        color: #f8fafc;
+        margin-bottom: 18px;
+    }
+    .template-corporate .corporate-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-corporate .corporate-avatar-initials {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.2em;
+    }
     .template-corporate .corporate-name {
         font-size: 24px;
         font-weight: 600;
@@ -73,6 +96,15 @@
 <div class="corporate-wrapper">
     <aside class="corporate-sidebar">
         <div>
+            @if ($profileImage || $initials)
+                <div class="corporate-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="corporate-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
+            @endif
             <h1 class="corporate-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
             @if ($headline)
                 <p class="corporate-headline">{{ strtoupper($headline) }}</p>

@@ -20,8 +20,35 @@
     .template-creative .creative-avatar {
         display: flex;
         flex-direction: column;
-        gap: 12px;
+        gap: 16px;
         align-items: flex-start;
+    }
+    .template-creative .creative-avatar-block {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+    .template-creative .creative-avatar-figure {
+        width: 88px;
+        height: 88px;
+        border-radius: 28px;
+        background: rgba(15, 23, 42, 0.18);
+        border: 3px solid rgba(255, 255, 255, 0.55);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+    }
+    .template-creative .creative-avatar-figure img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-creative .creative-avatar-initials {
+        font-size: 22px;
+        font-weight: 600;
+        letter-spacing: 0.3em;
     }
     .template-creative .creative-name {
         font-size: 30px;
@@ -120,10 +147,23 @@
     <div class="creative-top">
         <div class="creative-avatar">
             <span class="creative-pill">{{ strtoupper($templateKey ?? 'Creative') }}</span>
-            <h1 class="creative-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-            @if ($headline)
-                <p class="creative-headline">{{ strtoupper($headline) }}</p>
-            @endif
+            <div class="creative-avatar-block">
+                @if ($profileImage || $initials)
+                    <div class="creative-avatar-figure">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @else
+                            <span class="creative-avatar-initials">{{ $initials }}</span>
+                        @endif
+                    </div>
+                @endif
+                <div>
+                    <h1 class="creative-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                    @if ($headline)
+                        <p class="creative-headline">{{ strtoupper($headline) }}</p>
+                    @endif
+                </div>
+            </div>
         </div>
         @if (!empty($contactItems))
             <div class="creative-contact">

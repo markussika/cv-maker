@@ -16,6 +16,33 @@
         align-items: flex-start;
         margin-bottom: 26px;
     }
+    .template-gradient .gradient-header-main {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+    }
+    .template-gradient .gradient-avatar {
+        width: 82px;
+        height: 82px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(16, 185, 129, 0.28));
+        border: 3px solid rgba(14, 165, 233, 0.35);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f172a;
+    }
+    .template-gradient .gradient-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .template-gradient .gradient-avatar-initials {
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.28em;
+    }
     .template-gradient .gradient-name {
         font-size: 27px;
         font-weight: 600;
@@ -97,12 +124,23 @@
 </style>
 <div class="gradient-wrapper">
     <header class="gradient-header">
-        <div>
-            <div class="gradient-badge">Profile</div>
-            <h1 class="gradient-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-            @if ($headline)
-                <p class="gradient-headline">{{ strtoupper($headline) }}</p>
+        <div class="gradient-header-main">
+            @if ($profileImage || $initials)
+                <div class="gradient-avatar">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @else
+                        <span class="gradient-avatar-initials">{{ $initials }}</span>
+                    @endif
+                </div>
             @endif
+            <div>
+                <div class="gradient-badge">Profile</div>
+                <h1 class="gradient-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                @if ($headline)
+                    <p class="gradient-headline">{{ strtoupper($headline) }}</p>
+                @endif
+            </div>
         </div>
         @if (!empty($contactItems))
             <div class="gradient-contact">
