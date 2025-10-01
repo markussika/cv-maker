@@ -15,46 +15,55 @@
                         'title' => 'Classic',
                         'description' => 'A balanced layout with timeless typography.',
                         'preview' => 'from-slate-200 via-white to-slate-100',
+                        'partial' => 'templates.previews.classic',
                     ],
                     'modern' => [
                         'title' => 'Modern',
                         'description' => 'Bold headings and clear hierarchies.',
                         'preview' => 'from-blue-200 via-blue-100 to-slate-50',
+                        'partial' => 'templates.previews.modern',
                     ],
                     'creative' => [
                         'title' => 'Creative',
                         'description' => 'Playful colour accents that stand out.',
                         'preview' => 'from-pink-200 via-purple-200 to-sky-100',
+                        'partial' => 'templates.previews.creative',
                     ],
                     'minimal' => [
                         'title' => 'Minimal',
                         'description' => 'Airy spacing with quiet confidence.',
                         'preview' => 'from-white via-slate-50 to-slate-100',
+                        'partial' => 'templates.previews.minimal',
                     ],
                     'elegant' => [
                         'title' => 'Elegant',
                         'description' => 'Fine lines with soft serif accents.',
                         'preview' => 'from-amber-100 via-rose-50 to-white',
+                        'partial' => 'templates.previews.elegant',
                     ],
                     'corporate' => [
                         'title' => 'Corporate',
                         'description' => 'Structure and clarity for leadership roles.',
                         'preview' => 'from-slate-300 via-slate-200 to-white',
+                        'partial' => 'templates.previews.corporate',
                     ],
                     'gradient' => [
                         'title' => 'Gradient',
                         'description' => 'Vivid blends for creative roles.',
                         'preview' => 'from-emerald-200 via-teal-200 to-cyan-100',
+                        'partial' => 'templates.previews.gradient',
                     ],
                     'darkmode' => [
                         'title' => 'Dark Mode',
                         'description' => 'High contrast with refined details.',
                         'preview' => 'from-slate-900 via-slate-800 to-black',
+                        'partial' => 'templates.previews.darkmode',
                     ],
                     'futuristic' => [
                         'title' => 'Futuristic',
                         'description' => 'Sharp angles with neon accents.',
                         'preview' => 'from-indigo-300 via-purple-300 to-slate-100',
+                        'partial' => 'templates.previews.futuristic',
                     ],
                 ];
 
@@ -63,6 +72,7 @@
                     'title' => ucfirst($templateKey),
                     'description' => 'Ready-to-print layout for your story.',
                     'preview' => 'from-slate-200 via-white to-slate-100',
+                    'partial' => null,
                 ];
 
                 $fullName = trim(($cvData['first_name'] ?? '') . ' ' . ($cvData['last_name'] ?? ''));
@@ -331,13 +341,19 @@
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Template') }}</p>
                         <h2 class="text-lg font-semibold text-slate-900">{{ $templateInfo['title'] }}</h2>
                         <p class="text-sm text-slate-600">{{ $templateInfo['description'] }}</p>
-                        <div class="mt-4 h-36 rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} p-4 shadow-inner shadow-slate-400/20">
-                            <div class="h-2 w-24 rounded-full bg-white/70"></div>
-                            <div class="mt-4 space-y-2">
-                                <div class="h-2 w-28 rounded-full bg-white/60"></div>
-                                <div class="h-2 w-32 rounded-full bg-white/40"></div>
-                                <div class="h-16 rounded-2xl border border-white/50 bg-white/30"></div>
-                            </div>
+                        <div class="relative mt-4 h-52 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
+                            @if (!empty($templateInfo['partial']) && view()->exists($templateInfo['partial']))
+                                @include($templateInfo['partial'])
+                            @else
+                                <div class="p-4">
+                                    <div class="h-2 w-24 rounded-full bg-white/70"></div>
+                                    <div class="mt-4 space-y-2">
+                                        <div class="h-2 w-28 rounded-full bg-white/60"></div>
+                                        <div class="h-2 w-32 rounded-full bg-white/40"></div>
+                                        <div class="h-16 rounded-2xl border border-white/50 bg-white/30"></div>
+                                    </div>
+                                </div>
+                            @endif
                         </div>
                         <div class="flex flex-col gap-3 pt-2">
                             <a href="{{ route('cv.download', array_filter(['template' => $templateKey, 'cv' => request('cv')])) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-400/40 transition hover:-translate-y-0.5 hover:bg-black">
