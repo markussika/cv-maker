@@ -19,15 +19,11 @@
     <div class="modern-page">
         <aside class="modern-sidebar">
             <div class="modern-profile-card">
-                <div class="modern-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="modern-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div class="modern-profile-text">
                     <h1 class="modern-name">{{ $data['name'] ?? __('Your Name') }}</h1>
                     @if ($data['headline'])

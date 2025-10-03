@@ -113,13 +113,9 @@
 <div class="classic-wrapper">
     <header class="classic-header">
         <div class="classic-header-main">
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="classic-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="classic-avatar-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <div>

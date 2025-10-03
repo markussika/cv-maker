@@ -59,15 +59,9 @@
     <div class="page">
         <header class="page-header">
             <div class="header-main">
-                @if ($profileImage || $initials !== '')
+                @if ($profileImage)
                     <div class="portrait">
-                        @if ($profileImage)
-                            <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                        @elseif ($initials !== '')
-                            <span>{{ $initials }}</span>
-                        @else
-                            <span>{{ __('CV') }}</span>
-                        @endif
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
                     </div>
                 @endif
                 <div class="hero-text">

@@ -122,13 +122,9 @@
 <div class="dark-wrapper">
     <header class="dark-header">
         <div class="dark-header-main">
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="dark-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="dark-avatar-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <div>

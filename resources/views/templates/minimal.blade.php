@@ -22,15 +22,11 @@
             <header class="minimal-header">
                 <div class="minimal-header-bar">
                     <div class="minimal-identity">
-                        <div class="minimal-avatar">
-                            @if ($profileImage)
+                        @if ($profileImage)
+                            <div class="minimal-avatar">
                                 <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                            @elseif ($initials !== '')
-                                <span>{{ $initials }}</span>
-                            @else
-                                <span>{{ __('CV') }}</span>
-                            @endif
-                        </div>
+                            </div>
+                        @endif
                         <div>
                             <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
                             @if ($data['headline'])

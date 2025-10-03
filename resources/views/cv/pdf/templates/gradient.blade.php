@@ -125,13 +125,9 @@
 <div class="gradient-wrapper">
     <header class="gradient-header">
         <div class="gradient-header-main">
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="gradient-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="gradient-avatar-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <div>

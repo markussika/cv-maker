@@ -148,13 +148,9 @@
         <div class="creative-avatar">
             <span class="creative-pill">{{ strtoupper($templateKey ?? 'Creative') }}</span>
             <div class="creative-avatar-block">
-                @if ($profileImage || $initials)
+                @if ($profileImage)
                     <div class="creative-avatar-figure">
-                        @if ($profileImage)
-                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                        @else
-                            <span class="creative-avatar-initials">{{ $initials }}</span>
-                        @endif
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                     </div>
                 @endif
                 <div>
