@@ -197,34 +197,36 @@
                         @if (!empty($data['skills']))
                             <section class="section skills">
                                 <h2>{{ __('Technical Skills') }}</h2>
-                                <ul class="skills-list">
+                                <div class="skills-grid">
                                     @foreach ($data['skills'] as $skill)
-                                        <li>{{ $skill }}</li>
+                                        <div class="skill-item">
+                                            <span>{{ $skill }}</span>
+                                        </div>
                                     @endforeach
-                                </ul>
+                                </div>
                             </section>
                         @endif
 
                         @if (!empty($data['languages']))
                             <section class="section languages">
                                 <h2>{{ __('Languages') }}</h2>
-                                <ul class="languages-list">
+                                <div class="languages-grid">
                                     @foreach ($data['languages'] as $language)
-                                        <li>
+                                        <div class="language-item">
                                             <span>{{ $language['name'] }}</span>
                                             @if (!empty($language['level']))
                                                 <span class="language-level">{{ ucfirst($language['level']) }}</span>
                                             @endif
-                                        </li>
+                                        </div>
                                     @endforeach
-                                </ul>
+                                </div>
                             </section>
                         @endif
 
                         @if (!empty($data['hobbies']))
                             <section class="section interests">
                                 <h2>{{ __('Interests') }}</h2>
-                                <ul class="tag-list">
+                                <ul class="hobbies-list">
                                     @foreach ($data['hobbies'] as $hobby)
                                         <li>{{ $hobby }}</li>
                                     @endforeach
