@@ -19,15 +19,11 @@
     <div class="futuristic-frame">
         <header class="futuristic-header">
             <div class="futuristic-identity">
-                <div class="futuristic-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="futuristic-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <p class="futuristic-badge">{{ __('Futuristic Resume') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>

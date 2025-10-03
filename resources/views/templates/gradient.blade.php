@@ -19,15 +19,11 @@
     <div class="gradient-wrapper">
         <header class="gradient-hero">
             <div class="gradient-profile">
-                <div class="gradient-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="gradient-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <span class="gradient-badge">{{ __('Gradient Resume') }}</span>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>

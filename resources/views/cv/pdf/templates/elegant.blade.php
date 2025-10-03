@@ -106,13 +106,9 @@
 <div class="elegant-wrapper">
     <aside class="elegant-sidebar">
         <div>
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="elegant-portrait">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="elegant-portrait-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <div class="elegant-badge">Profile</div>

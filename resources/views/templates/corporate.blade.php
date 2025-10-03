@@ -19,15 +19,11 @@
     <div class="corporate-wrapper">
         <header class="corporate-topbar">
             <div class="corporate-brand">
-                <div class="corporate-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="corporate-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <p class="corporate-badge">{{ __('Corporate Resume') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>

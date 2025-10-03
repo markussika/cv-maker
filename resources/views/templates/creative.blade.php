@@ -19,15 +19,11 @@
     <div class="creative-canvas">
         <header class="creative-banner">
             <div class="creative-nameplate">
-                <div class="creative-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="creative-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <p class="creative-badge">{{ __('Creative Resume') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>

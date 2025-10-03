@@ -96,13 +96,9 @@
 <div class="corporate-wrapper">
     <aside class="corporate-sidebar">
         <div>
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="corporate-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="corporate-avatar-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <h1 class="corporate-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>

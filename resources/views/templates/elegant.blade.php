@@ -19,15 +19,11 @@
     <div class="elegant-page">
         <header class="elegant-header">
             <div class="elegant-header__info">
-                <div class="elegant-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="elegant-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
                     @if ($data['headline'])

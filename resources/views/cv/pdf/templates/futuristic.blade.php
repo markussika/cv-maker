@@ -132,13 +132,9 @@
 <div class="futuristic-wrapper">
     <header class="futuristic-header">
         <div class="futuristic-header-main">
-            @if ($profileImage || $initials)
+            @if ($profileImage)
                 <div class="futuristic-avatar">
-                    @if ($profileImage)
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @else
-                        <span class="futuristic-avatar-initials">{{ $initials }}</span>
-                    @endif
+                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
                 </div>
             @endif
             <div>

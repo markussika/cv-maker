@@ -19,15 +19,11 @@
     <div class="darkmode-shell">
         <header class="darkmode-header">
             <div class="darkmode-identity">
-                <div class="darkmode-avatar">
-                    @if ($profileImage)
+                @if ($profileImage)
+                    <div class="darkmode-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                    @elseif ($initials !== '')
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
+                    </div>
+                @endif
                 <div>
                     <p class="darkmode-badge">{{ __('Dark Mode Resume') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
