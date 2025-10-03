@@ -125,20 +125,12 @@
                         'preview' => 'from-slate-200 via-white to-slate-100',
                         'partial' => 'templates.previews.classic',
                     ];
-                    $previewId = 'template-preview-' . $template;
-                    $previewSource = view('templates.' . $template, [
-                        'cv' => (object) array_merge($sampleCv, ['template' => $template]),
-                    ])->render();
                 @endphp
                 <div class="group createit-template-card">
                     <div class="createit-template-card__preview bg-gradient-to-br {{ $meta['preview'] }}">
                         @isset($meta['partial'])
                             @include($meta['partial'])
                         @endisset
-                        <div class="createit-template-card__badge">
-                            <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
-                            {{ __('Preview ready') }}
-                        </div>
                     </div>
                     <div class="createit-template-card__body">
                         <div>
@@ -150,29 +142,11 @@
                                 {{ __('Use template') }}
                                 <span aria-hidden="true">&rarr;</span>
                             </a>
-                            <a href="{{ route('cv.preview', ['template' => $template]) }}" class="createit-template-card__preview-button" data-preview-trigger="{{ $previewId }}">
-                                {{ __('Preview') }}
-                            </a>
                         </div>
                     </div>
                 </div>
-
-                <dialog id="{{ $previewId }}" class="createit-modal" aria-label="{{ $meta['title'] }} template preview">
-                    <div class="createit-modal__header">
-                        <h3 class="createit-modal__title">{{ $meta['title'] }} {{ __('template preview') }}</h3>
-                        <button type="button" class="createit-modal__close" data-preview-close>{{ __('Close') }}</button>
-                    </div>
-                    <div class="createit-modal__body">
-                        <div class="createit-modal__iframe-wrapper">
-                            <iframe class="createit-modal__iframe" srcdoc="{{ e($previewSource) }}" title="{{ $meta['title'] }} template preview"></iframe>
-                        </div>
-                    </div>
-                </dialog>
             @endforeach
         </div>
     </div>
 </x-app-layout>
 
-@push('scripts')
-    @vite('resources/js/templates.js')
-@endpush

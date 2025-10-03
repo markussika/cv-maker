@@ -13,10 +13,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="hidden shrink-0 items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 md:flex">
-                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                    <span>Preview ready</span>
-                </div>
             </div>
             <div class="grid gap-4">
                 <div class="grid gap-4 md:grid-cols-2">
