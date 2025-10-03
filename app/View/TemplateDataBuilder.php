@@ -258,13 +258,18 @@ class TemplateDataBuilder
         if (is_string($profileImage) && trim($profileImage) !== '') {
             $profileImage = trim($profileImage);
             $isAbsoluteUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
-            $isStorageLike = str_starts_with($profileImage, '/storage/') || str_starts_with($profileImage, 'storage/');
+            $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
+            $storagePath = ltrim((string) $storagePath, '/');
 
-            if ($isStorageLike && !$isAbsoluteUrl) {
-                $profileImage = '/' . ltrim($profileImage, '/');
-            } elseif (!$isAbsoluteUrl) {
+            if (!$isAbsoluteUrl) {
                 try {
-                    $profileImage = Storage::disk('public')->url(ltrim($profileImage, '/'));
+                    if ($storagePath !== '' && Storage::disk('public')->exists($storagePath)) {
+                        $profileImage = Storage::disk('public')->url($storagePath);
+                    } elseif (Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
+                        $profileImage = Storage::disk('public')->url(ltrim($profileImage, '/'));
+                    } else {
+                        $profileImage = null;
+                    }
                 } catch (\Throwable $e) {
                     $profileImage = null;
                 }

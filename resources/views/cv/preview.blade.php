@@ -186,6 +186,28 @@
                 $linkedin = is_string($cvData['linkedin'] ?? null) ? trim($cvData['linkedin']) : null;
                 $github = is_string($cvData['github'] ?? null) ? trim($cvData['github']) : null;
                 $profileImage = is_string($cvData['profile_image'] ?? null) ? trim($cvData['profile_image']) : null;
+                if ($profileImage === '') {
+                    $profileImage = null;
+                }
+                if ($profileImage) {
+                    $isAbsoluteProfileUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
+                    if (! $isAbsoluteProfileUrl) {
+                        $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
+                        $storagePath = ltrim((string) $storagePath, '/');
+
+                        try {
+                            if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
+                                $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
+                            } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
+                                $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($profileImage, '/'));
+                            } else {
+                                $profileImage = null;
+                            }
+                        } catch (\Throwable $e) {
+                            $profileImage = null;
+                        }
+                    }
+                }
 
                 $socialLinks = collect([
                     ['label' => 'Website', 'url' => $website],

@@ -232,8 +232,17 @@
             if (filter_var($candidate, FILTER_VALIDATE_URL)) {
                 $profileImageUrl = $candidate;
             } else {
+                $storagePath = preg_replace('#^/?storage/#', '', $candidate);
+                $storagePath = ltrim((string) $storagePath, '/');
+
                 try {
-                    $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($candidate);
+                    if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
+                        $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
+                    } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($candidate, '/'))) {
+                        $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($candidate, '/'));
+                    } else {
+                        $profileImageUrl = null;
+                    }
                 } catch (\Throwable $e) {
                     $profileImageUrl = null;
                 }
