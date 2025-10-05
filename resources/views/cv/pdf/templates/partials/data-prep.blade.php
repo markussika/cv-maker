@@ -5,14 +5,14 @@
         ->values();
 
     $achievementLines = function ($text) {
-        return collect(preg_split('/\r\n|\r|\n|•|‣|▪|\u2022|\u25CF|\u25CB|\u25AA|\u25AB|\u25A0|\u25A1|\u2023|\u2043|\-/u', (string) ($text ?? '')))
+        return collect(preg_split('/\r\n|\r|\n|•|‣|▪|\x{2022}|\x{25CF}|\x{25CB}|\x{25AA}|\x{25AB}|\x{25A0}|\x{25A1}|\x{2023}|\x{2043}|\-/u', (string) ($text ?? '')))
             ->map(function ($line) {
                 $line = trim((string) $line);
                 if ($line === '') {
                     return null;
                 }
 
-                $line = preg_replace('/^[\p{Pd}\s•‣▪\u2022\u25CF\u25CB\u25AA\u25AB\u25A0\u25A1\u2023\u2043]+/u', '', $line);
+                $line = preg_replace('/^[\p{Pd}\s•‣▪\x{2022}\x{25CF}\x{25CB}\x{25AA}\x{25AB}\x{25A0}\x{25A1}\x{2023}\x{2043}]+/u', '', $line);
 
                 return trim((string) $line);
             })
