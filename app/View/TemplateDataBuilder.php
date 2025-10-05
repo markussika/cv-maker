@@ -260,10 +260,19 @@ class TemplateDataBuilder
             $profileImage = trim($profileImage);
             $isAbsoluteUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
             $isDataUri = str_starts_with($profileImage, 'data:');
-            $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
-            $storagePath = ltrim((string) $storagePath, '/');
 
-            if (! $isAbsoluteUrl && ! $isDataUri) {
+            $storageCandidate = $profileImage;
+            if ($isAbsoluteUrl) {
+                $urlPath = parse_url($storageCandidate, PHP_URL_PATH);
+                if (is_string($urlPath) && $urlPath !== '') {
+                    $storageCandidate = $urlPath;
+                }
+            }
+
+            $storageCandidate = preg_replace('#^/?storage/#', '', (string) $storageCandidate);
+            $storagePath = ltrim((string) $storageCandidate, '/');
+
+            if (! $isDataUri) {
                 try {
                     if ($storagePath !== '' && Storage::disk('public')->exists($storagePath)) {
                         $profileImage = Storage::disk('public')->url($storagePath);
@@ -272,7 +281,7 @@ class TemplateDataBuilder
                         } catch (\Throwable $e) {
                             $profileImageFilesystemPath = null;
                         }
-                    } elseif (Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
+                    } elseif (! $isAbsoluteUrl && Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
                         $relativePath = ltrim($profileImage, '/');
                         $profileImage = Storage::disk('public')->url($relativePath);
                         try {
@@ -280,13 +289,10 @@ class TemplateDataBuilder
                         } catch (\Throwable $e) {
                             $profileImageFilesystemPath = null;
                         }
-                    } elseif (is_file($profileImage) && is_readable($profileImage)) {
+                    } elseif (! $isAbsoluteUrl && is_file($profileImage) && is_readable($profileImage)) {
                         $profileImageFilesystemPath = $profileImage;
-                    } else {
-                        $profileImage = null;
                     }
                 } catch (\Throwable $e) {
-                    $profileImage = null;
                     $profileImageFilesystemPath = null;
                 }
             }
