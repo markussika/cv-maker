@@ -214,17 +214,13 @@
     <header class="minimal-header">
         <table>
             <tr>
-                <td style="width: 110px;">
-                    <div class="minimal-avatar">
-                        @if ($profileImage)
+                @if ($profileImage)
+                    <td style="width: 110px;">
+                        <div class="minimal-avatar">
                             <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                        @elseif ($initials)
-                            <span>{{ $initials }}</span>
-                        @else
-                            <span>{{ __('CV') }}</span>
-                        @endif
-                    </div>
-                </td>
+                        </div>
+                    </td>
+                @endif
                 <td>
                     <div class="minimal-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                     @if ($headline)

@@ -216,17 +216,13 @@
     <header class="elegant-header">
         <table>
             <tr>
-                <td style="width: 120px;">
-                    <div class="elegant-avatar">
-                        @if ($profileImage)
+                @if ($profileImage)
+                    <td style="width: 120px;">
+                        <div class="elegant-avatar">
                             <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                        @elseif ($initials)
-                            <span>{{ $initials }}</span>
-                        @else
-                            <span>{{ __('CV') }}</span>
-                        @endif
-                    </div>
-                </td>
+                        </div>
+                    </td>
+                @endif
                 <td>
                     <div class="elegant-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                     @if ($headline)
