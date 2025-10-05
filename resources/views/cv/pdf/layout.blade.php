@@ -194,8 +194,48 @@
         ->all();
 
     $profileImage = null;
+    $profileImageFilesystemPath = null;
     if (!empty($data['profile_image']) && is_string($data['profile_image'])) {
-        $profileImage = $data['profile_image'];
+        $candidate = trim((string) $data['profile_image']);
+        if ($candidate !== '') {
+            $profileImage = $candidate;
+
+            $isDataUri = str_starts_with($candidate, 'data:');
+            $isAbsolute = filter_var($candidate, FILTER_VALIDATE_URL) !== false;
+
+            if (! $isDataUri && ! $isAbsolute) {
+                $storagePath = preg_replace('#^/?storage/#', '', $candidate);
+                $storagePath = ltrim((string) $storagePath, '/');
+
+                try {
+                    if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
+                        $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($storagePath);
+                        $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
+                    } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($candidate, '/'))) {
+                        $relativePath = ltrim($candidate, '/');
+                        $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($relativePath);
+                        $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($relativePath);
+                    } else {
+                        $profileImage = null;
+                    }
+                } catch (\Throwable $exception) {
+                    $profileImage = null;
+                    $profileImageFilesystemPath = null;
+                }
+            }
+
+            if (! $isDataUri && $profileImage && $profileImageFilesystemPath && is_readable($profileImageFilesystemPath)) {
+                try {
+                    $contents = @file_get_contents($profileImageFilesystemPath);
+                    if ($contents !== false) {
+                        $mimeType = @mime_content_type($profileImageFilesystemPath) ?: 'image/png';
+                        $profileImage = 'data:' . $mimeType . ';base64,' . base64_encode($contents);
+                    }
+                } catch (\Throwable $exception) {
+                    // keep the resolved URL fallback
+                }
+            }
+        }
     }
 
     $summaryParagraphs = collect(preg_split('/\r\n|\r|\n/', (string) ($summary ?? '')))
