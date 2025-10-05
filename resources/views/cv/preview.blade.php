@@ -248,13 +248,11 @@
                     <div>
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Overview') }}</p>
                         <div class="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start">
-                            <div class="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 text-2xl font-semibold text-slate-600 shadow-sm">
-                                @if ($profileImage)
+                            @if ($profileImage)
+                                <div class="flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 text-2xl font-semibold text-slate-600 shadow-sm">
                                     <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}" class="h-full w-full object-cover">
-                                @else
-                                    <span>{{ $initials }}</span>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                             <div class="flex-1">
                                 <h1 class="text-3xl font-semibold text-slate-900">{{ $fullName ?: __('Untitled CV') }}</h1>
                                 @if ($headline)

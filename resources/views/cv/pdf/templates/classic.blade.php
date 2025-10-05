@@ -213,17 +213,13 @@
 <div class="classic-page">
     <table class="classic-header">
         <tr>
-            <td style="width: 110px;">
-                <div class="classic-avatar">
-                    @if ($profileImage)
+            @if ($profileImage)
+                <td style="width: 110px;">
+                    <div class="classic-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                    @elseif ($initials)
-                        <span>{{ $initials }}</span>
-                    @else
-                        <span>{{ __('CV') }}</span>
-                    @endif
-                </div>
-            </td>
+                    </div>
+                </td>
+            @endif
             <td>
                 <div class="classic-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                 @if ($headline)

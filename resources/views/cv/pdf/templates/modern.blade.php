@@ -221,17 +221,13 @@
     <header class="modern-header">
         <table>
             <tr>
-                <td style="width: 110px;">
-                    <div class="modern-avatar">
-                        @if ($profileImage)
+                @if ($profileImage)
+                    <td style="width: 110px;">
+                        <div class="modern-avatar">
                             <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                        @elseif ($initials)
-                            <span>{{ $initials }}</span>
-                        @else
-                            <span>{{ __('CV') }}</span>
-                        @endif
-                    </div>
-                </td>
+                        </div>
+                    </td>
+                @endif
                 <td>
                     <div class="modern-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                     @if ($headline)
