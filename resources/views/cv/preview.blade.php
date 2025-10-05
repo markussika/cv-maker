@@ -189,22 +189,101 @@
                 if ($profileImage === '') {
                     $profileImage = null;
                 }
+
+                $profileImageFilesystemPath = null;
+                $profileImageStoragePath = null;
                 if ($profileImage) {
                     $isAbsoluteProfileUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
-                    if (! $isAbsoluteProfileUrl) {
+                    $isDataUri = is_string($profileImage) && str_starts_with($profileImage, 'data:');
+
+                    if (! $isAbsoluteProfileUrl && ! $isDataUri) {
                         $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
                         $storagePath = ltrim((string) $storagePath, '/');
 
                         try {
-                            if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
-                                $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
-                            } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
-                                $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($profileImage, '/'));
+                            $publicDisk = \Illuminate\Support\Facades\Storage::disk('public');
+
+                            if ($storagePath !== '' && $publicDisk->exists($storagePath)) {
+                                $profileImage = $publicDisk->url($storagePath);
+                                if (method_exists($publicDisk, 'path')) {
+                                    try {
+                                        $profileImageFilesystemPath = $publicDisk->path($storagePath);
+                                    } catch (\Throwable $pathException) {
+                                        $profileImageFilesystemPath = null;
+                                    }
+                                }
+                                $profileImageStoragePath = $storagePath;
+                            } elseif ($publicDisk->exists(ltrim($profileImage, '/'))) {
+                                $relativePath = ltrim($profileImage, '/');
+                                $profileImage = $publicDisk->url($relativePath);
+                                if (method_exists($publicDisk, 'path')) {
+                                    try {
+                                        $profileImageFilesystemPath = $publicDisk->path($relativePath);
+                                    } catch (\Throwable $pathException) {
+                                        $profileImageFilesystemPath = null;
+                                    }
+                                }
+                                $profileImageStoragePath = $relativePath;
                             } else {
                                 $profileImage = null;
                             }
                         } catch (\Throwable $e) {
                             $profileImage = null;
+                            $profileImageFilesystemPath = null;
+                            $profileImageStoragePath = null;
+                        }
+                    }
+
+                    if (! $isDataUri && $profileImage) {
+                        try {
+                            $embedded = null;
+                            $mimeType = null;
+
+                            if ($profileImageStoragePath) {
+                                $publicDisk ??= \Illuminate\Support\Facades\Storage::disk('public');
+
+                                try {
+                                    $contents = $publicDisk->get($profileImageStoragePath);
+                                    if (is_string($contents) && $contents !== '') {
+                                        try {
+                                            $mimeType = $publicDisk->mimeType($profileImageStoragePath);
+                                        } catch (\Throwable $mimeException) {
+                                            $mimeType = null;
+                                        }
+
+                                        if (! is_string($mimeType) || trim($mimeType) === '') {
+                                            try {
+                                                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                                                $detected = $finfo->buffer($contents);
+                                                if (is_string($detected) && trim($detected) !== '') {
+                                                    $mimeType = $detected;
+                                                }
+                                            } catch (\Throwable $finfoException) {
+                                                $mimeType = null;
+                                            }
+                                        }
+
+                                        $mimeType = is_string($mimeType) && trim($mimeType) !== '' ? trim($mimeType) : 'image/png';
+                                        $embedded = 'data:' . $mimeType . ';base64,' . base64_encode($contents);
+                                    }
+                                } catch (\Throwable $diskException) {
+                                    $embedded = null;
+                                }
+                            }
+
+                            if (! $embedded && $profileImageFilesystemPath && is_readable($profileImageFilesystemPath)) {
+                                $contents = @file_get_contents($profileImageFilesystemPath);
+                                if ($contents !== false) {
+                                    $mimeType = @mime_content_type($profileImageFilesystemPath) ?: 'image/png';
+                                    $embedded = 'data:' . $mimeType . ';base64,' . base64_encode($contents);
+                                }
+                            }
+
+                            if ($embedded) {
+                                $profileImage = $embedded;
+                            }
+                        } catch (\Throwable $e) {
+                            // fall back to the resolved URL if embedding fails
                         }
                     }
                 }
