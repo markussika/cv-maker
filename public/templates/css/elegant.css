@@ -1,12 +1,12 @@
-@import url('https://fonts.googleapis.com/css2?family=Marcellus&family=Source+Serif+4:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap');
 
 :root {
-    --elegant-ink: #1a1c23;
-    --elegant-muted: #5b606d;
-    --elegant-accent: #b08c5b;
-    --elegant-canvas: #fdf8f1;
-    --elegant-panel: rgba(255, 255, 255, 0.95);
-    --elegant-border: rgba(176, 140, 91, 0.18);
+    --elegant-ink: #1f2933;
+    --elegant-muted: #52606d;
+    --elegant-accent: #9d174d;
+    --elegant-soft: #fdf2f8;
+    --elegant-line: rgba(157, 23, 77, 0.18);
+    --elegant-bg: #fff7fb;
 }
 
 * {
@@ -15,58 +15,72 @@
 
 body.elegant-template {
     margin: 0;
-    font-family: 'Source Serif 4', 'Georgia', serif;
-    background: linear-gradient(180deg, rgba(253, 248, 241, 1), rgba(245, 235, 221, 0.85));
+    font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--elegant-bg);
     color: var(--elegant-ink);
-    font-size: 13px;
-    line-height: 1.75;
-    padding: 60px 48px;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 72px 48px;
 }
 
-.elegant-page {
-    max-width: 960px;
+.elegant-document {
+    max-width: 1140px;
     margin: 0 auto;
-    border-radius: 40px;
+    background: #ffffff;
+    border-radius: 32px;
     overflow: hidden;
-    background: var(--elegant-panel);
-    box-shadow: 0 48px 120px rgba(26, 28, 35, 0.18);
-    display: grid;
-    grid-template-columns: 320px minmax(0, 1fr);
-    min-height: 1120px;
-    position: relative;
+    box-shadow: 0 40px 80px rgba(157, 23, 77, 0.12);
+    border: 1px solid rgba(157, 23, 77, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 1160px;
 }
 
-.elegant-page::after {
-    content: '';
+.elegant-hero {
+    position: relative;
+    padding: 56px 64px;
+    background: linear-gradient(130deg, rgba(157, 23, 77, 0.9), rgba(76, 29, 149, 0.85));
+    color: #fff;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+}
+
+.elegant-hero::after {
+    content: "";
     position: absolute;
-    inset: 18px;
-    border-radius: 32px;
-    border: 1px solid rgba(176, 140, 91, 0.2);
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(244, 114, 182, 0.35), transparent 45%);
     pointer-events: none;
 }
 
-.elegant-sidebar {
-    padding: 76px 54px;
-    background: linear-gradient(165deg, rgba(255, 255, 255, 0.95), rgba(245, 235, 221, 0.95));
-    border-right: 1px solid rgba(176, 140, 91, 0.15);
+.elegant-hero__identity,
+.elegant-hero__contact {
+    position: relative;
+    z-index: 1;
+}
+
+.elegant-hero__identity {
     display: flex;
-    flex-direction: column;
-    gap: 42px;
+    align-items: center;
+    gap: 28px;
 }
 
 .elegant-avatar {
-    width: 180px;
-    height: 180px;
-    border-radius: 90px;
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.5);
     overflow: hidden;
-    border: 2px solid rgba(176, 140, 91, 0.35);
     display: grid;
     place-items: center;
-    font-family: 'Marcellus', serif;
-    font-size: 48px;
-    letter-spacing: 0.12em;
-    color: rgba(26, 28, 35, 0.65);
-    background: rgba(176, 140, 91, 0.08);
+    font-family: 'Playfair Display', serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .elegant-avatar img {
@@ -75,138 +89,162 @@ body.elegant-template {
     object-fit: cover;
 }
 
-.elegant-contact {
-    list-style: none;
+.elegant-label {
     margin: 0;
-    padding: 18px 0 0;
-    border-top: 1px solid rgba(26, 28, 35, 0.08);
-    display: grid;
-    gap: 12px;
-    font-size: 12px;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: var(--elegant-muted);
+    font-size: 12px;
+    opacity: 0.75;
 }
 
-.elegant-details {
+.elegant-hero h1 {
+    margin: 8px 0 6px;
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.elegant-headline {
+    margin: 0;
+    font-size: 15px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.85;
+}
+
+.elegant-hero__contact {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.elegant-body {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 32px;
+    padding: 56px 64px 72px;
+    background: linear-gradient(180deg, rgba(253, 242, 248, 0.65), rgba(255, 255, 255, 0));
+    flex: 1;
+}
+
+.elegant-primary,
+.elegant-secondary {
     display: flex;
     flex-direction: column;
     gap: 32px;
 }
 
-.elegant-details section {
+.elegant-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid rgba(157, 23, 77, 0.12);
+    padding: 32px 36px;
+    box-shadow: 0 24px 48px rgba(157, 23, 77, 0.08);
     display: grid;
-    gap: 16px;
-}
-
-.elegant-details h2 {
-    margin: 0;
-    letter-spacing: 0.42em;
-    text-transform: uppercase;
-    font-size: 12px;
-    color: rgba(26, 28, 35, 0.58);
-}
-
-.elegant-main {
-    padding: 76px 82px 72px;
-    display: flex;
-    flex-direction: column;
-    gap: 52px;
-}
-
-.elegant-hero {
-    display: grid;
-    gap: 16px;
-}
-
-.elegant-hero h1 {
-    margin: 0;
-    font-family: 'Marcellus', serif;
-    font-size: 54px;
-    letter-spacing: 0.08em;
-}
-
-.elegant-hero p {
-    margin: 0;
-    letter-spacing: 0.28em;
-    text-transform: uppercase;
-    font-size: 13px;
-    color: rgba(26, 28, 35, 0.55);
+    gap: 20px;
 }
 
 .elegant-summary {
-    margin-top: 24px;
-    padding: 32px 36px;
-    border-radius: 28px;
-    background: rgba(176, 140, 91, 0.08);
-    border: 1px solid rgba(176, 140, 91, 0.16);
-    display: grid;
-    gap: 14px;
+    position: relative;
+    overflow: hidden;
+}
+
+.elegant-summary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(253, 242, 248, 0.9), rgba(255, 255, 255, 0.4));
+    z-index: 0;
+}
+
+.elegant-summary h2,
+.elegant-summary__text {
+    position: relative;
+    z-index: 1;
+}
+
+.elegant-card h2 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 24px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.elegant-summary__text p {
+    margin: 0;
     color: var(--elegant-muted);
 }
 
-.elegant-section {
+.elegant-section-header {
     display: grid;
-    gap: 24px;
+    gap: 6px;
 }
 
-.elegant-section header {
-    display: flex;
-    flex-direction: column;
+.elegant-section-header h2 {
+    margin: 0;
+}
+
+.elegant-section-header p {
+    margin: 0;
+    color: var(--elegant-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.elegant-journey {
+    display: grid;
+    gap: 24px;
+    border-left: 2px solid var(--elegant-line);
+    padding-left: 28px;
+}
+
+.elegant-journey__item {
+    display: grid;
     gap: 8px;
 }
 
-.elegant-section h2 {
+.elegant-journey__period span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--elegant-accent);
+    font-weight: 600;
+}
+
+.elegant-journey__period span::before {
+    content: "";
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--elegant-accent);
+    display: inline-block;
+}
+
+.elegant-journey__details h3 {
     margin: 0;
+    font-size: 20px;
+    letter-spacing: 0.05em;
+}
+
+.elegant-journey__meta {
     font-size: 13px;
-    letter-spacing: 0.35em;
     text-transform: uppercase;
-    color: rgba(26, 28, 35, 0.55);
-}
-
-.elegant-timeline {
-    display: grid;
-    gap: 28px;
-}
-
-.elegant-entry {
-    display: grid;
-    gap: 12px;
-    border-left: 3px solid rgba(176, 140, 91, 0.3);
-    padding-left: 24px;
-}
-
-.elegant-entry__head {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    align-items: flex-start;
-}
-
-.elegant-entry__head h3 {
-    margin: 0;
-    font-size: 22px;
-}
-
-.elegant-entry__head span {
     letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-size: 11px;
-    color: rgba(26, 28, 35, 0.45);
+    color: var(--elegant-muted);
 }
 
-.elegant-entry__meta {
-    margin: 0;
+.elegant-journey__details p {
+    margin: 8px 0 0;
     color: var(--elegant-muted);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.elegant-entry__summary {
-    margin: 0;
-    color: var(--elegant-muted);
-    font-size: 12px;
 }
 
 .elegant-education {
@@ -215,51 +253,150 @@ body.elegant-template {
 }
 
 .elegant-education article {
+    border: 1px solid rgba(157, 23, 77, 0.15);
+    border-radius: 20px;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, rgba(253, 242, 248, 0.65), rgba(255, 255, 255, 0.95));
     display: grid;
-    gap: 10px;
-    padding: 24px 26px;
-    border-radius: 24px;
-    border: 1px solid rgba(176, 140, 91, 0.18);
-    background: rgba(255, 255, 255, 0.85);
+    gap: 8px;
 }
 
-.elegant-education h3 {
-    margin: 0;
-    font-size: 18px;
-}
-
-.elegant-education__meta {
+.elegant-education__header {
     display: flex;
     justify-content: space-between;
-    gap: 14px;
+    gap: 12px;
     font-size: 12px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: rgba(26, 28, 35, 0.45);
+    color: var(--elegant-muted);
 }
 
-.elegant-hobbies {
+.elegant-education__header h3 {
+    margin: 0;
+    font-size: 18px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--elegant-ink);
+}
+
+.elegant-education__role {
+    margin: 0;
+    color: var(--elegant-muted);
+}
+
+.elegant-education__location {
+    margin: 0;
+    color: var(--elegant-muted);
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+
+.elegant-aside-card {
+    background: linear-gradient(180deg, rgba(253, 242, 248, 0.9), rgba(255, 255, 255, 0.9));
+    border-radius: 24px;
+    border: 1px solid rgba(157, 23, 77, 0.1);
+    padding: 28px 30px;
+    display: grid;
+    gap: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.elegant-aside-card h2 {
+    margin: 0;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--elegant-accent);
+}
+
+.elegant-tag-list,
+.elegant-language-list,
+.elegant-interest-list {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
+    gap: 10px;
+}
+
+.elegant-tag-list {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 12px;
+}
+
+.elegant-tag-list li {
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 16px;
+    text-align: center;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 12px;
+    border: 1px solid rgba(157, 23, 77, 0.18);
+}
+
+.elegant-language-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     font-size: 12px;
     color: var(--elegant-muted);
 }
 
-@media print {
+.elegant-language-list span:last-child {
+    font-weight: 600;
+    color: var(--elegant-accent);
+}
+
+.elegant-interest-list {
+    gap: 8px;
+}
+
+.elegant-interest-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(157, 23, 77, 0.16);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: var(--elegant-muted);
+}
+
+.elegant-interest-list li:last-child {
+    border-bottom: none;
+}
+
+@media (max-width: 1080px) {
     body.elegant-template {
-        padding: 0;
-        background: #ffffff;
+        padding: 32px;
     }
 
-    .elegant-page {
-        border-radius: 0;
-        box-shadow: none;
+    .elegant-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 720px) {
+    body.elegant-template {
+        padding: 24px 16px;
     }
 
-    .elegant-page::after {
-        display: none;
+    .elegant-hero {
+        padding: 40px;
+    }
+
+    .elegant-hero__identity {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .elegant-hero__contact {
+        width: 100%;
+    }
+
+    .elegant-body {
+        padding: 40px 32px 48px;
     }
 }
