@@ -358,7 +358,11 @@
     }
 
     .createit-template-card__preview {
-        @apply relative h-52 overflow-hidden rounded-t-[28px] bg-gradient-to-br;
+        @apply relative h-72 overflow-hidden rounded-t-[28px] bg-white;
+    }
+
+    .createit-template-card__preview-frame {
+        @apply h-full w-full border-0;
     }
 
     .createit-template-card__badge {

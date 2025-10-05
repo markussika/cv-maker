@@ -46,6 +46,7 @@ Route::middleware('auth')->group(function () {
 
 Route::prefix('cv')->controller(CvController::class)->group(function () {
     Route::get('/templates','templates')->name('cv.templates');
+    Route::get('/templates/{template}/preview','templatePreview')->name('cv.template-preview');
     Route::get('/download','download')->name('cv.download');
 });
 

@@ -275,6 +275,20 @@ class CvController extends Controller
         return view('cv.templates', ['templates' => $this->templateOptions()]);
     }
 
+    public function templatePreview(Request $request, string $template)
+    {
+        $available = $this->templateOptions();
+
+        if (!in_array($template, $available, true)) {
+            abort(404);
+        }
+
+        $sample = $this->sampleCvData();
+        $sample['template'] = $template;
+
+        return $this->renderPdf($sample, $template, 'cv-template-preview.pdf', false);
+    }
+
     public function download(Request $request)
     {
         $templates = $this->templateOptions();
@@ -709,14 +723,18 @@ class CvController extends Controller
         return $values;
     }
 
-    protected function renderPdf(array $data, string $template, string $filename)
+    protected function renderPdf(array $data, string $template, string $filename, bool $download = true)
     {
-        return PDF::loadView('cv.pdf.layout', [
+        $pdf = PDF::loadView('cv.pdf.layout', [
             'data' => $data,
             'template' => $template,
             'accentColor' => $this->accentColour($template),
             'availableTemplates' => $this->templateOptions(),
-        ])->download($filename);
+        ]);
+
+        return $download
+            ? $pdf->download($filename)
+            : $pdf->stream($filename, ['Attachment' => false]);
     }
 
     protected function filenameForCv(array $cvData): string
@@ -753,5 +771,56 @@ class CvController extends Controller
             'futuristic' => '#7c3aed',
             default => '#1e293b',
         };
+    }
+
+    protected function sampleCvData(): array
+    {
+        return [
+            'first_name' => 'Jordan',
+            'last_name' => 'Rivera',
+            'headline' => 'Product Designer',
+            'email' => 'jordan.rivera@example.com',
+            'phone' => '+1 (555) 123-4567',
+            'city' => 'Toronto',
+            'country' => 'Canada',
+            'summary' => 'Designer blending research, motion, and storytelling to craft delightful digital experiences.',
+            'work_experience' => [
+                [
+                    'position' => 'Senior Product Designer',
+                    'company' => 'Northwind Studio',
+                    'city' => 'Toronto',
+                    'country' => 'Canada',
+                    'from' => '2021-02',
+                    'currently' => true,
+                    'achievements' => 'Led cross-functional sprints and launched a design system that lifted activation by 28%.',
+                ],
+                [
+                    'position' => 'Product Designer',
+                    'company' => 'Aurora Labs',
+                    'city' => 'Vancouver',
+                    'country' => 'Canada',
+                    'from' => '2018-05',
+                    'to' => '2021-01',
+                    'achievements' => 'Prototyped immersive flows that increased retention across mobile and web surfaces.',
+                ],
+            ],
+            'education' => [
+                [
+                    'degree' => 'B.A. Interaction Design',
+                    'institution' => 'University of British Columbia',
+                    'city' => 'Vancouver',
+                    'country' => 'Canada',
+                    'start_year' => '2014',
+                    'end_year' => '2018',
+                    'field' => 'Design & Technology',
+                ],
+            ],
+            'skills' => ['Design Systems', 'User Research', 'Prototyping', 'Motion'],
+            'languages' => [
+                ['name' => 'English', 'level' => 'native'],
+                ['name' => 'French', 'level' => 'advanced'],
+            ],
+            'hobbies' => ['Gallery hopping', 'Cycling', 'Synth music'],
+        ];
     }
 }
