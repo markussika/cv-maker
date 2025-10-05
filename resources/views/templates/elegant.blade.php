@@ -22,7 +22,7 @@
 
     <div class="elegant-document">
         <header class="elegant-hero">
-            <div class="elegant-hero__identity">
+            <div class="elegant-hero__inner">
                 @if ($profileImage)
                     <figure class="elegant-avatar">
                         <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
@@ -30,25 +30,67 @@
                 @elseif ($initials)
                     <figure class="elegant-avatar elegant-avatar--initials">{{ $initials }}</figure>
                 @endif
-                <div>
+                <div class="elegant-hero__identity">
                     <p class="elegant-label">{{ __('Curriculum Vitae') }}</p>
                     <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
                     @if ($data['headline'])
                         <p class="elegant-headline">{{ $data['headline'] }}</p>
                     @endif
+                    @if (($data['location'] ?? null) || ($data['phone'] ?? null))
+                        <div class="elegant-hero__meta">
+                            @if ($data['location'] ?? null)
+                                <span>{{ $data['location'] }}</span>
+                            @endif
+                            @if ($data['phone'] ?? null)
+                                <span>{{ $data['phone'] }}</span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
-
-            @if (!empty($data['contacts']))
-                <div class="elegant-hero__contact">
-                    @foreach ($data['contacts'] as $contact)
-                        <span>{{ $contact }}</span>
-                    @endforeach
-                </div>
-            @endif
         </header>
 
         <div class="elegant-body">
+            <aside class="elegant-secondary">
+                @if (!empty($data['skills']))
+                    <section class="elegant-aside-card">
+                        <h2>{{ __('Competencies') }}</h2>
+                        <ul class="elegant-tag-list">
+                            @foreach ($data['skills'] as $skill)
+                                <li>{{ $skill }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
+                @if (!empty($data['languages']))
+                    <section class="elegant-aside-card">
+                        <h2>{{ __('Languages') }}</h2>
+                        <ul class="elegant-language-list">
+                            @foreach ($data['languages'] as $language)
+                                <li>
+                                    <span>{{ $language['name'] }}</span>
+                                    @if (!empty($language['level']))
+                                        <span>{{ ucfirst($language['level']) }}</span>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+
+                @if (!empty($data['hobbies']))
+                    <section class="elegant-aside-card">
+                        <h2>{{ __('Interests') }}</h2>
+                        <ul class="elegant-interest-list">
+                            @foreach ($data['hobbies'] as $hobby)
+                                <li>{{ $hobby }}</li>
+                            @endforeach
+                        </ul>
+                    </section>
+                @endif
+            </aside>
+
             <main class="elegant-primary">
                 @if ($summaryParagraphs->isNotEmpty())
                     <section class="elegant-card elegant-summary">
@@ -115,46 +157,6 @@
                     </section>
                 @endif
             </main>
-
-            <aside class="elegant-secondary">
-                @if (!empty($data['skills']))
-                    <section class="elegant-aside-card">
-                        <h2>{{ __('Competencies') }}</h2>
-                        <ul class="elegant-tag-list">
-                            @foreach ($data['skills'] as $skill)
-                                <li>{{ $skill }}</li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-
-                @if (!empty($data['languages']))
-                    <section class="elegant-aside-card">
-                        <h2>{{ __('Languages') }}</h2>
-                        <ul class="elegant-language-list">
-                            @foreach ($data['languages'] as $language)
-                                <li>
-                                    <span>{{ $language['name'] }}</span>
-                                    @if (!empty($language['level']))
-                                        <span>{{ ucfirst($language['level']) }}</span>
-                                    @endif
-                                </li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-
-                @if (!empty($data['hobbies']))
-                    <section class="elegant-aside-card">
-                        <h2>{{ __('Interests') }}</h2>
-                        <ul class="elegant-interest-list">
-                            @foreach ($data['hobbies'] as $hobby)
-                                <li>{{ $hobby }}</li>
-                            @endforeach
-                        </ul>
-                    </section>
-                @endif
-            </aside>
         </div>
     </div>
 </body>
