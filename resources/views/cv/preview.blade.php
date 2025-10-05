@@ -195,23 +195,28 @@
                     $isAbsoluteProfileUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
                     $isDataUri = is_string($profileImage) && str_starts_with($profileImage, 'data:');
 
-                    if (! $isAbsoluteProfileUrl && ! $isDataUri) {
-                        $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
-                        $storagePath = ltrim((string) $storagePath, '/');
+                    $storageCandidate = $profileImage;
+                    if ($isAbsoluteProfileUrl) {
+                        $urlPath = parse_url($storageCandidate, PHP_URL_PATH);
+                        if (is_string($urlPath) && $urlPath !== '') {
+                            $storageCandidate = $urlPath;
+                        }
+                    }
 
+                    $storageCandidate = preg_replace('#^/?storage/#', '', (string) $storageCandidate);
+                    $storagePath = ltrim((string) $storageCandidate, '/');
+
+                    if (! $isDataUri) {
                         try {
                             if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
                                 $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($storagePath);
                                 $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
-                            } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
+                            } elseif (! $isAbsoluteProfileUrl && \Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
                                 $relativePath = ltrim($profileImage, '/');
                                 $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($relativePath);
                                 $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($relativePath);
-                            } else {
-                                $profileImage = null;
                             }
                         } catch (\Throwable $e) {
-                            $profileImage = null;
                             $profileImageFilesystemPath = null;
                         }
                     }

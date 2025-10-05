@@ -203,23 +203,28 @@
             $isDataUri = str_starts_with($candidate, 'data:');
             $isAbsolute = filter_var($candidate, FILTER_VALIDATE_URL) !== false;
 
-            if (! $isDataUri && ! $isAbsolute) {
-                $storagePath = preg_replace('#^/?storage/#', '', $candidate);
-                $storagePath = ltrim((string) $storagePath, '/');
+            $storageCandidate = $candidate;
+            if ($isAbsolute) {
+                $urlPath = parse_url($candidate, PHP_URL_PATH);
+                if (is_string($urlPath) && $urlPath !== '') {
+                    $storageCandidate = $urlPath;
+                }
+            }
 
+            $storageCandidate = preg_replace('#^/?storage/#', '', (string) $storageCandidate);
+            $storagePath = ltrim((string) $storageCandidate, '/');
+
+            if (! $isDataUri) {
                 try {
                     if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
                         $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($storagePath);
                         $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
-                    } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($candidate, '/'))) {
+                    } elseif (! $isAbsolute && \Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($candidate, '/'))) {
                         $relativePath = ltrim($candidate, '/');
                         $profileImageFilesystemPath = \Illuminate\Support\Facades\Storage::disk('public')->path($relativePath);
                         $profileImage = \Illuminate\Support\Facades\Storage::disk('public')->url($relativePath);
-                    } else {
-                        $profileImage = null;
                     }
                 } catch (\Throwable $exception) {
-                    $profileImage = null;
                     $profileImageFilesystemPath = null;
                 }
             }
