@@ -255,23 +255,51 @@ class TemplateDataBuilder
             ->values();
 
         $profileImage = $value('profile_image');
+        $profileImageFilesystemPath = null;
         if (is_string($profileImage) && trim($profileImage) !== '') {
             $profileImage = trim($profileImage);
             $isAbsoluteUrl = filter_var($profileImage, FILTER_VALIDATE_URL) !== false;
+            $isDataUri = str_starts_with($profileImage, 'data:');
             $storagePath = preg_replace('#^/?storage/#', '', $profileImage);
             $storagePath = ltrim((string) $storagePath, '/');
 
-            if (!$isAbsoluteUrl) {
+            if (! $isAbsoluteUrl && ! $isDataUri) {
                 try {
                     if ($storagePath !== '' && Storage::disk('public')->exists($storagePath)) {
                         $profileImage = Storage::disk('public')->url($storagePath);
+                        try {
+                            $profileImageFilesystemPath = Storage::disk('public')->path($storagePath);
+                        } catch (\Throwable $e) {
+                            $profileImageFilesystemPath = null;
+                        }
                     } elseif (Storage::disk('public')->exists(ltrim($profileImage, '/'))) {
-                        $profileImage = Storage::disk('public')->url(ltrim($profileImage, '/'));
+                        $relativePath = ltrim($profileImage, '/');
+                        $profileImage = Storage::disk('public')->url($relativePath);
+                        try {
+                            $profileImageFilesystemPath = Storage::disk('public')->path($relativePath);
+                        } catch (\Throwable $e) {
+                            $profileImageFilesystemPath = null;
+                        }
+                    } elseif (is_file($profileImage) && is_readable($profileImage)) {
+                        $profileImageFilesystemPath = $profileImage;
                     } else {
                         $profileImage = null;
                     }
                 } catch (\Throwable $e) {
                     $profileImage = null;
+                    $profileImageFilesystemPath = null;
+                }
+            }
+
+            if (! $isDataUri && $profileImage && $profileImageFilesystemPath && is_readable($profileImageFilesystemPath)) {
+                try {
+                    $contents = @file_get_contents($profileImageFilesystemPath);
+                    if ($contents !== false) {
+                        $mimeType = @mime_content_type($profileImageFilesystemPath) ?: 'image/png';
+                        $profileImage = 'data:' . $mimeType . ';base64,' . base64_encode($contents);
+                    }
+                } catch (\Throwable $e) {
+                    // keep the resolved URL if base64 conversion fails
                 }
             }
         } else {
