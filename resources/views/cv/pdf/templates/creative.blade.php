@@ -1,5 +1,3 @@
-@include('cv.pdf.templates.partials.data-prep')
-
 @php
     $accent = $accentColor ?? '#ec4899';
     $secondary = '#3b82f6';

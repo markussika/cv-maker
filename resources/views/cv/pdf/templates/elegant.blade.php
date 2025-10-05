@@ -1,5 +1,3 @@
-@include('cv.pdf.templates.partials.data-prep')
-
 @php
     $accent = $accentColor ?? '#c026d3';
     $hasElegantAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
