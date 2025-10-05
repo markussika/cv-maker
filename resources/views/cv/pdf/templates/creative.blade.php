@@ -1,254 +1,390 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#ec4899';
+    $secondary = '#3b82f6';
+    $hasCreativeAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-creative {
-        background: linear-gradient(135deg, rgba(236, 72, 153, 0.08), rgba(59, 130, 246, 0.08));
+    body.template-creative {
+        background-color: #fff6fb;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Trebuchet MS', 'Arial', sans-serif;
+        color: #1f1b2e;
     }
-    .template-creative .creative-wrapper {
-        width: 100%;
-        background: #ffffff;
-        border-radius: 28px;
-        border: 1px solid rgba(236, 72, 153, 0.15);
+
+    body.template-creative .creative-page {
+        background-color: #ffffff;
+        border: 2px solid #fbd1e9;
+        border-radius: 24px;
+        padding: 0;
         overflow: hidden;
     }
-    .template-creative .creative-top {
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 24px;
-        padding: 32px;
-        background: linear-gradient(120deg, rgba(236, 72, 153, 0.85), rgba(14, 165, 233, 0.75));
+
+    body.template-creative .creative-header {
+        background-color: {{ $accent }};
         color: #ffffff;
+        padding: 24px 30px;
     }
-    .template-creative .creative-avatar {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        align-items: flex-start;
-    }
-    .template-creative .creative-avatar-block {
-        display: flex;
-        align-items: center;
-        gap: 22px;
-    }
-    .template-creative .creative-avatar-figure {
-        width: 88px;
-        height: 88px;
-        border-radius: 28px;
-        background: rgba(15, 23, 42, 0.18);
-        border: 3px solid rgba(255, 255, 255, 0.55);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #ffffff;
-    }
-    .template-creative .creative-avatar-figure img {
+
+    body.template-creative .creative-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-creative .creative-header td {
+        vertical-align: top;
+    }
+
+    body.template-creative .creative-avatar {
+        width: 94px;
+        height: 94px;
+        border-radius: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.6);
+        background-color: rgba(15, 23, 42, 0.18);
+        overflow: hidden;
+    }
+
+    body.template-creative .creative-avatar img {
+        width: 94px;
+        height: 94px;
         object-fit: cover;
     }
-    .template-creative .creative-avatar-initials {
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
-    }
-    .template-creative .creative-name {
-        font-size: 30px;
-        font-weight: 700;
-        letter-spacing: 0.01em;
-    }
-    .template-creative .creative-headline {
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.24em;
-        color: rgba(255, 255, 255, 0.78);
-    }
-    .template-creative .creative-contact {
-        display: grid;
-        gap: 6px;
-        font-size: 11px;
-        color: rgba(255, 255, 255, 0.9);
-    }
-    .template-creative .creative-body {
-        padding: 28px 32px 32px;
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 28px;
-    }
-    .template-creative .creative-section-title {
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.3em;
-        color: #0f172a;
-        margin-bottom: 12px;
-    }
-    .template-creative .creative-card {
-        border-radius: 20px;
-        padding: 18px 20px;
-        margin-bottom: 18px;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 1), rgba(148, 163, 184, 0.15));
-        border: 1px solid rgba(148, 163, 184, 0.3);
-    }
-    .template-creative .creative-card:last-child {
-        margin-bottom: 0;
-    }
-    .template-creative .creative-card h3 {
-        font-size: 14px;
-        font-weight: 600;
-        color: #0f172a;
-    }
-    .template-creative .creative-meta {
-        font-size: 11px;
-        color: #475569;
-        margin-top: 4px;
-    }
-    .template-creative .creative-pill {
-        display: inline-block;
-        padding: 6px 12px;
-        border-radius: 999px;
-        font-size: 10px;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.4);
+
+    body.template-creative .creative-avatar span {
+        display: block;
+        width: 94px;
+        height: 94px;
+        line-height: 94px;
+        text-align: center;
+        font-size: 26px;
+        letter-spacing: 4px;
         color: #ffffff;
     }
-    .template-creative .creative-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 10px;
-        letter-spacing: 0.3em;
+
+    body.template-creative .creative-name {
+        font-size: 30px;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        color: #6366f1;
-        margin-bottom: 12px;
+        margin: 0;
     }
-    .template-creative .creative-aside-card {
-        border-radius: 22px;
-        padding: 18px 20px;
-        background: rgba(248, 250, 252, 0.75);
-        border: 1px dashed rgba(59, 130, 246, 0.35);
-        margin-bottom: 18px;
+
+    body.template-creative .creative-headline {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.82);
     }
-    .template-creative .creative-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+
+    body.template-creative .creative-tagline {
+        display: inline-block;
+        background-color: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 999px;
+        padding: 4px 12px;
+        font-size: 10px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-top: 10px;
     }
-    .template-creative .creative-tag {
-        padding: 6px 12px;
-        border-radius: 14px;
+
+    body.template-creative .creative-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         font-size: 11px;
-        background: rgba(99, 102, 241, 0.12);
-        color: #4338ca;
-        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    body.template-creative .creative-contact li {
+        margin-bottom: 4px;
+    }
+
+    body.template-creative .creative-body {
+        padding: 26px 32px 32px;
+    }
+
+    body.template-creative .creative-summary {
+        border: 2px dashed rgba(236, 72, 153, 0.35);
+        background-color: #fff0f8;
+        border-radius: 18px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        font-size: 12px;
+        color: #312652;
+    }
+
+    body.template-creative .creative-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-creative .creative-summary p:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-creative .creative-columns {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-creative .creative-columns td {
+        vertical-align: top;
+    }
+
+    body.template-creative .creative-main {
+        width: 64%;
+        padding-right: 20px;
+        border-right: 2px dotted #f0d0ff;
+    }
+
+    body.template-creative .creative-aside {
+        width: 36%;
+        padding-left: 20px;
+    }
+
+    body.template-creative .creative-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-creative .creative-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-creative .creative-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: {{ $secondary }};
+        margin-bottom: 10px;
+    }
+
+    body.template-creative .creative-entry {
+        background-color: #fbf6ff;
+        border: 1px solid #e6d9ff;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+    }
+
+    body.template-creative .creative-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-creative .creative-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #1f1b2e;
+    }
+
+    body.template-creative .creative-meta {
+        font-size: 11px;
+        color: #5c4f7f;
+        margin-top: 4px;
+    }
+
+    body.template-creative .creative-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-creative .creative-bullets li {
+        font-size: 12px;
+        color: #312652;
+        margin-bottom: 6px;
+    }
+
+    body.template-creative .creative-bullets li:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-creative .creative-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-creative .creative-chip-list li {
+        display: inline-block;
+        background-color: rgba(59, 130, 246, 0.12);
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        color: #2563eb;
+        border-radius: 14px;
+        padding: 5px 12px;
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-creative .creative-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-creative .creative-simple-list li {
+        font-size: 11px;
+        color: #312652;
+        margin-bottom: 6px;
+    }
+
+    body.template-creative .creative-simple-list li span {
+        color: #6d5bb5;
     }
 </style>
-<div class="creative-wrapper">
-    <div class="creative-top">
-        <div class="creative-avatar">
-            <span class="creative-pill">{{ strtoupper($templateKey ?? 'Creative') }}</span>
-            <div class="creative-avatar-block">
-                @if ($profileImage)
-                    <div class="creative-avatar-figure">
-                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+
+<div class="creative-page">
+    <header class="creative-header">
+        <table>
+            <tr>
+                <td style="width: 110px;">
+                    <div class="creative-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
                     </div>
-                @endif
-                <div>
-                    <h1 class="creative-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+                </td>
+                <td>
+                    <div class="creative-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                     @if ($headline)
-                        <p class="creative-headline">{{ strtoupper($headline) }}</p>
+                        <div class="creative-headline">{{ strtoupper($headline) }}</div>
                     @endif
-                </div>
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="creative-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
+                    <div class="creative-tagline">{{ strtoupper($templateKey ?? 'Creative') }}</div>
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="creative-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
+                @endif
+            </tr>
+        </table>
+    </header>
+
+    <div class="creative-body">
+        @if ($summaryParagraphs->isNotEmpty())
+            <div class="creative-summary">
+                @foreach ($summaryParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
                 @endforeach
             </div>
         @endif
-    </div>
-    <div class="creative-body">
-        <main>
-            @if ($summary)
-                <section class="creative-card" style="margin-bottom: 24px;">
-                    <div class="creative-badge">Spotlight</div>
-                    <p style="color: #1f2937; font-size: 12px;">{{ $summary }}</p>
-                </section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section style="margin-bottom: 26px;">
-                    <h2 class="creative-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="creative-card">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="creative-meta">{{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}</p>
-                            <p class="creative-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="margin-top: 12px; color: #1e293b;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+        <table class="creative-columns">
+            <tr>
+                <td class="creative-main" @if (! $hasCreativeAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                    @if ($experienceBlocks->isNotEmpty())
+                        <div class="creative-section">
+                            <div class="creative-title">{{ __('Experience') }}</div>
+                            @foreach ($experienceBlocks as $experience)
+                                <div class="creative-entry">
+                                    @if (!empty($experience['position']))
+                                        <div class="creative-entry-title">{{ $experience['position'] }}</div>
+                                    @endif
+                                    @php
+                                        $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                        $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                    @endphp
+                                    @if ($metaPieces->isNotEmpty())
+                                        <div class="creative-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($timePieces->isNotEmpty())
+                                        <div class="creative-meta">{{ $timePieces->implode(' – ') }}</div>
+                                    @endif
+                                    @if ($experience['bullets']->isNotEmpty())
+                                        <ul class="creative-bullets">
+                                            @foreach ($experience['bullets'] as $bullet)
+                                                <li>{{ $bullet }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif (!empty($experience['achievements']))
+                                        <p class="creative-meta" style="color: #312652; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            @if (!empty($educationItems))
-                <section>
-                    <h2 class="creative-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="creative-card">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="creative-meta">{{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}</p>
-                            <p class="creative-meta">{{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}</p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section class="creative-aside-card">
-                    <h2 class="creative-section-title" style="margin-bottom: 14px;">Skills</h2>
-                    <div class="creative-tags">
-                        @foreach ($skills as $skill)
-                            <span class="creative-tag">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                    @if ($educationBlocks->isNotEmpty())
+                        <div class="creative-section">
+                            <div class="creative-title">{{ __('Education') }}</div>
+                            @foreach ($educationBlocks as $education)
+                                <div class="creative-entry">
+                                    @if (!empty($education['institution']))
+                                        <div class="creative-entry-title">{{ $education['institution'] }}</div>
+                                    @endif
+                                    @php
+                                        $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                        $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                        $locationPieces = collect([$education['location'] ?? null])->filter();
+                                    @endphp
+                                    @if ($studyPieces->isNotEmpty())
+                                        <div class="creative-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                        <div class="creative-meta">
+                                            {{ $locationPieces->implode(' · ') }}
+                                            @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                                ·
+                                            @endif
+                                            {{ $durationPieces->implode(' – ') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </td>
+                @if ($hasCreativeAside)
+                    <td class="creative-aside">
+                        @if ($skillTags->isNotEmpty())
+                            <div class="creative-section">
+                                <div class="creative-title">{{ __('Skills') }}</div>
+                                <ul class="creative-chip-list">
+                                    @foreach ($skillTags as $skill)
+                                        <li>{{ $skill }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($languages))
-                <section class="creative-aside-card">
-                    <h2 class="creative-section-title" style="margin-bottom: 12px;">Languages</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #1f2937;">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #6366f1;"> &middot; {{ $language['level'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+                        @if ($languageItems->isNotEmpty())
+                            <div class="creative-section">
+                                <div class="creative-title">{{ __('Languages') }}</div>
+                                <ul class="creative-simple-list">
+                                    @foreach ($languageItems as $language)
+                                        <li>
+                                            {{ $language['name'] }}
+                                            @if ($language['level'])
+                                                <span>· {{ $language['level'] }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($hobbies))
-                <section class="creative-aside-card">
-                    <h2 class="creative-section-title" style="margin-bottom: 12px;">Interests</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #1f2937;">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-        </aside>
+                        @if ($hobbyItems->isNotEmpty())
+                            <div class="creative-section">
+                                <div class="creative-title">{{ __('Interests') }}</div>
+                                <ul class="creative-simple-list">
+                                    @foreach ($hobbyItems as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                @endif
+            </tr>
+        </table>
     </div>
 </div>

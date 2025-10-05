@@ -1,224 +1,376 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#1f2937';
+    $highlight = '#22d3ee';
+    $hasDarkAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-darkmode {
-        background: #0b1120;
+    body.template-darkmode {
+        background-color: #0f172a;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
         color: #e2e8f0;
     }
-    .template-darkmode .dark-wrapper {
-        width: 100%;
-        background: #111827;
-        border-radius: 24px;
-        border: 1px solid rgba(148, 163, 184, 0.25);
-        padding: 32px;
-        color: #e2e8f0;
-    }
-    .template-darkmode .dark-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 28px;
-    }
-    .template-darkmode .dark-header-main {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .template-darkmode .dark-avatar {
-        width: 86px;
-        height: 86px;
-        border-radius: 999px;
-        border: 3px solid rgba(56, 189, 248, 0.6);
+
+    body.template-darkmode .dark-page {
+        background-color: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 20px;
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 118, 110, 0.35);
-        color: #e2e8f0;
     }
-    .template-darkmode .dark-avatar img {
+
+    body.template-darkmode .dark-header {
+        background-color: #111827;
+        padding: 24px 30px;
+        border-bottom: 3px solid {{ $highlight }};
+    }
+
+    body.template-darkmode .dark-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-darkmode .dark-header td {
+        vertical-align: top;
+    }
+
+    body.template-darkmode .dark-avatar {
+        width: 92px;
+        height: 92px;
+        border-radius: 46px;
+        border: 2px solid {{ $highlight }};
+        overflow: hidden;
+        background-color: #0f172a;
+    }
+
+    body.template-darkmode .dark-avatar img {
+        width: 92px;
+        height: 92px;
         object-fit: cover;
     }
-    .template-darkmode .dark-avatar-initials {
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: 0.3em;
+
+    body.template-darkmode .dark-avatar span {
+        display: block;
+        width: 92px;
+        height: 92px;
+        line-height: 92px;
+        text-align: center;
+        font-size: 24px;
+        letter-spacing: 4px;
+        color: {{ $highlight }};
     }
-    .template-darkmode .dark-name {
+
+    body.template-darkmode .dark-name {
         font-size: 28px;
-        font-weight: 600;
-        color: #f8fafc;
-    }
-    .template-darkmode .dark-headline {
-        margin-top: 6px;
-        font-size: 11px;
-        letter-spacing: 0.34em;
+        letter-spacing: 3px;
         text-transform: uppercase;
-        color: #38bdf8;
+        margin: 0;
+        color: #f9fafb;
     }
-    .template-darkmode .dark-contact {
-        text-align: right;
-        display: grid;
-        gap: 6px;
-        font-size: 11px;
+
+    body.template-darkmode .dark-headline {
+        font-size: 12px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-top: 6px;
         color: #94a3b8;
     }
-    .template-darkmode .dark-grid {
-        display: grid;
-        grid-template-columns: 1.5fr 1fr;
-        gap: 32px;
-    }
-    .template-darkmode .dark-section-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.4em;
-        color: #38bdf8;
-        margin-bottom: 14px;
-    }
-    .template-darkmode .dark-card {
-        border-radius: 18px;
-        border: 1px solid rgba(148, 163, 184, 0.2);
-        background: rgba(15, 23, 42, 0.8);
-        padding: 18px 20px;
-        margin-bottom: 16px;
-    }
-    .template-darkmode .dark-card:last-child {
-        margin-bottom: 0;
-    }
-    .template-darkmode .dark-card h3 {
-        font-size: 13px;
-        color: #f1f5f9;
-    }
-    .template-darkmode .dark-meta {
+
+    body.template-darkmode .dark-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         font-size: 11px;
         color: #cbd5f5;
+    }
+
+    body.template-darkmode .dark-contact li {
+        margin-bottom: 4px;
+    }
+
+    body.template-darkmode .dark-body {
+        padding: 26px 30px 30px;
+    }
+
+    body.template-darkmode .dark-summary {
+        border: 1px solid #374151;
+        background-color: #0f172a;
+        border-radius: 16px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        font-size: 12px;
+        color: #cbd5f5;
+    }
+
+    body.template-darkmode .dark-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-darkmode .dark-summary p:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-darkmode .dark-columns {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-darkmode .dark-columns td {
+        vertical-align: top;
+    }
+
+    body.template-darkmode .dark-main {
+        width: 65%;
+        padding-right: 20px;
+        border-right: 1px solid #374151;
+    }
+
+    body.template-darkmode .dark-aside {
+        width: 35%;
+        padding-left: 20px;
+    }
+
+    body.template-darkmode .dark-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-darkmode .dark-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-darkmode .dark-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: {{ $highlight }};
+        margin-bottom: 10px;
+    }
+
+    body.template-darkmode .dark-entry {
+        margin-bottom: 18px;
+        padding-left: 12px;
+        border-left: 3px solid rgba(34, 211, 238, 0.35);
+    }
+
+    body.template-darkmode .dark-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-darkmode .dark-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #e2e8f0;
+    }
+
+    body.template-darkmode .dark-meta {
+        font-size: 11px;
+        color: #94a3b8;
         margin-top: 4px;
     }
-    .template-darkmode .dark-summary {
-        background: rgba(8, 145, 178, 0.12);
-        border: 1px solid rgba(56, 189, 248, 0.25);
-        padding: 18px;
-        border-radius: 18px;
+
+    body.template-darkmode .dark-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-darkmode .dark-bullets li {
         font-size: 12px;
-        color: #e0f2fe;
-        margin-bottom: 24px;
+        color: #cbd5f5;
+        margin-bottom: 6px;
     }
-    .template-darkmode .dark-chiplist {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+
+    body.template-darkmode .dark-bullets li:last-child {
+        margin-bottom: 0;
     }
-    .template-darkmode .dark-chip {
-        padding: 6px 12px;
+
+    body.template-darkmode .dark-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-darkmode .dark-chip-list li {
+        display: inline-block;
+        background-color: rgba(34, 211, 238, 0.12);
+        border: 1px solid rgba(34, 211, 238, 0.35);
         border-radius: 999px;
+        padding: 4px 11px;
         font-size: 10px;
-        letter-spacing: 0.3em;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        background: rgba(56, 189, 248, 0.1);
-        color: #38bdf8;
-        border: 1px solid rgba(56, 189, 248, 0.3);
+        color: #67e8f9;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-darkmode .dark-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-darkmode .dark-simple-list li {
+        font-size: 11px;
+        color: #cbd5f5;
+        margin-bottom: 6px;
+    }
+
+    body.template-darkmode .dark-simple-list li span {
+        color: #67e8f9;
     }
 </style>
-<div class="dark-wrapper">
+
+<div class="dark-page">
     <header class="dark-header">
-        <div class="dark-header-main">
-            @if ($profileImage)
-                <div class="dark-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                </div>
-            @endif
-            <div>
-                <h1 class="dark-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-                @if ($headline)
-                    <p class="dark-headline">{{ strtoupper($headline) }}</p>
+        <table>
+            <tr>
+                <td style="width: 120px;">
+                    <div class="dark-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="dark-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
+                    @if ($headline)
+                        <div class="dark-headline">{{ strtoupper($headline) }}</div>
+                    @endif
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="dark-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
                 @endif
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="dark-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
+            </tr>
+        </table>
+    </header>
+
+    <div class="dark-body">
+        @if ($summaryParagraphs->isNotEmpty())
+            <div class="dark-summary">
+                @foreach ($summaryParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
                 @endforeach
             </div>
         @endif
-    </header>
-    <div class="dark-grid">
-        <main>
-            @if ($summary)
-                <section class="dark-summary">{{ $summary }}</section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section style="margin-bottom: 24px;">
-                    <h2 class="dark-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="dark-card">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="dark-meta">{{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}</p>
-                            <p class="dark-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="margin-top: 10px; color: #bae6fd;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+        <table class="dark-columns">
+            <tr>
+                <td class="dark-main" @if (! $hasDarkAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                    @if ($experienceBlocks->isNotEmpty())
+                        <div class="dark-section">
+                            <div class="dark-title">{{ __('Experience') }}</div>
+                            @foreach ($experienceBlocks as $experience)
+                                <div class="dark-entry">
+                                    @if (!empty($experience['position']))
+                                        <div class="dark-entry-title">{{ $experience['position'] }}</div>
+                                    @endif
+                                    @php
+                                        $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                        $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                    @endphp
+                                    @if ($metaPieces->isNotEmpty())
+                                        <div class="dark-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($timePieces->isNotEmpty())
+                                        <div class="dark-meta">{{ $timePieces->implode(' – ') }}</div>
+                                    @endif
+                                    @if ($experience['bullets']->isNotEmpty())
+                                        <ul class="dark-bullets">
+                                            @foreach ($experience['bullets'] as $bullet)
+                                                <li>{{ $bullet }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif (!empty($experience['achievements']))
+                                        <p class="dark-meta" style="color: #cbd5f5; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            @if (!empty($educationItems))
-                <section>
-                    <h2 class="dark-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="dark-card">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="dark-meta">{{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}</p>
-                            <p class="dark-meta">{{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}</p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section style="margin-bottom: 20px;">
-                    <h2 class="dark-section-title">Skills</h2>
-                    <div class="dark-chiplist">
-                        @foreach ($skills as $skill)
-                            <span class="dark-chip">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                    @if ($educationBlocks->isNotEmpty())
+                        <div class="dark-section">
+                            <div class="dark-title">{{ __('Education') }}</div>
+                            @foreach ($educationBlocks as $education)
+                                <div class="dark-entry">
+                                    @if (!empty($education['institution']))
+                                        <div class="dark-entry-title">{{ $education['institution'] }}</div>
+                                    @endif
+                                    @php
+                                        $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                        $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                        $locationPieces = collect([$education['location'] ?? null])->filter();
+                                    @endphp
+                                    @if ($studyPieces->isNotEmpty())
+                                        <div class="dark-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                        <div class="dark-meta">
+                                            {{ $locationPieces->implode(' · ') }}
+                                            @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                                ·
+                                            @endif
+                                            {{ $durationPieces->implode(' – ') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </td>
+                @if ($hasDarkAside)
+                    <td class="dark-aside">
+                        @if ($skillTags->isNotEmpty())
+                            <div class="dark-section">
+                                <div class="dark-title">{{ __('Skills') }}</div>
+                                <ul class="dark-chip-list">
+                                    @foreach ($skillTags as $skill)
+                                        <li>{{ $skill }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($languages))
-                <section style="margin-bottom: 20px;">
-                    <h2 class="dark-section-title">Languages</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #e2e8f0;">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #38bdf8;"> &middot; {{ $language['level'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+                        @if ($languageItems->isNotEmpty())
+                            <div class="dark-section">
+                                <div class="dark-title">{{ __('Languages') }}</div>
+                                <ul class="dark-simple-list">
+                                    @foreach ($languageItems as $language)
+                                        <li>
+                                            {{ $language['name'] }}
+                                            @if ($language['level'])
+                                                <span>· {{ $language['level'] }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($hobbies))
-                <section>
-                    <h2 class="dark-section-title">Interests</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #e2e8f0;">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-        </aside>
+                        @if ($hobbyItems->isNotEmpty())
+                            <div class="dark-section">
+                                <div class="dark-title">{{ __('Interests') }}</div>
+                                <ul class="dark-simple-list">
+                                    @foreach ($hobbyItems as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                @endif
+            </tr>
+        </table>
     </div>
 </div>

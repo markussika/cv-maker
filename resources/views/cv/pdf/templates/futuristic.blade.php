@@ -1,234 +1,382 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#7c3aed';
+    $secondary = '#22d3ee';
+    $hasFuturisticAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-futuristic {
-        background: radial-gradient(circle at top left, rgba(124, 58, 237, 0.25), transparent 45%), #0f172a;
-        color: #e2e8f0;
+    body.template-futuristic {
+        background-color: #06080f;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
+        color: #e5edff;
     }
-    .template-futuristic .futuristic-wrapper {
-        width: 100%;
-        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
-        border-radius: 28px;
-        border: 1px solid rgba(124, 58, 237, 0.35);
-        padding: 34px;
-    }
-    .template-futuristic .futuristic-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 30px;
-    }
-    .template-futuristic .futuristic-header-main {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .template-futuristic .futuristic-avatar {
-        width: 88px;
-        height: 88px;
-        border-radius: 28px;
-        border: 3px solid rgba(124, 58, 237, 0.6);
+
+    body.template-futuristic .futuristic-page {
+        background-color: #111827;
+        border: 1px solid #1f2937;
+        border-radius: 24px;
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: radial-gradient(circle at center, rgba(168, 85, 247, 0.3), rgba(30, 64, 175, 0.35));
-        color: #f5f3ff;
     }
-    .template-futuristic .futuristic-avatar img {
+
+    body.template-futuristic .futuristic-header {
+        background-color: #0b1120;
+        border-bottom: 3px solid {{ $accent }};
+        padding: 24px 32px;
+    }
+
+    body.template-futuristic .futuristic-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-futuristic .futuristic-header td {
+        vertical-align: top;
+    }
+
+    body.template-futuristic .futuristic-avatar {
+        width: 94px;
+        height: 94px;
+        border-radius: 20px;
+        border: 2px solid {{ $accent }};
+        overflow: hidden;
+        background-color: #06080f;
+        box-shadow: 0 0 12px rgba(124, 58, 237, 0.45);
+    }
+
+    body.template-futuristic .futuristic-avatar img {
+        width: 94px;
+        height: 94px;
         object-fit: cover;
     }
-    .template-futuristic .futuristic-avatar-initials {
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: 0.35em;
+
+    body.template-futuristic .futuristic-avatar span {
+        display: block;
+        width: 94px;
+        height: 94px;
+        line-height: 94px;
+        text-align: center;
+        font-size: 24px;
+        letter-spacing: 4px;
+        color: {{ $accent }};
     }
-    .template-futuristic .futuristic-name {
-        font-size: 30px;
-        font-weight: 600;
-        color: #f5f3ff;
-    }
-    .template-futuristic .futuristic-headline {
-        margin-top: 8px;
-        font-size: 11px;
-        letter-spacing: 0.45em;
+
+    body.template-futuristic .futuristic-name {
+        font-size: 28px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        color: #a855f7;
+        margin: 0;
+        color: #f8fafc;
     }
-    .template-futuristic .futuristic-contact {
-        text-align: right;
-        display: grid;
-        gap: 6px;
-        font-size: 11px;
-        color: #c4b5fd;
-    }
-    .template-futuristic .futuristic-grid {
-        display: grid;
-        grid-template-columns: 1.4fr 1fr;
-        gap: 28px;
-    }
-    .template-futuristic .futuristic-section-title {
+
+    body.template-futuristic .futuristic-headline {
         font-size: 12px;
+        letter-spacing: 5px;
         text-transform: uppercase;
-        letter-spacing: 0.4em;
-        color: #a855f7;
-        margin-bottom: 14px;
+        margin-top: 6px;
+        color: #a5b4fc;
     }
-    .template-futuristic .futuristic-card {
-        position: relative;
-        border-radius: 20px;
-        overflow: hidden;
-        padding: 18px 20px;
-        background: rgba(15, 118, 110, 0.1);
-        border: 1px solid rgba(124, 58, 237, 0.3);
-        margin-bottom: 18px;
+
+    body.template-futuristic .futuristic-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        font-size: 11px;
+        color: #cbd5f5;
     }
-    .template-futuristic .futuristic-card:last-child {
+
+    body.template-futuristic .futuristic-contact li {
+        margin-bottom: 4px;
+    }
+
+    body.template-futuristic .futuristic-body {
+        padding: 26px 32px 34px;
+        background: linear-gradient(90deg, rgba(124, 58, 237, 0.08), rgba(34, 211, 238, 0.08));
+    }
+
+    body.template-futuristic .futuristic-summary {
+        border: 1px solid rgba(124, 58, 237, 0.4);
+        background-color: rgba(15, 23, 42, 0.8);
+        border-radius: 18px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
+        font-size: 12px;
+        color: #d0dcff;
+    }
+
+    body.template-futuristic .futuristic-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-futuristic .futuristic-summary p:last-child {
         margin-bottom: 0;
     }
-    .template-futuristic .futuristic-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(120deg, rgba(124, 58, 237, 0.25), transparent 55%);
-        pointer-events: none;
+
+    body.template-futuristic .futuristic-columns {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .template-futuristic .futuristic-card h3 {
-        position: relative;
+
+    body.template-futuristic .futuristic-columns td {
+        vertical-align: top;
+    }
+
+    body.template-futuristic .futuristic-main {
+        width: 65%;
+        padding-right: 22px;
+        border-right: 1px solid rgba(99, 102, 241, 0.25);
+    }
+
+    body.template-futuristic .futuristic-aside {
+        width: 35%;
+        padding-left: 22px;
+    }
+
+    body.template-futuristic .futuristic-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-futuristic .futuristic-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-futuristic .futuristic-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 4px;
+        color: {{ $secondary }};
+        margin-bottom: 10px;
+    }
+
+    body.template-futuristic .futuristic-entry {
+        margin-bottom: 18px;
+        padding-left: 14px;
+        border-left: 3px solid rgba(124, 58, 237, 0.45);
+        background-color: rgba(15, 23, 42, 0.6);
+        border-radius: 6px;
+        padding-bottom: 10px;
+        padding-top: 10px;
+    }
+
+    body.template-futuristic .futuristic-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-futuristic .futuristic-entry-title {
         font-size: 13px;
-        color: #f5f3ff;
+        font-weight: bold;
+        color: #f8fafc;
+    }
+
+    body.template-futuristic .futuristic-meta {
+        font-size: 11px;
+        color: #a5b4fc;
+        margin-top: 4px;
+    }
+
+    body.template-futuristic .futuristic-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-futuristic .futuristic-bullets li {
+        font-size: 12px;
+        color: #d0dcff;
         margin-bottom: 6px;
     }
-    .template-futuristic .futuristic-meta {
-        position: relative;
-        font-size: 11px;
-        color: #c4b5fd;
+
+    body.template-futuristic .futuristic-bullets li:last-child {
+        margin-bottom: 0;
     }
-    .template-futuristic .futuristic-summary {
-        border-radius: 22px;
-        padding: 20px;
-        margin-bottom: 24px;
-        background: linear-gradient(120deg, rgba(124, 58, 237, 0.25), rgba(14, 116, 144, 0.25));
+
+    body.template-futuristic .futuristic-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-futuristic .futuristic-chip-list li {
+        display: inline-block;
+        background-color: rgba(124, 58, 237, 0.15);
         border: 1px solid rgba(124, 58, 237, 0.35);
-        font-size: 12px;
-        color: #ede9fe;
-    }
-    .template-futuristic .futuristic-chiplist {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .template-futuristic .futuristic-chip {
-        padding: 6px 12px;
         border-radius: 999px;
+        padding: 4px 11px;
         font-size: 10px;
-        letter-spacing: 0.32em;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        background: rgba(124, 58, 237, 0.2);
         color: #c4b5fd;
-        border: 1px solid rgba(99, 102, 241, 0.45);
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-futuristic .futuristic-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-futuristic .futuristic-simple-list li {
+        font-size: 11px;
+        color: #d0dcff;
+        margin-bottom: 6px;
+    }
+
+    body.template-futuristic .futuristic-simple-list li span {
+        color: #a5b4fc;
     }
 </style>
-<div class="futuristic-wrapper">
+
+<div class="futuristic-page">
     <header class="futuristic-header">
-        <div class="futuristic-header-main">
-            @if ($profileImage)
-                <div class="futuristic-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                </div>
-            @endif
-            <div>
-                <h1 class="futuristic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-                @if ($headline)
-                    <p class="futuristic-headline">{{ strtoupper($headline) }}</p>
+        <table>
+            <tr>
+                <td style="width: 120px;">
+                    <div class="futuristic-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="futuristic-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
+                    @if ($headline)
+                        <div class="futuristic-headline">{{ strtoupper($headline) }}</div>
+                    @endif
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="futuristic-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
                 @endif
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="futuristic-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
+            </tr>
+        </table>
+    </header>
+
+    <div class="futuristic-body">
+        @if ($summaryParagraphs->isNotEmpty())
+            <div class="futuristic-summary">
+                @foreach ($summaryParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
                 @endforeach
             </div>
         @endif
-    </header>
-    <div class="futuristic-grid">
-        <main>
-            @if ($summary)
-                <section class="futuristic-summary">{{ $summary }}</section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section style="margin-bottom: 24px;">
-                    <h2 class="futuristic-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="futuristic-card">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="futuristic-meta">{{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}</p>
-                            <p class="futuristic-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="position: relative; margin-top: 10px; color: #f1f5f9;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+        <table class="futuristic-columns">
+            <tr>
+                <td class="futuristic-main" @if (! $hasFuturisticAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                    @if ($experienceBlocks->isNotEmpty())
+                        <div class="futuristic-section">
+                            <div class="futuristic-title">{{ __('Experience') }}</div>
+                            @foreach ($experienceBlocks as $experience)
+                                <div class="futuristic-entry">
+                                    @if (!empty($experience['position']))
+                                        <div class="futuristic-entry-title">{{ $experience['position'] }}</div>
+                                    @endif
+                                    @php
+                                        $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                        $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                    @endphp
+                                    @if ($metaPieces->isNotEmpty())
+                                        <div class="futuristic-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($timePieces->isNotEmpty())
+                                        <div class="futuristic-meta">{{ $timePieces->implode(' – ') }}</div>
+                                    @endif
+                                    @if ($experience['bullets']->isNotEmpty())
+                                        <ul class="futuristic-bullets">
+                                            @foreach ($experience['bullets'] as $bullet)
+                                                <li>{{ $bullet }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif (!empty($experience['achievements']))
+                                        <p class="futuristic-meta" style="color: #d0dcff; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            @if (!empty($educationItems))
-                <section>
-                    <h2 class="futuristic-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="futuristic-card">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="futuristic-meta">{{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}</p>
-                            <p class="futuristic-meta">{{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}</p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section style="margin-bottom: 18px;">
-                    <h2 class="futuristic-section-title">Skills</h2>
-                    <div class="futuristic-chiplist">
-                        @foreach ($skills as $skill)
-                            <span class="futuristic-chip">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                    @if ($educationBlocks->isNotEmpty())
+                        <div class="futuristic-section">
+                            <div class="futuristic-title">{{ __('Education') }}</div>
+                            @foreach ($educationBlocks as $education)
+                                <div class="futuristic-entry">
+                                    @if (!empty($education['institution']))
+                                        <div class="futuristic-entry-title">{{ $education['institution'] }}</div>
+                                    @endif
+                                    @php
+                                        $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                        $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                        $locationPieces = collect([$education['location'] ?? null])->filter();
+                                    @endphp
+                                    @if ($studyPieces->isNotEmpty())
+                                        <div class="futuristic-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                        <div class="futuristic-meta">
+                                            {{ $locationPieces->implode(' · ') }}
+                                            @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                                ·
+                                            @endif
+                                            {{ $durationPieces->implode(' – ') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </td>
+                @if ($hasFuturisticAside)
+                    <td class="futuristic-aside">
+                        @if ($skillTags->isNotEmpty())
+                            <div class="futuristic-section">
+                                <div class="futuristic-title">{{ __('Skills') }}</div>
+                                <ul class="futuristic-chip-list">
+                                    @foreach ($skillTags as $skill)
+                                        <li>{{ $skill }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($languages))
-                <section style="margin-bottom: 18px;">
-                    <h2 class="futuristic-section-title">Languages</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #e2e8f0;">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #a855f7;"> &middot; {{ $language['level'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+                        @if ($languageItems->isNotEmpty())
+                            <div class="futuristic-section">
+                                <div class="futuristic-title">{{ __('Languages') }}</div>
+                                <ul class="futuristic-simple-list">
+                                    @foreach ($languageItems as $language)
+                                        <li>
+                                            {{ $language['name'] }}
+                                            @if ($language['level'])
+                                                <span>· {{ $language['level'] }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($hobbies))
-                <section>
-                    <h2 class="futuristic-section-title">Interests</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #e2e8f0;">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-        </aside>
+                        @if ($hobbyItems->isNotEmpty())
+                            <div class="futuristic-section">
+                                <div class="futuristic-title">{{ __('Interests') }}</div>
+                                <ul class="futuristic-simple-list">
+                                    @foreach ($hobbyItems as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                @endif
+            </tr>
+        </table>
     </div>
 </div>

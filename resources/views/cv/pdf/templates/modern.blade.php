@@ -1,235 +1,374 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#2563eb';
+    $hasModernAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-modern {
-        background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.12));
+    body.template-modern {
+        background-color: #eef3ff;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
+        color: #0f172a;
     }
-    .template-modern .modern-wrapper {
-        width: 100%;
-        background: #ffffff;
-        border-radius: 24px;
+
+    body.template-modern .modern-page {
+        background-color: #ffffff;
+        border: 1px solid #cbd5f5;
+        border-radius: 20px;
+        padding: 0;
         overflow: hidden;
-        border: 1px solid rgba(37, 99, 235, 0.2);
     }
-    .template-modern .modern-header {
-        background: {{ $accentColor }};
+
+    body.template-modern .modern-header {
+        background-color: {{ $accent }};
         color: #ffffff;
-        padding: 28px 32px;
+        padding: 22px 28px;
     }
-    .template-modern .modern-header-top {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .template-modern .modern-avatar {
-        width: 84px;
-        height: 84px;
-        border-radius: 999px;
-        border: 3px solid rgba(255, 255, 255, 0.55);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 23, 42, 0.2);
-        color: #ffffff;
-    }
-    .template-modern .modern-avatar img {
+
+    body.template-modern .modern-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-modern .modern-header td {
+        vertical-align: top;
+    }
+
+    body.template-modern .modern-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 50px;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        overflow: hidden;
+        background-color: rgba(15, 23, 42, 0.25);
+    }
+
+    body.template-modern .modern-avatar img {
+        width: 90px;
+        height: 90px;
         object-fit: cover;
     }
-    .template-modern .modern-avatar-initials {
-        font-size: 22px;
-        font-weight: 600;
-        letter-spacing: 0.18em;
+
+    body.template-modern .modern-avatar span {
+        display: block;
+        width: 90px;
+        height: 90px;
+        line-height: 90px;
+        text-align: center;
+        font-size: 24px;
+        letter-spacing: 5px;
+        color: #ffffff;
     }
-    .template-modern .modern-name {
-        font-size: 28px;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-    }
-    .template-modern .modern-headline {
-        font-size: 13px;
-        margin-top: 6px;
-        letter-spacing: 0.18em;
+
+    body.template-modern .modern-name {
+        font-size: 27px;
+        letter-spacing: 3px;
         text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.72);
+        margin: 0;
     }
-    .template-modern .modern-contact {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-        margin-top: 18px;
+
+    body.template-modern .modern-headline {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.78);
+    }
+
+    body.template-modern .modern-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         font-size: 11px;
     }
-    .template-modern .modern-body {
-        display: grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 28px;
-        padding: 28px 32px;
-    }
-    .template-modern .modern-section-title {
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.26em;
-        color: #0f172a;
-        margin-bottom: 12px;
-    }
-    .template-modern .modern-summary {
-        background: rgba(37, 99, 235, 0.08);
-        border: 1px solid rgba(37, 99, 235, 0.18);
-        padding: 18px;
-        border-radius: 18px;
-        font-size: 12px;
-        color: #1f2937;
-        margin-bottom: 24px;
-    }
-    .template-modern .modern-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 16px 18px;
-        margin-bottom: 16px;
-    }
-    .template-modern .modern-card:last-child {
-        margin-bottom: 0;
-    }
-    .template-modern .modern-card h3 {
-        font-size: 13px;
-        font-weight: 600;
-        color: #0f172a;
+
+    body.template-modern .modern-contact li {
         margin-bottom: 4px;
     }
-    .template-modern .modern-meta {
+
+    body.template-modern .modern-body {
+        padding: 26px 30px 28px;
+    }
+
+    body.template-modern .modern-summary {
+        background-color: rgba(37, 99, 235, 0.08);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+        font-size: 12px;
+        color: #1f2937;
+    }
+
+    body.template-modern .modern-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-modern .modern-summary p:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-modern .modern-columns {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-modern .modern-columns td {
+        vertical-align: top;
+    }
+
+    body.template-modern .modern-main {
+        width: 66%;
+        padding-right: 18px;
+        border-right: 1px solid #d9e2ff;
+    }
+
+    body.template-modern .modern-aside {
+        width: 34%;
+        padding-left: 18px;
+    }
+
+    body.template-modern .modern-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-modern .modern-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-modern .modern-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: {{ $accent }};
+        margin-bottom: 10px;
+    }
+
+    body.template-modern .modern-entry {
+        border-left: 3px solid rgba(37, 99, 235, 0.35);
+        padding-left: 12px;
+        margin-bottom: 18px;
+    }
+
+    body.template-modern .modern-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-modern .modern-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #0f172a;
+    }
+
+    body.template-modern .modern-meta {
         font-size: 11px;
         color: #475569;
+        margin-top: 4px;
     }
-    .template-modern .modern-aside-card {
-        border: 1px solid rgba(15, 23, 42, 0.12);
-        border-radius: 18px;
-        padding: 18px;
-        margin-bottom: 18px;
-        background: rgba(15, 23, 42, 0.02);
+
+    body.template-modern .modern-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
     }
-    .template-modern .modern-chiplist {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
+
+    body.template-modern .modern-bullets li {
+        font-size: 12px;
+        color: #1f2937;
+        margin-bottom: 6px;
     }
-    .template-modern .modern-chip {
-        padding: 5px 12px;
-        border-radius: 999px;
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.2em;
-        background: rgba(37, 99, 235, 0.12);
+
+    body.template-modern .modern-bullets li:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-modern .modern-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-modern .modern-chip-list li {
+        display: inline-block;
+        background-color: rgba(37, 99, 235, 0.12);
+        border: 1px solid rgba(37, 99, 235, 0.3);
         color: #1d4ed8;
+        border-radius: 999px;
+        padding: 4px 11px;
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-modern .modern-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-modern .modern-simple-list li {
+        font-size: 11px;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    body.template-modern .modern-simple-list li span {
+        color: #64748b;
     }
 </style>
-<div class="modern-wrapper">
+
+<div class="modern-page">
     <header class="modern-header">
-        <div class="modern-header-top">
-            @if ($profileImage)
-                <div class="modern-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                </div>
-            @endif
-            <div>
-                <h1 class="modern-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-                @if ($headline)
-                    <p class="modern-headline">{{ strtoupper($headline) }}</p>
+        <table>
+            <tr>
+                <td style="width: 110px;">
+                    <div class="modern-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="modern-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
+                    @if ($headline)
+                        <div class="modern-headline">{{ strtoupper($headline) }}</div>
+                    @endif
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="modern-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
                 @endif
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="modern-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
+            </tr>
+        </table>
+    </header>
+
+    <div class="modern-body">
+        @if ($summaryParagraphs->isNotEmpty())
+            <div class="modern-summary">
+                @foreach ($summaryParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
                 @endforeach
             </div>
         @endif
-    </header>
-    <div class="modern-body">
-        <main>
-            @if ($summary)
-                <section class="modern-summary">{{ $summary }}</section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section style="margin-bottom: 24px;">
-                    <h2 class="modern-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="modern-card">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="modern-meta">
-                                {{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}
-                            </p>
-                            <p class="modern-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="margin-top: 10px; color: #1f2937;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+        <table class="modern-columns">
+            <tr>
+                <td class="modern-main" @if (! $hasModernAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                    @if ($experienceBlocks->isNotEmpty())
+                        <div class="modern-section">
+                            <div class="modern-title">{{ __('Experience') }}</div>
+                            @foreach ($experienceBlocks as $experience)
+                                <div class="modern-entry">
+                                    @if (!empty($experience['position']))
+                                        <div class="modern-entry-title">{{ $experience['position'] }}</div>
+                                    @endif
+                                    @php
+                                        $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                        $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                    @endphp
+                                    @if ($metaPieces->isNotEmpty())
+                                        <div class="modern-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($timePieces->isNotEmpty())
+                                        <div class="modern-meta">{{ $timePieces->implode(' – ') }}</div>
+                                    @endif
+                                    @if ($experience['bullets']->isNotEmpty())
+                                        <ul class="modern-bullets">
+                                            @foreach ($experience['bullets'] as $bullet)
+                                                <li>{{ $bullet }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif (!empty($experience['achievements']))
+                                        <p class="modern-meta" style="color: #1f2937; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            @if (!empty($educationItems))
-                <section>
-                    <h2 class="modern-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="modern-card">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="modern-meta">
-                                {{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}
-                            </p>
-                            <p class="modern-meta">
-                                {{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}
-                            </p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section class="modern-aside-card">
-                    <h2 class="modern-section-title" style="margin-bottom: 16px;">Skills</h2>
-                    <div class="modern-chiplist">
-                        @foreach ($skills as $skill)
-                            <span class="modern-chip">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                    @if ($educationBlocks->isNotEmpty())
+                        <div class="modern-section">
+                            <div class="modern-title">{{ __('Education') }}</div>
+                            @foreach ($educationBlocks as $education)
+                                <div class="modern-entry">
+                                    @if (!empty($education['institution']))
+                                        <div class="modern-entry-title">{{ $education['institution'] }}</div>
+                                    @endif
+                                    @php
+                                        $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                        $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                        $locationPieces = collect([$education['location'] ?? null])->filter();
+                                    @endphp
+                                    @if ($studyPieces->isNotEmpty())
+                                        <div class="modern-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                        <div class="modern-meta">
+                                            {{ $locationPieces->implode(' · ') }}
+                                            @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                                ·
+                                            @endif
+                                            {{ $durationPieces->implode(' – ') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </td>
+                @if ($hasModernAside)
+                    <td class="modern-aside">
+                        @if ($skillTags->isNotEmpty())
+                            <div class="modern-section">
+                                <div class="modern-title">{{ __('Skills') }}</div>
+                                <ul class="modern-chip-list">
+                                    @foreach ($skillTags as $skill)
+                                        <li>{{ $skill }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($languages))
-                <section class="modern-aside-card">
-                    <h2 class="modern-section-title" style="margin-bottom: 12px;">Languages</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #1f2937;">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #64748b;"> &middot; {{ $language['level'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+                        @if ($languageItems->isNotEmpty())
+                            <div class="modern-section">
+                                <div class="modern-title">{{ __('Languages') }}</div>
+                                <ul class="modern-simple-list">
+                                    @foreach ($languageItems as $language)
+                                        <li>
+                                            {{ $language['name'] }}
+                                            @if ($language['level'])
+                                                <span>· {{ $language['level'] }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($hobbies))
-                <section class="modern-aside-card">
-                    <h2 class="modern-section-title" style="margin-bottom: 12px;">Interests</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #1f2937;">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-        </aside>
+                        @if ($hobbyItems->isNotEmpty())
+                            <div class="modern-section">
+                                <div class="modern-title">{{ __('Interests') }}</div>
+                                <ul class="modern-simple-list">
+                                    @foreach ($hobbyItems as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                @endif
+            </tr>
+        </table>
     </div>
 </div>
