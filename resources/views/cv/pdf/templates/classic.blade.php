@@ -1,5 +1,3 @@
-@include('cv.pdf.templates.partials.data-prep')
-
 @php
     $skillTags = ($skillTags ?? collect())->filter();
     $languageItems = ($languageItems ?? collect())->filter();
