@@ -14,162 +14,146 @@
             ->map(fn ($item) => mb_strtoupper(mb_substr(trim($item), 0, 1)))
             ->implode('');
         $profileImage = $data['profile_image'] ?? null;
-        $hasSidebar = !empty($data['skills']) || !empty($data['languages']) || !empty($data['hobbies']);
+        $summaryText = is_string($data['summary'] ?? null) ? trim((string) $data['summary']) : null;
+        $summaryParagraphs = $summaryText !== null
+            ? collect(preg_split('/\r\n|\r|\n/', $summaryText))->map(fn ($line) => trim($line))->filter()
+            : collect();
     @endphp
 
-    <div class="minimal-page">
-        <div class="minimal-sheet">
-            <header class="minimal-header">
-                <div class="minimal-header-bar">
-                    <div class="minimal-identity">
-                        @if ($profileImage)
-                            <div class="minimal-avatar">
-                                <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
-                            </div>
-                        @endif
-                        <div>
-                            <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
-                            @if ($data['headline'])
-                                <p>{{ $data['headline'] }}</p>
-                            @endif
-                        </div>
+    <div class="minimal-wrapper">
+        <aside class="minimal-sidebar">
+            <div class="minimal-identity">
+                @if ($profileImage)
+                    <div class="minimal-avatar">
+                        <img src="{{ $profileImage }}" alt="{{ $data['name'] ?? __('Profile photo') }}">
                     </div>
-
-                    @if (!empty($data['contacts']))
-                        <div class="minimal-contact">
-                            @foreach ($data['contacts'] as $contact)
-                                <span>{{ $contact }}</span>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </header>
-
-            <main class="minimal-main">
-                @if ($data['summary'])
-                    <section class="minimal-card minimal-summary">
-                        <h2>{{ __('Summary') }}</h2>
-                        <p>{{ $data['summary'] }}</p>
-                    </section>
+                @elseif ($initials)
+                    <div class="minimal-avatar minimal-avatar--initials">{{ $initials }}</div>
                 @endif
-
-                <div class="minimal-layout">
-                    <div class="minimal-column">
-                        @if (!empty($data['experiences']))
-                            <section class="minimal-card minimal-experience">
-                                <div class="minimal-card-header">
-                                    <h2>{{ __('Experience') }}</h2>
-                                </div>
-                                <div class="minimal-experience-list">
-                                    @foreach ($data['experiences'] as $experience)
-                                        <article class="minimal-experience-item">
-                                            <header>
-                                                <div>
-                                                    @if ($experience['role'])
-                                                        <h3>{{ $experience['role'] }}</h3>
-                                                    @endif
-                                                    @if ($experience['company'] || $experience['location'])
-                                                        <p>
-                                                            {{ $experience['company'] }}
-                                                            @if ($experience['company'] && $experience['location'])
-                                                                ·
-                                                            @endif
-                                                            {{ $experience['location'] }}
-                                                        </p>
-                                                    @endif
-                                                </div>
-                                                @if ($experience['period'])
-                                                    <span>{{ $experience['period'] }}</span>
-                                                @endif
-                                            </header>
-                                            @if ($experience['summary'])
-                                                <p class="minimal-note">{{ $experience['summary'] }}</p>
-                                            @endif
-                                        </article>
-                                    @endforeach
-                                </div>
-                            </section>
-                        @endif
-
-                        @if (!empty($data['education']))
-                            <section class="minimal-card minimal-education">
-                                <div class="minimal-card-header">
-                                    <h2>{{ __('Education') }}</h2>
-                                </div>
-                                <div class="minimal-education-list">
-                                    @foreach ($data['education'] as $education)
-                                        <article class="minimal-education-item">
-                                            <header>
-                                                <div>
-                                                    <h3>{{ $education['institution'] }}</h3>
-                                                    @if ($education['degree'] || $education['field'])
-                                                        <p>
-                                                            {{ $education['degree'] }}
-                                                            @if ($education['degree'] && $education['field'])
-                                                                ·
-                                                            @endif
-                                                            {{ $education['field'] }}
-                                                        </p>
-                                                    @endif
-                                                </div>
-                                                @if ($education['period'])
-                                                    <span>{{ $education['period'] }}</span>
-                                                @endif
-                                            </header>
-                                            @if ($education['location'])
-                                                <p class="minimal-muted">{{ $education['location'] }}</p>
-                                            @endif
-                                        </article>
-                                    @endforeach
-                                </div>
-                            </section>
-                        @endif
-                    </div>
-
-                    @if ($hasSidebar)
-                        <div class="minimal-column minimal-column--aside">
-                            @if (!empty($data['skills']))
-                                <section class="minimal-card minimal-aside-card">
-                                    <h2>{{ __('Skills') }}</h2>
-                                    <ul>
-                                        @foreach ($data['skills'] as $skill)
-                                            <li>{{ $skill }}</li>
-                                        @endforeach
-                                    </ul>
-                                </section>
-                            @endif
-
-                            @if (!empty($data['languages']))
-                                <section class="minimal-card minimal-aside-card">
-                                    <h2>{{ __('Languages') }}</h2>
-                                    <ul>
-                                        @foreach ($data['languages'] as $language)
-                                            <li>
-                                                <span>{{ $language['name'] }}</span>
-                                                @if (!empty($language['level']))
-                                                    <span>{{ ucfirst($language['level']) }}</span>
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </section>
-                            @endif
-
-                            @if (!empty($data['hobbies']))
-                                <section class="minimal-card minimal-aside-card">
-                                    <h2>{{ __('Interests') }}</h2>
-                                    <ul>
-                                        @foreach ($data['hobbies'] as $hobby)
-                                            <li>{{ $hobby }}</li>
-                                        @endforeach
-                                    </ul>
-                                </section>
-                            @endif
-                        </div>
+                <div class="minimal-identity__text">
+                    <h1>{{ $data['name'] ?? __('Your Name') }}</h1>
+                    @if ($data['headline'])
+                        <p class="minimal-headline">{{ $data['headline'] }}</p>
                     @endif
                 </div>
-            </main>
-        </div>
+            </div>
+
+            @if (!empty($data['contacts']))
+                <dl class="minimal-contact">
+                    @foreach ($data['contacts'] as $contact)
+                        <div>
+                            <dt>{{ __('Contact') }}</dt>
+                            <dd>{{ $contact }}</dd>
+                        </div>
+                    @endforeach
+                </dl>
+            @endif
+
+            @if (!empty($data['skills']))
+                <section class="minimal-sidebar-section">
+                    <h2>{{ __('Strengths') }}</h2>
+                    <ul>
+                        @foreach ($data['skills'] as $skill)
+                            <li>{{ $skill }}</li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            @if (!empty($data['languages']))
+                <section class="minimal-sidebar-section">
+                    <h2>{{ __('Languages') }}</h2>
+                    <ul>
+                        @foreach ($data['languages'] as $language)
+                            <li>
+                                <span>{{ $language['name'] }}</span>
+                                @if (!empty($language['level']))
+                                    <span class="minimal-badge">{{ ucfirst($language['level']) }}</span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+
+            @if (!empty($data['hobbies']))
+                <section class="minimal-sidebar-section">
+                    <h2>{{ __('Interests') }}</h2>
+                    <ul class="minimal-pill-list">
+                        @foreach ($data['hobbies'] as $hobby)
+                            <li>{{ $hobby }}</li>
+                        @endforeach
+                    </ul>
+                </section>
+            @endif
+        </aside>
+
+        <main class="minimal-content">
+            @if ($summaryParagraphs->isNotEmpty())
+                <section class="minimal-section minimal-section--summary">
+                    <h2>{{ __('Overview') }}</h2>
+                    <div class="minimal-section__body">
+                        @foreach ($summaryParagraphs as $paragraph)
+                            <p>{{ $paragraph }}</p>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            @if (!empty($data['experiences']))
+                <section class="minimal-section">
+                    <header class="minimal-section__header">
+                        <h2>{{ __('Experience') }}</h2>
+                        <p>{{ __('Roles, results and responsibilities in reverse chronology.') }}</p>
+                    </header>
+                    <div class="minimal-timeline">
+                        @foreach ($data['experiences'] as $experience)
+                            <article class="minimal-timeline__item">
+                                <div class="minimal-timeline__meta">
+                                    @if ($experience['period'])
+                                        <span class="minimal-timeline__period">{{ $experience['period'] }}</span>
+                                    @endif
+                                    <span class="minimal-timeline__company">{{ collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter()->implode(' · ') }}</span>
+                                </div>
+                                <div class="minimal-timeline__content">
+                                    @if ($experience['role'])
+                                        <h3>{{ $experience['role'] }}</h3>
+                                    @endif
+                                    @if ($experience['summary'])
+                                        <p>{{ $experience['summary'] }}</p>
+                                    @endif
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            @if (!empty($data['education']))
+                <section class="minimal-section">
+                    <header class="minimal-section__header">
+                        <h2>{{ __('Education') }}</h2>
+                        <p>{{ __('Programmes and academic achievements.') }}</p>
+                    </header>
+                    <div class="minimal-education">
+                        @foreach ($data['education'] as $education)
+                            <article>
+                                <h3>{{ $education['institution'] }}</h3>
+                                <div class="minimal-education__details">
+                                    <span>{{ collect([$education['degree'] ?? null, $education['field'] ?? null])->filter()->implode(' · ') }}</span>
+                                    @if ($education['period'])
+                                        <span>{{ $education['period'] }}</span>
+                                    @endif
+                                </div>
+                                @if ($education['location'])
+                                    <p>{{ $education['location'] }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+        </main>
     </div>
 </body>
 </html>
