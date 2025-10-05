@@ -1,228 +1,376 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#0ea5e9';
+    $secondary = '#f97316';
+    $hasGradientAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-gradient {
-        background: linear-gradient(160deg, rgba(14, 165, 233, 0.18), rgba(16, 185, 129, 0.18));
-        color: #0f172a;
+    body.template-gradient {
+        background-color: #f1f9ff;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
+        color: #13223a;
     }
-    .template-gradient .gradient-wrapper {
-        width: 100%;
-        background: #ffffff;
-        border-radius: 28px;
-        padding: 32px;
-        border: 1px solid rgba(14, 165, 233, 0.2);
-    }
-    .template-gradient .gradient-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 26px;
-    }
-    .template-gradient .gradient-header-main {
-        display: flex;
-        align-items: center;
-        gap: 22px;
-    }
-    .template-gradient .gradient-avatar {
-        width: 82px;
-        height: 82px;
-        border-radius: 24px;
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.22), rgba(16, 185, 129, 0.28));
-        border: 3px solid rgba(14, 165, 233, 0.35);
+
+    body.template-gradient .gradient-page {
+        background-color: #ffffff;
+        border: 2px solid #cdeafe;
+        border-radius: 22px;
         overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #0f172a;
     }
-    .template-gradient .gradient-avatar img {
+
+    body.template-gradient .gradient-header {
+        background-color: {{ $accent }};
+        color: #ffffff;
+        padding: 26px 32px;
+        border-bottom: 4px solid {{ $secondary }};
+    }
+
+    body.template-gradient .gradient-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-gradient .gradient-header td {
+        vertical-align: top;
+    }
+
+    body.template-gradient .gradient-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.6);
+        overflow: hidden;
+        background-color: rgba(15, 23, 42, 0.25);
+    }
+
+    body.template-gradient .gradient-avatar img {
+        width: 96px;
+        height: 96px;
         object-fit: cover;
     }
-    .template-gradient .gradient-avatar-initials {
-        font-size: 20px;
-        font-weight: 600;
-        letter-spacing: 0.28em;
+
+    body.template-gradient .gradient-avatar span {
+        display: block;
+        width: 96px;
+        height: 96px;
+        line-height: 96px;
+        text-align: center;
+        font-size: 24px;
+        letter-spacing: 4px;
+        color: #ffffff;
     }
-    .template-gradient .gradient-name {
-        font-size: 27px;
-        font-weight: 600;
+
+    body.template-gradient .gradient-name {
+        font-size: 30px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin: 0;
     }
-    .template-gradient .gradient-headline {
-        margin-top: 8px;
+
+    body.template-gradient .gradient-headline {
         font-size: 12px;
-        letter-spacing: 0.3em;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        color: #0284c7;
+        margin-top: 6px;
+        color: rgba(255, 255, 255, 0.8);
     }
-    .template-gradient .gradient-badge {
-        font-size: 10px;
-        letter-spacing: 0.3em;
-        text-transform: uppercase;
-        color: #0ea5e9;
-    }
-    .template-gradient .gradient-contact {
-        display: grid;
-        gap: 6px;
+
+    body.template-gradient .gradient-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         font-size: 11px;
-        text-align: right;
-        color: #0369a1;
+        color: rgba(255, 255, 255, 0.85);
     }
-    .template-gradient .gradient-grid {
-        display: grid;
-        grid-template-columns: 1.6fr 1fr;
-        gap: 28px;
+
+    body.template-gradient .gradient-contact li {
+        margin-bottom: 4px;
     }
-    .template-gradient .gradient-section-title {
+
+    body.template-gradient .gradient-body {
+        padding: 28px 32px 34px;
+    }
+
+    body.template-gradient .gradient-summary {
+        border: 1px solid #cdeafe;
+        background-color: #ebf8ff;
+        border-radius: 18px;
+        padding: 16px 20px;
+        margin-bottom: 24px;
         font-size: 12px;
-        letter-spacing: 0.32em;
-        text-transform: uppercase;
-        color: #0e7490;
-        margin-bottom: 12px;
+        color: #1b2e44;
     }
-    .template-gradient .gradient-card {
-        border-left: 4px solid rgba(6, 182, 212, 0.4);
-        border-radius: 16px;
-        background: rgba(240, 249, 255, 0.8);
-        padding: 18px 20px;
-        margin-bottom: 16px;
+
+    body.template-gradient .gradient-summary p {
+        margin: 0 0 10px 0;
     }
-    .template-gradient .gradient-card:last-child {
+
+    body.template-gradient .gradient-summary p:last-child {
         margin-bottom: 0;
     }
-    .template-gradient .gradient-card h3 {
-        font-size: 13px;
-        font-weight: 600;
-        color: #0f172a;
+
+    body.template-gradient .gradient-columns {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .template-gradient .gradient-meta {
+
+    body.template-gradient .gradient-columns td {
+        vertical-align: top;
+    }
+
+    body.template-gradient .gradient-main {
+        width: 65%;
+        padding-right: 22px;
+        border-right: 1px solid #d7ecff;
+    }
+
+    body.template-gradient .gradient-aside {
+        width: 35%;
+        padding-left: 22px;
+    }
+
+    body.template-gradient .gradient-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-gradient .gradient-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-gradient .gradient-title {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: {{ $secondary }};
+        margin-bottom: 10px;
+    }
+
+    body.template-gradient .gradient-entry {
+        margin-bottom: 18px;
+        padding-left: 12px;
+        border-left: 3px solid rgba(14, 165, 233, 0.35);
+    }
+
+    body.template-gradient .gradient-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-gradient .gradient-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #13223a;
+    }
+
+    body.template-gradient .gradient-meta {
         font-size: 11px;
-        color: #0e7490;
+        color: #355072;
         margin-top: 4px;
     }
-    .template-gradient .gradient-summary {
-        background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(16, 185, 129, 0.15));
-        border: 1px solid rgba(14, 165, 233, 0.25);
-        border-radius: 16px;
-        padding: 18px;
+
+    body.template-gradient .gradient-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-gradient .gradient-bullets li {
         font-size: 12px;
-        margin-bottom: 24px;
+        color: #1b2e44;
+        margin-bottom: 6px;
     }
-    .template-gradient .gradient-tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+
+    body.template-gradient .gradient-bullets li:last-child {
+        margin-bottom: 0;
     }
-    .template-gradient .gradient-tag {
-        padding: 5px 10px;
+
+    body.template-gradient .gradient-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-gradient .gradient-chip-list li {
+        display: inline-block;
+        background-color: rgba(14, 165, 233, 0.12);
+        border: 1px solid rgba(14, 165, 233, 0.3);
         border-radius: 12px;
+        padding: 4px 11px;
         font-size: 10px;
-        letter-spacing: 0.25em;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        background: rgba(16, 185, 129, 0.15);
-        color: #0f766e;
+        color: #0f4c75;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-gradient .gradient-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-gradient .gradient-simple-list li {
+        font-size: 11px;
+        color: #1b2e44;
+        margin-bottom: 6px;
+    }
+
+    body.template-gradient .gradient-simple-list li span {
+        color: #355072;
     }
 </style>
-<div class="gradient-wrapper">
+
+<div class="gradient-page">
     <header class="gradient-header">
-        <div class="gradient-header-main">
-            @if ($profileImage)
-                <div class="gradient-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                </div>
-            @endif
-            <div>
-                <div class="gradient-badge">Profile</div>
-                <h1 class="gradient-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-                @if ($headline)
-                    <p class="gradient-headline">{{ strtoupper($headline) }}</p>
+        <table>
+            <tr>
+                <td style="width: 120px;">
+                    <div class="gradient-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="gradient-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
+                    @if ($headline)
+                        <div class="gradient-headline">{{ strtoupper($headline) }}</div>
+                    @endif
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="gradient-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
                 @endif
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="gradient-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
+            </tr>
+        </table>
+    </header>
+
+    <div class="gradient-body">
+        @if ($summaryParagraphs->isNotEmpty())
+            <div class="gradient-summary">
+                @foreach ($summaryParagraphs as $paragraph)
+                    <p>{{ $paragraph }}</p>
                 @endforeach
             </div>
         @endif
-    </header>
-    <div class="gradient-grid">
-        <main>
-            @if ($summary)
-                <section class="gradient-summary">{{ $summary }}</section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section style="margin-bottom: 24px;">
-                    <h2 class="gradient-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="gradient-card">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="gradient-meta">{{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}</p>
-                            <p class="gradient-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="margin-top: 10px; color: #134e4a;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+        <table class="gradient-columns">
+            <tr>
+                <td class="gradient-main" @if (! $hasGradientAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                    @if ($experienceBlocks->isNotEmpty())
+                        <div class="gradient-section">
+                            <div class="gradient-title">{{ __('Experience') }}</div>
+                            @foreach ($experienceBlocks as $experience)
+                                <div class="gradient-entry">
+                                    @if (!empty($experience['position']))
+                                        <div class="gradient-entry-title">{{ $experience['position'] }}</div>
+                                    @endif
+                                    @php
+                                        $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                        $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                    @endphp
+                                    @if ($metaPieces->isNotEmpty())
+                                        <div class="gradient-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($timePieces->isNotEmpty())
+                                        <div class="gradient-meta">{{ $timePieces->implode(' – ') }}</div>
+                                    @endif
+                                    @if ($experience['bullets']->isNotEmpty())
+                                        <ul class="gradient-bullets">
+                                            @foreach ($experience['bullets'] as $bullet)
+                                                <li>{{ $bullet }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @elseif (!empty($experience['achievements']))
+                                        <p class="gradient-meta" style="color: #1b2e44; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
 
-            @if (!empty($educationItems))
-                <section>
-                    <h2 class="gradient-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="gradient-card">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="gradient-meta">{{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}</p>
-                            <p class="gradient-meta">{{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}</p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section style="margin-bottom: 18px;">
-                    <h2 class="gradient-section-title">Skills</h2>
-                    <div class="gradient-tags">
-                        @foreach ($skills as $skill)
-                            <span class="gradient-tag">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+                    @if ($educationBlocks->isNotEmpty())
+                        <div class="gradient-section">
+                            <div class="gradient-title">{{ __('Education') }}</div>
+                            @foreach ($educationBlocks as $education)
+                                <div class="gradient-entry">
+                                    @if (!empty($education['institution']))
+                                        <div class="gradient-entry-title">{{ $education['institution'] }}</div>
+                                    @endif
+                                    @php
+                                        $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                        $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                        $locationPieces = collect([$education['location'] ?? null])->filter();
+                                    @endphp
+                                    @if ($studyPieces->isNotEmpty())
+                                        <div class="gradient-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                    @endif
+                                    @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                        <div class="gradient-meta">
+                                            {{ $locationPieces->implode(' · ') }}
+                                            @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                                ·
+                                            @endif
+                                            {{ $durationPieces->implode(' – ') }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </td>
+                @if ($hasGradientAside)
+                    <td class="gradient-aside">
+                        @if ($skillTags->isNotEmpty())
+                            <div class="gradient-section">
+                                <div class="gradient-title">{{ __('Skills') }}</div>
+                                <ul class="gradient-chip-list">
+                                    @foreach ($skillTags as $skill)
+                                        <li>{{ $skill }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($languages))
-                <section style="margin-bottom: 18px;">
-                    <h2 class="gradient-section-title">Languages</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #0f172a;">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #0ea5e9;"> &middot; {{ $language['level'] }}</span>
-                                @endif
-                            </li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
+                        @if ($languageItems->isNotEmpty())
+                            <div class="gradient-section">
+                                <div class="gradient-title">{{ __('Languages') }}</div>
+                                <ul class="gradient-simple-list">
+                                    @foreach ($languageItems as $language)
+                                        <li>
+                                            {{ $language['name'] }}
+                                            @if ($language['level'])
+                                                <span>· {{ $language['level'] }}</span>
+                                            @endif
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
-            @if (!empty($hobbies))
-                <section>
-                    <h2 class="gradient-section-title">Interests</h2>
-                    <ul style="display: grid; gap: 6px; font-size: 11px; color: #0f172a;">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-        </aside>
+                        @if ($hobbyItems->isNotEmpty())
+                            <div class="gradient-section">
+                                <div class="gradient-title">{{ __('Interests') }}</div>
+                                <ul class="gradient-simple-list">
+                                    @foreach ($hobbyItems as $hobby)
+                                        <li>{{ $hobby }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    </td>
+                @endif
+            </tr>
+        </table>
     </div>
 </div>

@@ -1,219 +1,365 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $accent = $accentColor ?? '#0f172a';
+    $hasMinimalAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-minimal {
-        background: #ffffff;
-    }
-    .template-minimal .minimal-wrapper {
-        width: 100%;
-        padding: 24px 28px;
-    }
-    .template-minimal .minimal-header {
-        margin-bottom: 26px;
-    }
-    .template-minimal .minimal-header-main {
-        display: flex;
-        align-items: center;
-        gap: 24px;
-    }
-    .template-minimal .minimal-avatar {
-        width: 74px;
-        height: 74px;
-        border-radius: 999px;
-        border: 2px solid rgba(100, 116, 139, 0.3);
-        background: rgba(15, 23, 42, 0.05);
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    body.template-minimal {
+        background-color: #f4f7fb;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
         color: #0f172a;
     }
-    .template-minimal .minimal-avatar img {
+
+    body.template-minimal .minimal-page {
+        background-color: #ffffff;
+        border: 1px solid #d6deeb;
+        border-radius: 18px;
+        padding: 28px 32px;
+    }
+
+    body.template-minimal .minimal-header {
+        border-bottom: 1px solid #d6deeb;
+        padding-bottom: 18px;
+        margin-bottom: 22px;
+    }
+
+    body.template-minimal .minimal-header table {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-minimal .minimal-header td {
+        vertical-align: top;
+    }
+
+    body.template-minimal .minimal-avatar {
+        width: 90px;
+        height: 90px;
+        border-radius: 12px;
+        border: 2px solid #d6deeb;
+        overflow: hidden;
+        background-color: #f1f5f9;
+    }
+
+    body.template-minimal .minimal-avatar img {
+        width: 90px;
+        height: 90px;
         object-fit: cover;
     }
-    .template-minimal .minimal-avatar-initials {
-        font-size: 20px;
-        font-weight: 500;
-        letter-spacing: 0.22em;
-    }
-    .template-minimal .minimal-name {
-        font-size: 28px;
-        font-weight: 500;
-        letter-spacing: 0.02em;
-        color: #0f172a;
-    }
-    .template-minimal .minimal-headline {
-        margin-top: 8px;
-        font-size: 12px;
-        letter-spacing: 0.38em;
-        text-transform: uppercase;
+
+    body.template-minimal .minimal-avatar span {
+        display: block;
+        width: 90px;
+        height: 90px;
+        line-height: 90px;
+        text-align: center;
+        font-size: 22px;
+        letter-spacing: 4px;
         color: #475569;
     }
-    .template-minimal .minimal-contact {
-        margin-top: 16px;
-        display: grid;
-        gap: 4px;
+
+    body.template-minimal .minimal-name {
+        font-size: 26px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    body.template-minimal .minimal-headline {
+        font-size: 12px;
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        margin-top: 6px;
+        color: #64748b;
+    }
+
+    body.template-minimal .minimal-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
         font-size: 11px;
         color: #475569;
     }
-    .template-minimal .minimal-grid {
-        display: grid;
-        grid-template-columns: 1.7fr 1fr;
-        gap: 32px;
-    }
-    .template-minimal .minimal-section-title {
-        font-size: 12px;
-        text-transform: uppercase;
-        letter-spacing: 0.4em;
-        color: #64748b;
-        margin-bottom: 10px;
-    }
-    .template-minimal .minimal-divider {
-        height: 1px;
-        background: rgba(148, 163, 184, 0.5);
-        margin: 18px 0;
-    }
-    .template-minimal .minimal-item {
-        margin-bottom: 18px;
-    }
-    .template-minimal .minimal-item:last-child {
-        margin-bottom: 0;
-    }
-    .template-minimal .minimal-item h3 {
-        font-size: 13px;
-        font-weight: 500;
-        color: #0f172a;
+
+    body.template-minimal .minimal-contact li {
         margin-bottom: 4px;
     }
-    .template-minimal .minimal-meta {
-        font-size: 11px;
-        color: #94a3b8;
-    }
-    .template-minimal .minimal-summary {
+
+    body.template-minimal .minimal-summary {
+        border-left: 4px solid {{ $accent }};
+        background-color: #f8fafc;
+        padding: 14px 18px;
+        margin-bottom: 24px;
         font-size: 12px;
         color: #1f2937;
+    }
+
+    body.template-minimal .minimal-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-minimal .minimal-summary p:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-minimal .minimal-columns {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    body.template-minimal .minimal-columns td {
+        vertical-align: top;
+    }
+
+    body.template-minimal .minimal-main {
+        width: 67%;
+        padding-right: 20px;
+        border-right: 1px solid #e2e8f0;
+    }
+
+    body.template-minimal .minimal-aside {
+        width: 33%;
+        padding-left: 20px;
+    }
+
+    body.template-minimal .minimal-section {
         margin-bottom: 24px;
     }
-    .template-minimal .minimal-bullet {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 11px;
-        color: #334155;
+
+    body.template-minimal .minimal-section:last-child {
+        margin-bottom: 0;
     }
-    .template-minimal .minimal-dot {
-        width: 4px;
-        height: 4px;
+
+    body.template-minimal .minimal-title {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    body.template-minimal .minimal-entry {
+        margin-bottom: 16px;
+    }
+
+    body.template-minimal .minimal-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-minimal .minimal-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #0f172a;
+    }
+
+    body.template-minimal .minimal-meta {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    body.template-minimal .minimal-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-minimal .minimal-bullets li {
+        font-size: 12px;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    body.template-minimal .minimal-bullets li:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-minimal .minimal-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-minimal .minimal-chip-list li {
+        display: inline-block;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
         border-radius: 999px;
-        background: #475569;
+        padding: 4px 10px;
+        font-size: 10px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #475569;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-minimal .minimal-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-minimal .minimal-simple-list li {
+        font-size: 11px;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    body.template-minimal .minimal-simple-list li span {
+        color: #64748b;
     }
 </style>
-<div class="minimal-wrapper">
+
+<div class="minimal-page">
     <header class="minimal-header">
-        <div class="minimal-header-main">
-            @if ($profileImage)
-                <div class="minimal-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
-                </div>
-            @endif
-            <div>
-                <h1 class="minimal-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
-                @if ($headline)
-                    <p class="minimal-headline">{{ strtoupper($headline) }}</p>
+        <table>
+            <tr>
+                <td style="width: 110px;">
+                    <div class="minimal-avatar">
+                        @if ($profileImage)
+                            <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                        @elseif ($initials)
+                            <span>{{ $initials }}</span>
+                        @else
+                            <span>{{ __('CV') }}</span>
+                        @endif
+                    </div>
+                </td>
+                <td>
+                    <div class="minimal-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
+                    @if ($headline)
+                        <div class="minimal-headline">{{ strtoupper($headline) }}</div>
+                    @endif
+                </td>
+                @if (!empty($contactItems))
+                    <td style="width: 220px;">
+                        <ul class="minimal-contact">
+                            @foreach ($contactItems as $contact)
+                                <li>{{ $contact }}</li>
+                            @endforeach
+                        </ul>
+                    </td>
                 @endif
-            </div>
-        </div>
-        @if (!empty($contactItems))
-            <div class="minimal-contact">
-                @foreach ($contactItems as $contact)
-                    <span>{{ $contact }}</span>
-                @endforeach
-            </div>
-        @endif
+            </tr>
+        </table>
     </header>
-    <div class="minimal-grid">
-        <main>
-            @if ($summary)
-                <section class="minimal-summary">{{ $summary }}</section>
-            @endif
 
-            @if (!empty($experienceItems))
-                <section>
-                    <h2 class="minimal-section-title">Experience</h2>
-                    <div class="minimal-divider"></div>
-                    @foreach ($experienceItems as $experience)
-                        <article class="minimal-item">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="minimal-meta">{{ collect([$experience['company'], $experience['location']])->filter()->implode(' · ') }}</p>
-                            <p class="minimal-meta">{{ collect([$experience['from'], $experience['to']])->filter()->implode(' – ') }}</p>
-                            @if ($experience['achievements'])
-                                <p style="margin-top: 10px; color: #1f2937;">{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
+    @if ($summaryParagraphs->isNotEmpty())
+        <div class="minimal-summary">
+            @foreach ($summaryParagraphs as $paragraph)
+                <p>{{ $paragraph }}</p>
+            @endforeach
+        </div>
+    @endif
 
-            @if (!empty($educationItems))
-                <section style="margin-top: 28px;">
-                    <h2 class="minimal-section-title">Education</h2>
-                    <div class="minimal-divider"></div>
-                    @foreach ($educationItems as $education)
-                        <article class="minimal-item">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="minimal-meta">{{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}</p>
-                            <p class="minimal-meta">{{ collect([$education['location'], collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ')])->filter()->implode(' · ') }}</p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
-            @if (!empty($skills))
-                <section>
-                    <h2 class="minimal-section-title">Skills</h2>
-                    <div class="minimal-divider"></div>
-                    <ul style="display: grid; gap: 6px;">
-                        @foreach ($skills as $skill)
-                            <li class="minimal-bullet"><span class="minimal-dot"></span>{{ $skill }}</li>
-                        @endforeach
-                    </ul>
-                </section>
-            @endif
-
-            @if (!empty($languages))
-                <section style="margin-top: 28px;">
-                    <h2 class="minimal-section-title">Languages</h2>
-                    <div class="minimal-divider"></div>
-                    <ul style="display: grid; gap: 6px;">
-                        @foreach ($languages as $language)
-                            <li class="minimal-bullet">
-                                <span class="minimal-dot"></span>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span style="color: #94a3b8;">&nbsp;{{ $language['level'] }}</span>
+    <table class="minimal-columns">
+        <tr>
+            <td class="minimal-main" @if (! $hasMinimalAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                @if ($experienceBlocks->isNotEmpty())
+                    <div class="minimal-section">
+                        <div class="minimal-title">{{ __('Experience') }}</div>
+                        @foreach ($experienceBlocks as $experience)
+                            <div class="minimal-entry">
+                                @if (!empty($experience['position']))
+                                    <div class="minimal-entry-title">{{ $experience['position'] }}</div>
                                 @endif
-                            </li>
+                                @php
+                                    $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                    $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                @endphp
+                                @if ($metaPieces->isNotEmpty())
+                                    <div class="minimal-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                @endif
+                                @if ($timePieces->isNotEmpty())
+                                    <div class="minimal-meta">{{ $timePieces->implode(' – ') }}</div>
+                                @endif
+                                @if ($experience['bullets']->isNotEmpty())
+                                    <ul class="minimal-bullets">
+                                        @foreach ($experience['bullets'] as $bullet)
+                                            <li>{{ $bullet }}</li>
+                                        @endforeach
+                                    </ul>
+                                @elseif (!empty($experience['achievements']))
+                                    <p class="minimal-meta" style="color: #1f2937; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                @endif
+                            </div>
                         @endforeach
-                    </ul>
-                </section>
-            @endif
+                    </div>
+                @endif
 
-            @if (!empty($hobbies))
-                <section style="margin-top: 28px;">
-                    <h2 class="minimal-section-title">Interests</h2>
-                    <div class="minimal-divider"></div>
-                    <ul style="display: grid; gap: 6px;">
-                        @foreach ($hobbies as $hobby)
-                            <li class="minimal-bullet"><span class="minimal-dot"></span>{{ $hobby }}</li>
+                @if ($educationBlocks->isNotEmpty())
+                    <div class="minimal-section">
+                        <div class="minimal-title">{{ __('Education') }}</div>
+                        @foreach ($educationBlocks as $education)
+                            <div class="minimal-entry">
+                                @if (!empty($education['institution']))
+                                    <div class="minimal-entry-title">{{ $education['institution'] }}</div>
+                                @endif
+                                @php
+                                    $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                    $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                    $locationPieces = collect([$education['location'] ?? null])->filter();
+                                @endphp
+                                @if ($studyPieces->isNotEmpty())
+                                    <div class="minimal-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                @endif
+                                @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                    <div class="minimal-meta">
+                                        {{ $locationPieces->implode(' · ') }}
+                                        @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                            ·
+                                        @endif
+                                        {{ $durationPieces->implode(' – ') }}
+                                    </div>
+                                @endif
+                            </div>
                         @endforeach
-                    </ul>
-                </section>
+                    </div>
+                @endif
+            </td>
+            @if ($hasMinimalAside)
+                <td class="minimal-aside">
+                    @if ($skillTags->isNotEmpty())
+                        <div class="minimal-section">
+                            <div class="minimal-title">{{ __('Skills') }}</div>
+                            <ul class="minimal-chip-list">
+                                @foreach ($skillTags as $skill)
+                                    <li>{{ $skill }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($languageItems->isNotEmpty())
+                        <div class="minimal-section">
+                            <div class="minimal-title">{{ __('Languages') }}</div>
+                            <ul class="minimal-simple-list">
+                                @foreach ($languageItems as $language)
+                                    <li>
+                                        {{ $language['name'] }}
+                                        @if ($language['level'])
+                                            <span>· {{ $language['level'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($hobbyItems->isNotEmpty())
+                        <div class="minimal-section">
+                            <div class="minimal-title">{{ __('Interests') }}</div>
+                            <ul class="minimal-simple-list">
+                                @foreach ($hobbyItems as $hobby)
+                                    <li>{{ $hobby }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </td>
             @endif
-        </aside>
-    </div>
+        </tr>
+    </table>
 </div>

@@ -1,237 +1,359 @@
+@include('cv.pdf.templates.partials.data-prep')
+
+@php
+    $hasClassicAside = $skillTags->isNotEmpty() || $languageItems->isNotEmpty() || $hobbyItems->isNotEmpty();
+@endphp
+
 <style>
-    .template-classic {
-        background: #f8fafc;
+    body.template-classic {
+        background-color: #f5f1eb;
+        padding: 18px;
+        font-family: 'DejaVu Sans', 'Helvetica', 'Arial', sans-serif;
+        color: #2f2a1e;
     }
-    .template-classic .classic-wrapper {
-        width: 100%;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+
+    body.template-classic .classic-page {
+        background-color: #ffffff;
+        border: 2px solid #d9c7a3;
         border-radius: 18px;
-        padding: 28px;
+        padding: 26px 30px 30px;
+        box-shadow: none;
     }
-    .template-classic .classic-header {
-        border-bottom: 2px solid {{ $accentColor }};
-        padding-bottom: 18px;
-        margin-bottom: 22px;
-    }
-    .template-classic .classic-header-main {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-    .template-classic .classic-avatar {
-        width: 78px;
-        height: 78px;
-        border-radius: 999px;
-        border: 3px solid {{ $accentColor }};
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(15, 23, 42, 0.05);
-        color: {{ $accentColor }};
-    }
-    .template-classic .classic-avatar img {
+
+    body.template-classic .classic-header {
         width: 100%;
-        height: 100%;
+        border-collapse: collapse;
+        margin-bottom: 24px;
+    }
+
+    body.template-classic .classic-header td {
+        vertical-align: top;
+    }
+
+    body.template-classic .classic-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 54px;
+        border: 3px solid #c59d5f;
+        background-color: #f6ede1;
+        overflow: hidden;
+    }
+
+    body.template-classic .classic-avatar img {
+        width: 96px;
+        height: 96px;
         object-fit: cover;
     }
-    .template-classic .classic-avatar-initials {
-        font-size: 20px;
-        font-weight: 600;
-        letter-spacing: 0.18em;
+
+    body.template-classic .classic-avatar span {
+        display: block;
+        width: 96px;
+        height: 96px;
+        line-height: 96px;
+        text-align: center;
+        font-size: 24px;
+        letter-spacing: 6px;
+        color: #b07233;
     }
-    .template-classic .classic-name {
-        font-size: 26px;
-        font-weight: 600;
-        letter-spacing: 0.02em;
-        color: #0f172a;
-    }
-    .template-classic .classic-headline {
-        font-size: 13px;
+
+    body.template-classic .classic-name {
+        font-size: 28px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        letter-spacing: 0.32em;
-        color: {{ $accentColor }};
+        color: #2f2a1e;
+    }
+
+    body.template-classic .classic-headline {
         margin-top: 6px;
-    }
-    .template-classic .classic-layout {
-        display: grid;
-        grid-template-columns: 2.2fr 1fr;
-        gap: 28px;
-    }
-    .template-classic .classic-contact {
-        display: grid;
-        gap: 8px;
-        font-size: 11px;
-        color: #475569;
-    }
-    .template-classic .classic-section-title {
-        font-size: 14px;
-        font-weight: 600;
+        font-size: 12px;
+        letter-spacing: 4px;
         text-transform: uppercase;
-        letter-spacing: 0.28em;
-        color: {{ $accentColor }};
-        margin-bottom: 10px;
+        color: #b07233;
     }
-    .template-classic .classic-item {
-        margin-bottom: 18px;
+
+    body.template-classic .classic-contact {
+        list-style: none;
+        margin: 0;
+        padding: 0;
     }
-    .template-classic .classic-item:last-child {
+
+    body.template-classic .classic-contact li {
+        font-size: 11px;
+        color: #5b5043;
+        margin-bottom: 4px;
+    }
+
+    body.template-classic .classic-summary {
+        background-color: #faf4ea;
+        border: 1px solid #e9dcc7;
+        border-radius: 14px;
+        padding: 16px 18px;
+        margin-bottom: 24px;
+        font-size: 12px;
+        color: #42392f;
+    }
+
+    body.template-classic .classic-summary p {
+        margin: 0 0 10px 0;
+    }
+
+    body.template-classic .classic-summary p:last-child {
         margin-bottom: 0;
     }
-    .template-classic .classic-item h3 {
-        font-size: 13px;
-        font-weight: 600;
-        color: #1e293b;
-        margin-bottom: 4px;
+
+    body.template-classic .classic-columns {
+        width: 100%;
+        border-collapse: collapse;
     }
-    .template-classic .classic-meta {
-        font-size: 11px;
-        color: #64748b;
-        margin-bottom: 4px;
+
+    body.template-classic .classic-columns td {
+        vertical-align: top;
     }
-    .template-classic .classic-summary {
+
+    body.template-classic .classic-main {
+        width: 65%;
+        padding-right: 18px;
+        border-right: 1px solid #e6ddcf;
+    }
+
+    body.template-classic .classic-aside {
+        width: 35%;
+        padding-left: 18px;
+    }
+
+    body.template-classic .classic-section {
+        margin-bottom: 26px;
+    }
+
+    body.template-classic .classic-section:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-classic .classic-section-title {
         font-size: 12px;
-        color: #334155;
-        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        color: #b07233;
+        margin-bottom: 10px;
     }
-    .template-classic .classic-taglist {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+
+    body.template-classic .classic-entry {
+        margin-bottom: 18px;
     }
-    .template-classic .classic-tag {
-        background: rgba(148, 163, 184, 0.2);
+
+    body.template-classic .classic-entry:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-classic .classic-entry-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #2f2a1e;
+    }
+
+    body.template-classic .classic-entry-meta {
+        font-size: 11px;
+        color: #5b5043;
+        margin-top: 4px;
+    }
+
+    body.template-classic .classic-bullets {
+        margin: 10px 0 0 16px;
+        padding: 0;
+    }
+
+    body.template-classic .classic-bullets li {
+        font-size: 12px;
+        color: #42392f;
+        margin-bottom: 6px;
+    }
+
+    body.template-classic .classic-bullets li:last-child {
+        margin-bottom: 0;
+    }
+
+    body.template-classic .classic-chip-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-classic .classic-chip-list li {
+        display: inline-block;
+        background-color: #f0e4d3;
+        border: 1px solid #e3d2b8;
         border-radius: 999px;
         padding: 4px 10px;
         font-size: 10px;
+        letter-spacing: 2px;
         text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: #475569;
+        color: #6c5840;
+        margin: 0 6px 6px 0;
+    }
+
+    body.template-classic .classic-simple-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body.template-classic .classic-simple-list li {
+        font-size: 11px;
+        color: #3f372d;
+        margin-bottom: 6px;
+    }
+
+    body.template-classic .classic-simple-list li span {
+        color: #8c7b66;
     }
 </style>
-<div class="classic-wrapper">
-    <header class="classic-header">
-        <div class="classic-header-main">
-            @if ($profileImage)
+
+<div class="classic-page">
+    <table class="classic-header">
+        <tr>
+            <td style="width: 110px;">
                 <div class="classic-avatar">
-                    <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @if ($profileImage)
+                        <img src="{{ $profileImage }}" alt="{{ $fullName ?: __('Profile photo') }}">
+                    @elseif ($initials)
+                        <span>{{ $initials }}</span>
+                    @else
+                        <span>{{ __('CV') }}</span>
+                    @endif
                 </div>
-            @endif
-            <div>
-                <h1 class="classic-name">{{ $fullName ?: 'Curriculum Vitae' }}</h1>
+            </td>
+            <td>
+                <div class="classic-name">{{ $fullName ?: 'Curriculum Vitae' }}</div>
                 @if ($headline)
-                    <p class="classic-headline">{{ strtoupper($headline) }}</p>
+                    <div class="classic-headline">{{ strtoupper($headline) }}</div>
                 @endif
-            </div>
-        </div>
-    </header>
-    <div class="classic-layout">
-        <main>
-            @if ($summary)
-                <section class="classic-summary">{{ $summary }}</section>
-            @endif
-
-            @if (!empty($experienceItems))
-                <section class="classic-section">
-                    <h2 class="classic-section-title">Experience</h2>
-                    @foreach ($experienceItems as $experience)
-                        <article class="classic-item">
-                            @if ($experience['position'])
-                                <h3>{{ $experience['position'] }}</h3>
-                            @endif
-                            <p class="classic-meta">
-                                {{ $experience['company'] }}
-                                @if ($experience['company'] && $experience['location'])
-                                    &middot;
-                                @endif
-                                {{ $experience['location'] }}
-                            </p>
-                            <p class="classic-meta">
-                                {{ $experience['from'] ?: 'Unknown' }}
-                                &ndash;
-                                {{ $experience['to'] ?: 'Unknown' }}
-                            </p>
-                            @if ($experience['achievements'])
-                                <p>{{ $experience['achievements'] }}</p>
-                            @endif
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-
-            @if (!empty($educationItems))
-                <section class="classic-section" style="margin-top: 24px;">
-                    <h2 class="classic-section-title">Education</h2>
-                    @foreach ($educationItems as $education)
-                        <article class="classic-item">
-                            @if ($education['institution'])
-                                <h3>{{ $education['institution'] }}</h3>
-                            @endif
-                            <p class="classic-meta">
-                                {{ collect([$education['degree'], $education['field']])->filter()->implode(' · ') }}
-                            </p>
-                            <p class="classic-meta">
-                                {{ $education['location'] }}
-                                @if ($education['location'] && ($education['start'] || $education['end']))
-                                    &middot;
-                                @endif
-                                {{ collect([$education['start'], $education['end'] ?: __('Ongoing')])->filter()->implode(' – ') }}
-                            </p>
-                        </article>
-                    @endforeach
-                </section>
-            @endif
-        </main>
-        <aside>
+            </td>
             @if (!empty($contactItems))
-                <section style="margin-bottom: 20px;">
-                    <h2 class="classic-section-title">Contact</h2>
-                    <div class="classic-contact">
+                <td style="width: 220px;">
+                    <ul class="classic-contact">
                         @foreach ($contactItems as $contact)
-                            <span>{{ $contact }}</span>
+                            <li>{{ $contact }}</li>
                         @endforeach
-                    </div>
-                </section>
+                    </ul>
+                </td>
             @endif
+        </tr>
+    </table>
 
-            @if (!empty($skills))
-                <section style="margin-bottom: 20px;">
-                    <h2 class="classic-section-title">Skills</h2>
-                    <div class="classic-taglist">
-                        @foreach ($skills as $skill)
-                            <span class="classic-tag">{{ $skill }}</span>
-                        @endforeach
-                    </div>
-                </section>
-            @endif
+    @if ($summaryParagraphs->isNotEmpty())
+        <div class="classic-summary">
+            @foreach ($summaryParagraphs as $paragraph)
+                <p>{{ $paragraph }}</p>
+            @endforeach
+        </div>
+    @endif
 
-            @if (!empty($languages))
-                <section style="margin-bottom: 20px;">
-                    <h2 class="classic-section-title">Languages</h2>
-                    <ul class="classic-contact">
-                        @foreach ($languages as $language)
-                            <li>
-                                {{ $language['name'] }}
-                                @if ($language['level'])
-                                    <span> &middot; {{ $language['level'] }}</span>
+    <table class="classic-columns">
+        <tr>
+            <td class="classic-main" @if (! $hasClassicAside) style="width: 100%; padding-right: 0; border-right: none;" @endif>
+                @if ($experienceBlocks->isNotEmpty())
+                    <div class="classic-section">
+                        <div class="classic-section-title">{{ __('Experience') }}</div>
+                        @foreach ($experienceBlocks as $experience)
+                            <div class="classic-entry">
+                                @if (!empty($experience['position']))
+                                    <div class="classic-entry-title">{{ $experience['position'] }}</div>
                                 @endif
-                            </li>
+                                @php
+                                    $metaPieces = collect([$experience['company'] ?? null, $experience['location'] ?? null])->filter();
+                                    $timePieces = collect([$experience['from'] ?? null, $experience['to'] ?? null])->filter();
+                                @endphp
+                                @if ($metaPieces->isNotEmpty())
+                                    <div class="classic-entry-meta">{{ $metaPieces->implode(' · ') }}</div>
+                                @endif
+                                @if ($timePieces->isNotEmpty())
+                                    <div class="classic-entry-meta">{{ $timePieces->implode(' – ') }}</div>
+                                @endif
+                                @if ($experience['bullets']->isNotEmpty())
+                                    <ul class="classic-bullets">
+                                        @foreach ($experience['bullets'] as $bullet)
+                                            <li>{{ $bullet }}</li>
+                                        @endforeach
+                                    </ul>
+                                @elseif (!empty($experience['achievements']))
+                                    <p class="classic-entry-meta" style="color: #42392f; margin-top: 8px;">{{ $experience['achievements'] }}</p>
+                                @endif
+                            </div>
                         @endforeach
-                    </ul>
-                </section>
-            @endif
+                    </div>
+                @endif
 
-            @if (!empty($hobbies))
-                <section>
-                    <h2 class="classic-section-title">Interests</h2>
-                    <ul class="classic-contact">
-                        @foreach ($hobbies as $hobby)
-                            <li>{{ $hobby }}</li>
+                @if ($educationBlocks->isNotEmpty())
+                    <div class="classic-section">
+                        <div class="classic-section-title">{{ __('Education') }}</div>
+                        @foreach ($educationBlocks as $education)
+                            <div class="classic-entry">
+                                @if (!empty($education['institution']))
+                                    <div class="classic-entry-title">{{ $education['institution'] }}</div>
+                                @endif
+                                @php
+                                    $studyPieces = collect([$education['degree'] ?? null, $education['field'] ?? null])->filter();
+                                    $durationPieces = collect([$education['start'] ?? null, $education['end'] ?? __('Ongoing')])->filter();
+                                    $locationPieces = collect([$education['location'] ?? null])->filter();
+                                @endphp
+                                @if ($studyPieces->isNotEmpty())
+                                    <div class="classic-entry-meta">{{ $studyPieces->implode(' · ') }}</div>
+                                @endif
+                                @if ($locationPieces->isNotEmpty() || $durationPieces->isNotEmpty())
+                                    <div class="classic-entry-meta">
+                                        {{ $locationPieces->implode(' · ') }}
+                                        @if ($locationPieces->isNotEmpty() && $durationPieces->isNotEmpty())
+                                            ·
+                                        @endif
+                                        {{ $durationPieces->implode(' – ') }}
+                                    </div>
+                                @endif
+                            </div>
                         @endforeach
-                    </ul>
-                </section>
+                    </div>
+                @endif
+            </td>
+            @if ($hasClassicAside)
+                <td class="classic-aside">
+                    @if ($skillTags->isNotEmpty())
+                        <div class="classic-section">
+                            <div class="classic-section-title">{{ __('Skills') }}</div>
+                            <ul class="classic-chip-list">
+                                @foreach ($skillTags as $skill)
+                                    <li>{{ $skill }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($languageItems->isNotEmpty())
+                        <div class="classic-section">
+                            <div class="classic-section-title">{{ __('Languages') }}</div>
+                            <ul class="classic-simple-list">
+                                @foreach ($languageItems as $language)
+                                    <li>
+                                        {{ $language['name'] }}
+                                        @if ($language['level'])
+                                            <span>· {{ $language['level'] }}</span>
+                                        @endif
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if ($hobbyItems->isNotEmpty())
+                        <div class="classic-section">
+                            <div class="classic-section-title">{{ __('Interests') }}</div>
+                            <ul class="classic-simple-list">
+                                @foreach ($hobbyItems as $hobby)
+                                    <li>{{ $hobby }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+                </td>
             @endif
-        </aside>
-    </div>
+        </tr>
+    </table>
 </div>
