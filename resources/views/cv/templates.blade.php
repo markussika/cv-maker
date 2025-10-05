@@ -56,54 +56,6 @@
                 'partial' => 'templates.previews.futuristic',
             ],
         ];
-
-        $sampleCv = [
-            'first_name' => 'Jordan',
-            'last_name' => 'Rivera',
-            'headline' => 'Product Designer',
-            'email' => 'jordan.rivera@example.com',
-            'phone' => '+1 (555) 123-4567',
-            'city' => 'Toronto',
-            'country' => 'Canada',
-            'summary' => 'Designer blending research, motion, and storytelling to craft delightful digital experiences.',
-            'work_experience' => [
-                [
-                    'position' => 'Senior Product Designer',
-                    'company' => 'Northwind Studio',
-                    'city' => 'Toronto',
-                    'country' => 'Canada',
-                    'from' => '2021-02',
-                    'currently' => true,
-                    'achievements' => 'Led cross-functional sprints and launched a design system that lifted activation by 28%.',
-                ],
-                [
-                    'position' => 'Product Designer',
-                    'company' => 'Aurora Labs',
-                    'city' => 'Vancouver',
-                    'country' => 'Canada',
-                    'from' => '2018-05',
-                    'to' => '2021-01',
-                    'achievements' => 'Prototyped immersive flows that increased retention across mobile and web surfaces.',
-                ],
-            ],
-            'education' => [
-                [
-                    'degree' => 'B.A. Interaction Design',
-                    'institution' => 'University of British Columbia',
-                    'city' => 'Vancouver',
-                    'country' => 'Canada',
-                    'start_year' => '2014',
-                    'end_year' => '2018',
-                    'field' => 'Design & Technology',
-                ],
-            ],
-            'skills' => ['Design Systems', 'User Research', 'Prototyping', 'Motion'],
-            'languages' => [
-                ['name' => 'English', 'level' => 'native'],
-                ['name' => 'French', 'level' => 'advanced'],
-            ],
-            'hobbies' => ['Gallery hopping', 'Cycling', 'Synth music'],
-        ];
     @endphp
 
     <div class="space-y-10">
@@ -127,10 +79,15 @@
                     ];
                 @endphp
                 <div class="group createit-template-card">
-                    <div class="createit-template-card__preview bg-gradient-to-br {{ $meta['preview'] }}">
-                        @isset($meta['partial'])
-                            @include($meta['partial'])
-                        @endisset
+                    <div class="createit-template-card__preview">
+                        <iframe
+                            src="{{ route('cv.template-preview', $template) }}#toolbar=0&navpanes=0&scrollbar=0"
+                            title="{{ __('Preview of the :template template', ['template' => $meta['title']]) }}"
+                            class="createit-template-card__preview-frame"
+                            loading="lazy"
+                        >
+                            {{ __('PDF preview of the :template template.', ['template' => $meta['title']]) }}
+                        </iframe>
                     </div>
                     <div class="createit-template-card__body">
                         <div>
