@@ -394,11 +394,11 @@
     }
 
     .createit-template-preview__inner {
-        transform: scale(0.9);
-        transform-origin: top center;
-        height: 111%;
-        width: 111%;
-        margin: 0 auto;
+        @apply h-full w-full overflow-hidden;
+    }
+
+    .createit-template-preview__frame {
+        @apply h-full w-full border-0;
     }
 
     .createit-modal {

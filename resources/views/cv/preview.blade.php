@@ -410,18 +410,15 @@
                         <p class="text-sm text-slate-600">{{ $templateInfo['description'] }}</p>
                         <div class="createit-template-preview relative mt-4 h-52 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
                             <div class="createit-template-preview__inner">
-                                @if (!empty($templateInfo['partial']) && view()->exists($templateInfo['partial']))
-                                    @include($templateInfo['partial'])
-                                @else
-                                    <div class="p-4">
-                                        <div class="h-2 w-24 rounded-full bg-white/70"></div>
-                                        <div class="mt-4 space-y-2">
-                                            <div class="h-2 w-28 rounded-full bg-white/60"></div>
-                                            <div class="h-2 w-32 rounded-full bg-white/40"></div>
-                                            <div class="h-16 rounded-2xl border border-white/50 bg-white/30"></div>
-                                        </div>
-                                    </div>
-                                @endif
+                                <iframe
+                                    src="{{ $pdfPreviewUrl }}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit"
+                                    title="{{ __('Live preview of your CV PDF') }}"
+                                    class="createit-template-preview__frame"
+                                    scrolling="no"
+                                    loading="lazy"
+                                >
+                                    {{ __('PDF preview of your CV.') }}
+                                </iframe>
                             </div>
                         </div>
                         <div class="flex flex-col gap-3 pt-2">
