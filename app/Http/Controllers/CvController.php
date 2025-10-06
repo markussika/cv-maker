@@ -184,7 +184,7 @@ class CvController extends Controller
         $cvData = $this->resolveCvData($request);
         $template = $cvData['template'] ?? 'classic';
 
-        return $this->renderPdf($cvData, $template, $this->filenameForCv($cvData));
+        return $this->renderPdf($cvData, $template, $this->filenameForCv($cvData), false);
     }
 
     public function getCities(Request $request)

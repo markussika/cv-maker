@@ -35,6 +35,7 @@ Route::middleware('auth')->group(function () {
         Route::patch('/{cv}/template','updateTemplate')->name('cv.update-template');
         Route::delete('/{cv}','destroy')->name('cv.destroy');
         Route::get('/preview','preview')->name('cv.preview');
+        Route::get('/pdf','pdf')->name('cv.pdf');
         Route::get('/guide','guide')->name('cv.guide');
 
         // API endpoints routed to controller methods
