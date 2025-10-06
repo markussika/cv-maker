@@ -386,19 +386,21 @@
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Template') }}</p>
                         <h2 class="text-lg font-semibold text-slate-900">{{ $templateInfo['title'] }}</h2>
                         <p class="text-sm text-slate-600">{{ $templateInfo['description'] }}</p>
-                        <div class="relative mt-4 h-52 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
-                            @if (!empty($templateInfo['partial']) && view()->exists($templateInfo['partial']))
-                                @include($templateInfo['partial'])
-                            @else
-                                <div class="p-4">
-                                    <div class="h-2 w-24 rounded-full bg-white/70"></div>
-                                    <div class="mt-4 space-y-2">
-                                        <div class="h-2 w-28 rounded-full bg-white/60"></div>
-                                        <div class="h-2 w-32 rounded-full bg-white/40"></div>
-                                        <div class="h-16 rounded-2xl border border-white/50 bg-white/30"></div>
+                        <div class="createit-template-preview relative mt-4 h-52 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
+                            <div class="createit-template-preview__inner">
+                                @if (!empty($templateInfo['partial']) && view()->exists($templateInfo['partial']))
+                                    @include($templateInfo['partial'])
+                                @else
+                                    <div class="p-4">
+                                        <div class="h-2 w-24 rounded-full bg-white/70"></div>
+                                        <div class="mt-4 space-y-2">
+                                            <div class="h-2 w-28 rounded-full bg-white/60"></div>
+                                            <div class="h-2 w-32 rounded-full bg-white/40"></div>
+                                            <div class="h-16 rounded-2xl border border-white/50 bg-white/30"></div>
+                                        </div>
                                     </div>
-                                </div>
-                            @endif
+                                @endif
+                            </div>
                         </div>
                         <div class="flex flex-col gap-3 pt-2">
                             <a href="{{ route('cv.download', array_filter(['template' => $templateKey, 'cv' => request('cv')])) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-slate-400/40 transition hover:-translate-y-0.5 hover:bg-black">
