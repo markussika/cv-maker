@@ -14,7 +14,6 @@
 
     body.template-gradient .gradient-page {
         background-color: #ffffff;
-        border: 2px solid #cdeafe;
         border-radius: 22px;
         overflow: hidden;
     }

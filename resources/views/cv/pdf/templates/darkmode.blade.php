@@ -14,7 +14,6 @@
 
     body.template-darkmode .dark-page {
         background-color: #1f2937;
-        border: 1px solid #374151;
         border-radius: 20px;
         overflow: hidden;
     }

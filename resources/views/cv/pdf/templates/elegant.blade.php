@@ -13,7 +13,6 @@
 
     body.template-elegant .elegant-page {
         background-color: #ffffff;
-        border: 1px solid #dccdf2;
         border-radius: 24px;
         padding: 30px 34px;
     }

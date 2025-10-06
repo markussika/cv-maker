@@ -14,7 +14,6 @@
 
     body.template-futuristic .futuristic-page {
         background-color: #111827;
-        border: 1px solid #1f2937;
         border-radius: 24px;
         overflow: hidden;
     }

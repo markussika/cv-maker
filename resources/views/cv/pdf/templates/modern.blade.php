@@ -13,7 +13,6 @@
 
     body.template-modern .modern-page {
         background-color: #ffffff;
-        border: 1px solid #cbd5f5;
         border-radius: 20px;
         padding: 0;
         overflow: hidden;

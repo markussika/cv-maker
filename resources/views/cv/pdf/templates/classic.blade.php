@@ -16,7 +16,6 @@
 
     body.template-classic .classic-page {
         background-color: #ffffff;
-        border: 2px solid #d9c7a3;
         border-radius: 18px;
         padding: 26px 30px 30px;
         box-shadow: none;

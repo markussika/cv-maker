@@ -13,7 +13,6 @@
 
     body.template-minimal .minimal-page {
         background-color: #ffffff;
-        border: 1px solid #d6deeb;
         border-radius: 18px;
         padding: 28px 32px;
     }

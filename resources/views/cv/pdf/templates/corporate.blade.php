@@ -13,7 +13,6 @@
 
     body.template-corporate .corporate-page {
         background-color: #ffffff;
-        border: 1px solid #cbd5e1;
         border-radius: 20px;
         overflow: hidden;
     }
