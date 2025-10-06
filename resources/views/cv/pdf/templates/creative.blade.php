@@ -14,7 +14,6 @@
 
     body.template-creative .creative-page {
         background-color: #ffffff;
-        border: 2px solid #fbd1e9;
         border-radius: 24px;
         padding: 0;
         overflow: hidden;
