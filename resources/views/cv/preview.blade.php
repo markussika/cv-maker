@@ -252,20 +252,6 @@
             <div class="grid gap-6 lg:grid-cols-[2fr,1fr]">
                 <section class="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm space-y-8">
                     <div>
-                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Live PDF preview') }}</p>
-                        <div class="mt-4 overflow-hidden rounded-3xl border border-slate-200 bg-slate-100 shadow-inner shadow-slate-400/30">
-                            <iframe
-                                src="{{ $pdfPreviewUrl }}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit"
-                                title="{{ __('Live preview of your CV PDF') }}"
-                                class="h-[70vh] w-full"
-                                loading="lazy"
-                            >
-                                {{ __('PDF preview of your CV.') }}
-                            </iframe>
-                        </div>
-                        <p class="mt-2 text-xs text-slate-500">{{ __('This preview shows the exact PDF layout for your selected template.') }}</p>
-                    </div>
-                    <div>
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Overview') }}</p>
                         <div class="mt-4 flex flex-col gap-6 sm:flex-row sm:items-start">
                             @if ($profileImage)
@@ -402,6 +388,22 @@
                 </section>
 
                 <aside class="space-y-6">
+                    <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+                        <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Live PDF preview') }}</p>
+                        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-inner shadow-slate-400/30">
+                            <iframe
+                                src="{{ $pdfPreviewUrl }}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit"
+                                title="{{ __('Live preview of your CV PDF') }}"
+                                class="w-full"
+                                style="aspect-ratio: 3 / 4;"
+                                scrolling="no"
+                                loading="lazy"
+                            >
+                                {{ __('PDF preview of your CV.') }}
+                            </iframe>
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500">{{ __('This preview shows the exact PDF layout for your selected template.') }}</p>
+                    </div>
                     <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Template') }}</p>
                         <h2 class="text-lg font-semibold text-slate-900">{{ $templateInfo['title'] }}</h2>
