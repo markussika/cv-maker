@@ -81,7 +81,7 @@
                 <div class="group createit-template-card">
                     <div class="createit-template-card__preview">
                         <iframe
-                            src="{{ route('cv.template-preview', $template) }}#toolbar=0&navpanes=0&scrollbar=0"
+                            src="{{ route('cv.template-preview', $template) }}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit"
                             title="{{ __('Preview of the :template template', ['template' => $meta['title']]) }}"
                             class="createit-template-card__preview-frame"
                             loading="lazy"
