@@ -407,9 +407,18 @@
                                 {{ __('Download PDF') }}
                                 <span aria-hidden="true">&darr;</span>
                             </a>
-                            <a href="{{ route('cv.create', ['template' => $templateKey]) }}" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50">
-                                {{ __('Edit details') }}
-                            </a>
+                            @php
+                                $cvId = $cvData['id'] ?? null;
+                            @endphp
+                            @if ($cvId)
+                                <a href="{{ route('cv.edit', ['cv' => $cvId]) }}" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50">
+                                    {{ __('Edit details') }}
+                                </a>
+                            @else
+                                <a href="{{ route('cv.create', ['template' => $templateKey]) }}" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-300 px-5 py-2 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-50">
+                                    {{ __('Edit details') }}
+                                </a>
+                            @endif
                         </div>
                     </div>
 
