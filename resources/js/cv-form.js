@@ -16,6 +16,26 @@ const initCvForm = () => {
     let maxStepVisited = isEditing ? totalSteps : 1;
     const stepErrors = new Map();
 
+    const scrollToTop = () => {
+        if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') {
+            return;
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const scrollToBottom = () => {
+        if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') {
+            return;
+        }
+
+        const scrollElement = document.scrollingElement || document.documentElement || document.body;
+        const maxScroll = scrollElement?.scrollHeight ?? 0;
+        if (maxScroll > 0) {
+            window.scrollTo({ top: maxScroll, behavior: 'smooth' });
+        }
+    };
+
     const photoInput = form.querySelector('input[name="profile_image"]');
     const photoErrorElement = form.querySelector('[data-photo-error]');
     const photoPreviewContainer = form.querySelector('[data-photo-preview]');
@@ -287,12 +307,14 @@ const initCvForm = () => {
         currentStep += 1;
         maxStepVisited = Math.max(maxStepVisited, currentStep);
         updateStepVisuals();
+        scrollToTop();
     });
 
     prevButton?.addEventListener('click', () => {
         if (currentStep > 1) {
             currentStep -= 1;
             updateStepVisuals();
+            scrollToBottom();
         }
     });
 
