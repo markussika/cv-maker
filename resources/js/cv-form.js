@@ -16,24 +16,92 @@ const initCvForm = () => {
     let maxStepVisited = isEditing ? totalSteps : 1;
     const stepErrors = new Map();
 
-    const scrollToTop = () => {
-        if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') {
+    const getScrollElement = () => document.scrollingElement || document.documentElement || document.body;
+
+    const animateScrollTo = (targetPosition, { duration = 700 } = {}) => {
+        if (typeof window === 'undefined') {
             return;
         }
 
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        const scrollElement = getScrollElement();
+        if (!scrollElement) {
+            return;
+        }
+
+        const safeTarget = Math.max(targetPosition, 0);
+
+        if (typeof window.requestAnimationFrame !== 'function') {
+            window.scrollTo({ top: safeTarget, behavior: 'smooth' });
+            return;
+        }
+
+        const start = scrollElement.scrollTop ?? window.pageYOffset ?? 0;
+        const distance = safeTarget - start;
+        if (Math.abs(distance) < 1) {
+            return;
+        }
+
+        let startTime = null;
+
+        const easeInOutQuad = (t) => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
+
+        const step = (timestamp) => {
+            if (startTime === null) {
+                startTime = timestamp;
+            }
+
+            const elapsed = timestamp - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeInOutQuad(progress);
+            const nextPosition = start + distance * easedProgress;
+
+            if (typeof scrollElement.scrollTo === 'function') {
+                scrollElement.scrollTo({ top: nextPosition });
+            } else {
+                scrollElement.scrollTop = nextPosition;
+            }
+
+            if (elapsed < duration) {
+                window.requestAnimationFrame(step);
+            }
+        };
+
+        window.requestAnimationFrame(step);
     };
 
-    const scrollToBottom = () => {
-        if (typeof window === 'undefined' || typeof window.scrollTo !== 'function') {
+    const scrollToTop = () => {
+        if (typeof window === 'undefined') {
             return;
         }
 
-        const scrollElement = document.scrollingElement || document.documentElement || document.body;
-        const maxScroll = scrollElement?.scrollHeight ?? 0;
-        if (maxScroll > 0) {
-            window.scrollTo({ top: maxScroll, behavior: 'smooth' });
+        animateScrollTo(0, { duration: 500 });
+    };
+
+    const scrollToFormContainer = () => {
+        if (typeof window === 'undefined') {
+            return;
         }
+
+        const scrollElement = getScrollElement();
+        if (!scrollElement) {
+            return;
+        }
+
+        const container =
+            document.querySelector('[data-scroll-anchor="cv-form-container"]') ??
+            document.querySelector('.bg-white\\/95.backdrop-blur-xl.shadow-xl.rounded-\\[32px\\].p-6.sm\\:p-10.md\\:p-12');
+
+        if (!container) {
+            animateScrollTo(0, { duration: 600 });
+            return;
+        }
+
+        const rect = container.getBoundingClientRect();
+        const currentScroll = window.pageYOffset ?? scrollElement.scrollTop ?? 0;
+        const offset = 32;
+        const targetPosition = Math.max(rect.top + currentScroll - offset, 0);
+
+        animateScrollTo(targetPosition, { duration: 700 });
     };
 
     const photoInput = form.querySelector('input[name="profile_image"]');
@@ -314,7 +382,7 @@ const initCvForm = () => {
         if (currentStep > 1) {
             currentStep -= 1;
             updateStepVisuals();
-            scrollToBottom();
+            scrollToFormContainer();
         }
     });
 
