@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Cv;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class CvManagementTest extends TestCase
@@ -145,5 +146,22 @@ class CvManagementTest extends TestCase
         $this->actingAs($user)
             ->delete(route('cv.destroy', $otherCv))
             ->assertForbidden();
+    }
+
+    public function test_create_form_shows_resolved_avatar_url_for_account_photo(): void
+    {
+        Storage::fake('public');
+
+        $user = User::factory()->create([
+            'avatar_url' => 'profile-photos/account.jpg',
+        ]);
+
+        Storage::disk('public')->put('profile-photos/account.jpg', 'avatar');
+
+        $response = $this->actingAs($user)->get(route('cv.create'));
+
+        $response->assertOk();
+        $expectedUrl = Storage::disk('public')->url('profile-photos/account.jpg');
+        $response->assertSee('data-avatar-url="' . e($expectedUrl) . '"', false);
     }
 }
