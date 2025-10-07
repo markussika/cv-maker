@@ -296,7 +296,7 @@
                 </div>
             @endif
 
-            <div class="bg-white/95 backdrop-blur-xl shadow-xl rounded-[32px] p-6 sm:p-10 md:p-12">
+            <div class="bg-white/95 backdrop-blur-xl shadow-xl rounded-[32px] p-6 sm:p-10 md:p-12" data-scroll-anchor="cv-form-container">
                 <div class="mb-12">
                     <div class="flex flex-col gap-6 md:flex-row md:items-center md:gap-4">
                         @foreach ($stepItems as $index => $step)
