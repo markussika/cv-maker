@@ -316,7 +316,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ $formAction }}" id="cvForm" class="space-y-10" enctype="multipart/form-data" data-cities-endpoint="{{ route('cv.cities') }}">
+                <form method="POST" action="{{ $formAction }}" id="cvForm" class="space-y-10" enctype="multipart/form-data" data-cities-endpoint="{{ route('cv.cities') }}" data-is-editing="{{ $isEditing ? 'true' : 'false' }}">
                     @csrf
                     @if ($formMethod !== 'POST')
                         @method($formMethod)
