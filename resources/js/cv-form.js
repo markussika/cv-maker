@@ -11,8 +11,9 @@ const initCvForm = () => {
     const prevButton = document.getElementById('prevStep');
     const submitButton = document.getElementById('submitStep');
     const totalSteps = stepPanels.length;
+    const isEditing = form.dataset.isEditing === 'true';
     let currentStep = 1;
-    let maxStepVisited = 1;
+    let maxStepVisited = isEditing ? totalSteps : 1;
     const stepErrors = new Map();
 
     const photoInput = form.querySelector('input[name="profile_image"]');
