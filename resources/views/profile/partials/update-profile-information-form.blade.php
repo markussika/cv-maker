@@ -1,3 +1,14 @@
+@php
+    $storedAvatar = $user->avatar_url;
+    $displayAvatar = null;
+
+    if (is_string($storedAvatar) && trim($storedAvatar) !== '') {
+        $displayAvatar = filter_var($storedAvatar, FILTER_VALIDATE_URL)
+            ? $storedAvatar
+            : \Illuminate\Support\Facades\Storage::disk('public')->url($storedAvatar);
+    }
+@endphp
+
 <section class="rounded-3xl border border-slate-200 bg-white/90 p-8 shadow-xl shadow-slate-900/5 backdrop-blur">
     <header class="flex flex-col gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-start gap-4">
@@ -24,7 +35,7 @@
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-8 grid gap-6 sm:grid-cols-2">
+    <form method="post" action="{{ route('profile.update') }}" class="mt-8 grid gap-6 sm:grid-cols-2" enctype="multipart/form-data">
         @csrf
         @method('patch')
 
@@ -59,6 +70,45 @@
                     @endif
                 </div>
             @endif
+        </div>
+
+        <div class="sm:col-span-2">
+            <x-input-label for="profile_photo" :value="__('Profile photo')" class="text-sm font-semibold text-slate-700" />
+
+            <div class="mt-3 flex flex-wrap items-center gap-5">
+                <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-slate-200 shadow-inner">
+                    @if ($displayAvatar)
+                        <img src="{{ $displayAvatar }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover">
+                    @else
+                        <span class="text-lg font-semibold text-slate-500">
+                            {{ \Illuminate\Support\Str::of($user->name)->trim()->take(2)->upper() ?: __('You') }}
+                        </span>
+                    @endif
+                </div>
+
+                <div class="flex-1 space-y-3">
+                    <input
+                        id="profile_photo"
+                        name="profile_photo"
+                        type="file"
+                        accept="image/*"
+                        class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-600 hover:file:bg-indigo-100"
+                    >
+
+                    <p class="text-xs text-slate-500">
+                        {{ __('Upload a square image (max 2 MB) to personalize your profile and CV templates.') }}
+                    </p>
+
+                    @if ($displayAvatar)
+                        <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                            <input type="checkbox" name="remove_profile_photo" value="1" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <span>{{ __('Remove current photo') }}</span>
+                        </label>
+                    @endif
+                </div>
+            </div>
+
+            <x-input-error class="mt-2" :messages="$errors->get('profile_photo')" />
         </div>
 
         <div class="flex flex-wrap items-center gap-3 sm:col-span-2">
