@@ -69,14 +69,6 @@ const initCvForm = () => {
         window.requestAnimationFrame(step);
     };
 
-    const scrollToTop = () => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        animateScrollTo(0, { duration: 500 });
-    };
-
     const scrollToFormContainer = () => {
         if (typeof window === 'undefined') {
             return;
@@ -375,7 +367,7 @@ const initCvForm = () => {
         currentStep += 1;
         maxStepVisited = Math.max(maxStepVisited, currentStep);
         updateStepVisuals();
-        scrollToTop();
+        scrollToFormContainer();
     });
 
     prevButton?.addEventListener('click', () => {
