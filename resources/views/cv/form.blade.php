@@ -226,28 +226,56 @@
         $skillNextIndex = count($skillEntries);
 
         $existingProfileImage = $prefill ? data_get($prefill, 'profile_image') : null;
-        $profileImageUrl = null;
+        $storedProfileImageUrl = null;
         if (is_string($existingProfileImage) && trim($existingProfileImage) !== '') {
             $candidate = trim($existingProfileImage);
             if (filter_var($candidate, FILTER_VALIDATE_URL)) {
-                $profileImageUrl = $candidate;
+                $storedProfileImageUrl = $candidate;
             } else {
                 $storagePath = preg_replace('#^/?storage/#', '', $candidate);
                 $storagePath = ltrim((string) $storagePath, '/');
 
                 try {
                     if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
-                        $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
+                        $storedProfileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
                     } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($candidate, '/'))) {
-                        $profileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($candidate, '/'));
+                        $storedProfileImageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($candidate, '/'));
                     } else {
-                        $profileImageUrl = null;
+                        $storedProfileImageUrl = null;
                     }
                 } catch (\Throwable $e) {
-                    $profileImageUrl = null;
+                    $storedProfileImageUrl = null;
                 }
             }
         }
+
+        $accountAvatarUrl = isset($accountAvatarUrl) && is_string($accountAvatarUrl) ? trim($accountAvatarUrl) : null;
+        if ($accountAvatarUrl === '') {
+            $accountAvatarUrl = null;
+        }
+
+        $hasAccountAvatar = $accountAvatarUrl !== null;
+        $matchesAccountAvatar = $hasAccountAvatar && $storedProfileImageUrl && $storedProfileImageUrl === $accountAvatarUrl;
+        $initialUploadPhotoUrl = $matchesAccountAvatar ? null : $storedProfileImageUrl;
+
+        $profileImageSource = old('profile_image_source');
+        if (!in_array($profileImageSource, ['upload', 'avatar'], true)) {
+            if ($matchesAccountAvatar) {
+                $profileImageSource = 'avatar';
+            } elseif ($initialUploadPhotoUrl) {
+                $profileImageSource = 'upload';
+            } elseif ($hasAccountAvatar) {
+                $profileImageSource = 'avatar';
+            } else {
+                $profileImageSource = 'upload';
+            }
+        }
+
+        if ($profileImageSource === 'avatar' && !$hasAccountAvatar) {
+            $profileImageSource = 'upload';
+        }
+
+        $profileImageUrl = $profileImageSource === 'avatar' ? $accountAvatarUrl : $initialUploadPhotoUrl;
 
         $prefillBirthdayValue = data_get($prefill, 'birthday');
         if ($prefillBirthdayValue instanceof \Carbon\CarbonInterface) {
@@ -422,20 +450,43 @@
                                 </div>
                             </div>
 
-                            <div class="md:col-span-2">
+                            <div class="md:col-span-2" data-photo-section data-selected-source="{{ $profileImageSource }}" data-avatar-url="{{ $hasAccountAvatar ? e($accountAvatarUrl) : '' }}" data-initial-upload-url="{{ $initialUploadPhotoUrl ? e($initialUploadPhotoUrl) : '' }}">
                                 <label class="block text-sm font-medium text-slate-600">Profile photo</label>
                                 <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
                                     <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50" data-photo-preview>
                                         <img src="{{ $profileImageUrl }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover {{ $profileImageUrl ? '' : 'hidden' }}" data-photo-preview-image>
                                         <span class="px-2 text-center text-xs text-slate-400 {{ $profileImageUrl ? 'hidden' : '' }}" data-photo-preview-placeholder>{{ __('No photo yet') }}</span>
                                     </div>
-                                    <div class="flex-1">
-                                        <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
-                                        <p class="mt-2 text-xs text-slate-500">{{ __('Upload any image file (JPG, PNG, WebP, HEIC, etc.). Max 2 MB.') }}</p>
-                                        <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
-                                        @error('profile_image')
-                                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                                        @enderror
+                                    <div class="flex-1 space-y-3">
+                                        @if ($hasAccountAvatar)
+                                            <div class="space-y-2">
+                                                <p class="text-sm font-medium text-slate-600">{{ __('Choose photo source') }}</p>
+                                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                                                    <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                                                        <input type="radio" name="profile_image_source" value="avatar" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'avatar') data-photo-source-option="avatar">
+                                                        <span>{{ __('Use my account profile photo') }}</span>
+                                                    </label>
+                                                    <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                                                        <input type="radio" name="profile_image_source" value="upload" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'upload') data-photo-source-option="upload">
+                                                        <span>{{ __('Upload a different photo') }}</span>
+                                                    </label>
+                                                </div>
+                                                <p class="text-xs text-slate-500">{{ __('We’ll reuse your saved profile photo unless you pick a new one for this CV.') }}</p>
+                                            </div>
+                                        @else
+                                            <input type="hidden" name="profile_image_source" value="upload">
+                                        @endif
+                                        <div>
+                                            <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
+                                            <p class="mt-2 text-xs text-slate-500">{{ __('Upload any image file (JPG, PNG, WebP, HEIC, etc.). Max 2 MB.') }}</p>
+                                            @if ($hasAccountAvatar)
+                                                <p class="mt-1 text-xs text-slate-500">{{ __('Switch between the options above to keep your profile photo or upload a different picture.') }}</p>
+                                            @endif
+                                            <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
+                                            @error('profile_image')
+                                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                            @enderror
+                                        </div>
                                     </div>
                                 </div>
                             </div>
