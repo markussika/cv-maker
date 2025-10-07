@@ -76,14 +76,24 @@
             <x-input-label for="profile_photo" :value="__('Profile photo')" class="text-sm font-semibold text-slate-700" />
 
             <div class="mt-3 flex flex-wrap items-center gap-5">
-                <div class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-slate-200 shadow-inner">
-                    @if ($displayAvatar)
-                        <img src="{{ $displayAvatar }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover">
-                    @else
-                        <span class="text-lg font-semibold text-slate-500">
-                            {{ \Illuminate\Support\Str::of($user->name)->trim()->take(2)->upper() ?: __('You') }}
-                        </span>
-                    @endif
+                @php($initials = \Illuminate\Support\Str::of($user->name)->trim()->take(2)->upper() ?: __('You'))
+
+                <div
+                    class="flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl bg-slate-200 shadow-inner"
+                    data-profile-photo-preview
+                >
+                    <img
+                        src="{{ $displayAvatar }}"
+                        alt="{{ __('Profile photo preview') }}"
+                        class="h-full w-full object-cover {{ $displayAvatar ? '' : 'hidden' }}"
+                        data-profile-photo-preview-image
+                    >
+                    <span
+                        class="text-lg font-semibold text-slate-500 {{ $displayAvatar ? 'hidden' : '' }}"
+                        data-profile-photo-placeholder
+                    >
+                        {{ $initials }}
+                    </span>
                 </div>
 
                 <div class="flex-1 space-y-3">
@@ -92,6 +102,7 @@
                         name="profile_photo"
                         type="file"
                         accept="image/*"
+                        data-profile-photo-input
                         class="block w-full text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-600 hover:file:bg-indigo-100"
                     >
 
@@ -101,7 +112,13 @@
 
                     @if ($displayAvatar)
                         <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-                            <input type="checkbox" name="remove_profile_photo" value="1" class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                            <input
+                                type="checkbox"
+                                name="remove_profile_photo"
+                                value="1"
+                                class="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                data-profile-photo-remove
+                            >
                             <span>{{ __('Remove current photo') }}</span>
                         </label>
                     @endif
