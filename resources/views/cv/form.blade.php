@@ -254,6 +254,25 @@
             $accountAvatarUrl = null;
         }
 
+        if ($accountAvatarUrl) {
+            if (!filter_var($accountAvatarUrl, FILTER_VALIDATE_URL)) {
+                $storagePath = preg_replace('#^/?storage/#', '', $accountAvatarUrl);
+                $storagePath = ltrim((string) $storagePath, '/');
+
+                try {
+                    if ($storagePath !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($storagePath)) {
+                        $accountAvatarUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($storagePath);
+                    } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists(ltrim($accountAvatarUrl, '/'))) {
+                        $accountAvatarUrl = \Illuminate\Support\Facades\Storage::disk('public')->url(ltrim($accountAvatarUrl, '/'));
+                    } else {
+                        $accountAvatarUrl = null;
+                    }
+                } catch (\Throwable $e) {
+                    $accountAvatarUrl = null;
+                }
+            }
+        }
+
         $hasAccountAvatar = $accountAvatarUrl !== null;
         $matchesAccountAvatar = $hasAccountAvatar && $storedProfileImageUrl && $storedProfileImageUrl === $accountAvatarUrl;
         $initialUploadPhotoUrl = $matchesAccountAvatar ? null : $storedProfileImageUrl;
