@@ -43,6 +43,7 @@ class CvController extends Controller
             'isEditing' => false,
             'formAction' => route('cv.store'),
             'formMethod' => 'POST',
+            'accountAvatarUrl' => optional($request->user())->avatar_url,
         ]);
     }
 
@@ -55,7 +56,16 @@ class CvController extends Controller
         $attributes = $this->buildCvAttributes($validated);
         $attributes['user_id'] = $request->user()->id;
 
-        if ($request->hasFile('profile_image')) {
+        $photoSource = $this->resolveProfileImageSource($request);
+
+        if ($photoSource === 'avatar') {
+            $avatarUrl = optional($request->user())->avatar_url;
+            if (is_string($avatarUrl) && trim($avatarUrl) !== '') {
+                $attributes['profile_image'] = trim($avatarUrl);
+            } elseif ($request->hasFile('profile_image')) {
+                $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
+            }
+        } elseif ($request->hasFile('profile_image')) {
             $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
         }
 
@@ -100,6 +110,7 @@ class CvController extends Controller
             'isEditing' => true,
             'formAction' => route('cv.update', $cv),
             'formMethod' => 'PUT',
+            'accountAvatarUrl' => optional($request->user())->avatar_url,
         ]);
     }
 
@@ -112,11 +123,17 @@ class CvController extends Controller
 
         $attributes = $this->buildCvAttributes($validated);
 
-        if ($request->hasFile('profile_image')) {
-            if ($cv->profile_image) {
-                Storage::disk('public')->delete($cv->profile_image);
-            }
+        $photoSource = $this->resolveProfileImageSource($request);
+        $avatarUrl = optional($request->user())->avatar_url;
 
+        if ($photoSource === 'avatar' && is_string($avatarUrl) && trim($avatarUrl) !== '') {
+            $this->deleteStoredProfileImage($cv->profile_image);
+            $attributes['profile_image'] = trim($avatarUrl);
+        } elseif ($photoSource === 'avatar' && $request->hasFile('profile_image')) {
+            $this->deleteStoredProfileImage($cv->profile_image);
+            $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
+        } elseif ($photoSource === 'upload' && $request->hasFile('profile_image')) {
+            $this->deleteStoredProfileImage($cv->profile_image);
             $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
         }
 
@@ -324,6 +341,7 @@ class CvController extends Controller
             'linkedin' => ['nullable', 'url', 'max:255'],
             'github' => ['nullable', 'url', 'max:255'],
             'profile_image' => ['nullable', 'image', 'max:2048'],
+            'profile_image_source' => ['nullable', 'string', Rule::in(['upload', 'avatar'])],
             'birthday' => ['nullable', 'date'],
             'country' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -756,6 +774,30 @@ class CvController extends Controller
         }
 
         return $segments->implode('_') . '_cv.pdf';
+    }
+
+    protected function resolveProfileImageSource(Request $request): string
+    {
+        $source = $request->string('profile_image_source')->toString();
+
+        return in_array($source, ['avatar', 'upload'], true) ? $source : 'upload';
+    }
+
+    protected function deleteStoredProfileImage(?string $path): void
+    {
+        if (!is_string($path) || trim($path) === '') {
+            return;
+        }
+
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return;
+        }
+
+        try {
+            Storage::disk('public')->delete($path);
+        } catch (\Throwable $e) {
+            // ignore failures when cleaning up old images
+        }
     }
 
     protected function accentColour(string $template): string

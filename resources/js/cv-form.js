@@ -102,7 +102,30 @@ const initCvForm = () => {
     const photoPreviewImage = photoPreviewContainer?.querySelector('[data-photo-preview-image]') ?? null;
     const photoPreviewPlaceholder = photoPreviewContainer?.querySelector('[data-photo-preview-placeholder]') ?? null;
     const initialPhotoSrc = photoPreviewImage?.getAttribute('src')?.trim() || null;
-    const hasInitialPhoto = Boolean(initialPhotoSrc);
+    const photoSection = form.querySelector('[data-photo-section]');
+    const getDatasetValue = (element, key) => {
+        if (!element || !element.dataset) {
+            return null;
+        }
+
+        const raw = element.dataset[key];
+        if (typeof raw !== 'string') {
+            return null;
+        }
+
+        const trimmed = raw.trim();
+        return trimmed === '' ? null : trimmed;
+    };
+
+    const defaultAvatarPreview = getDatasetValue(photoSection, 'avatarUrl');
+    const defaultSelectedPhotoSource =
+        getDatasetValue(photoSection, 'selectedSource') ?? (defaultAvatarPreview ? 'avatar' : 'upload');
+    const defaultUploadPreview =
+        getDatasetValue(photoSection, 'initialUploadUrl') ??
+        (defaultSelectedPhotoSource === 'upload' ? initialPhotoSrc : null);
+    const photoSourceInputs = photoSection
+        ? Array.from(photoSection.querySelectorAll('[data-photo-source-option]'))
+        : [];
     let currentPhotoObjectUrl = null;
 
     const applyPhotoError = (message, { display = true } = {}) => {
@@ -278,19 +301,52 @@ const initCvForm = () => {
         }
     };
 
-    const showInitialPhoto = () => {
+    const showPhotoPlaceholder = () => {
         revokeCurrentPhotoObjectUrl();
-        if (photoPreviewImage && hasInitialPhoto && initialPhotoSrc) {
-            photoPreviewImage.src = initialPhotoSrc;
-            photoPreviewImage.classList.remove('hidden');
-        } else if (photoPreviewImage) {
+
+        if (photoPreviewImage) {
             photoPreviewImage.classList.add('hidden');
             photoPreviewImage.removeAttribute('src');
         }
 
         if (photoPreviewPlaceholder) {
-            photoPreviewPlaceholder.classList.toggle('hidden', Boolean(hasInitialPhoto && initialPhotoSrc));
+            photoPreviewPlaceholder.classList.remove('hidden');
         }
+    };
+
+    const showPhotoFromUrl = (url) => {
+        if (!url) {
+            showPhotoPlaceholder();
+            return;
+        }
+
+        revokeCurrentPhotoObjectUrl();
+
+        if (photoPreviewImage) {
+            photoPreviewImage.src = url;
+            photoPreviewImage.classList.remove('hidden');
+        }
+
+        if (photoPreviewPlaceholder) {
+            photoPreviewPlaceholder.classList.add('hidden');
+        }
+    };
+
+    const getSelectedPhotoSource = () => {
+        if (!photoSourceInputs.length) {
+            return defaultSelectedPhotoSource;
+        }
+
+        const selected = photoSourceInputs.find((input) => input.checked);
+        if (selected && typeof selected.value === 'string') {
+            return selected.value;
+        }
+
+        return defaultSelectedPhotoSource;
+    };
+
+    const showInitialPhoto = () => {
+        applyPhotoSourceToPreview();
     };
 
     const updatePhotoPreview = (file) => {
@@ -299,7 +355,7 @@ const initCvForm = () => {
         }
 
         if (!file) {
-            showInitialPhoto();
+            applyPhotoSourceToPreview();
             return;
         }
 
@@ -314,6 +370,41 @@ const initCvForm = () => {
 
         if (photoPreviewPlaceholder) {
             photoPreviewPlaceholder.classList.add('hidden');
+        }
+    };
+
+    const applyPhotoSourceToPreview = ({ resetFileSelection = false } = {}) => {
+        const source = getSelectedPhotoSource();
+
+        if (source === 'avatar' && defaultAvatarPreview) {
+            if (resetFileSelection && photoInput) {
+                photoInput.value = '';
+            }
+
+            validatePhotoFile(null);
+            showPhotoFromUrl(defaultAvatarPreview);
+            return;
+        }
+
+        const file = photoInput?.files && photoInput.files[0] ? photoInput.files[0] : null;
+        if (file) {
+            const isValid = validatePhotoFile(file);
+            if (isValid) {
+                updatePhotoPreview(file);
+                return;
+            }
+
+            if (resetFileSelection && photoInput) {
+                photoInput.value = '';
+            }
+        } else {
+            validatePhotoFile(null);
+        }
+
+        if (defaultUploadPreview) {
+            showPhotoFromUrl(defaultUploadPreview);
+        } else {
+            showPhotoPlaceholder();
         }
     };
 
@@ -455,14 +546,31 @@ const initCvForm = () => {
         window.addEventListener('beforeunload', revokeCurrentPhotoObjectUrl);
     }
 
+    if (photoSourceInputs.length > 0) {
+        photoSourceInputs.forEach((input) => {
+            input.addEventListener('change', () => {
+                const shouldReset = input.value === 'avatar';
+                applyPhotoSourceToPreview({ resetFileSelection: shouldReset });
+            });
+        });
+    }
+
     if (photoInput) {
         photoInput.addEventListener('change', () => {
             const file = photoInput.files && photoInput.files[0] ? photoInput.files[0] : null;
+
+            if (file) {
+                const uploadOption = photoSourceInputs.find((input) => input.value === 'upload');
+                if (uploadOption && !uploadOption.checked) {
+                    uploadOption.checked = true;
+                }
+            }
+
             const isValidPhoto = validatePhotoFile(file);
-            if (isValidPhoto) {
+            if (isValidPhoto && file) {
                 updatePhotoPreview(file);
             } else {
-                updatePhotoPreview(null);
+                applyPhotoSourceToPreview();
             }
         });
 
