@@ -10,6 +10,11 @@ const initCvForm = () => {
     const nextButton = document.getElementById('nextStep');
     const prevButton = document.getElementById('prevStep');
     const submitButton = document.getElementById('submitStep');
+    const stepProgress = document.querySelector('[data-step-progress]');
+    const stepMobileLabel = document.querySelector('[data-step-mobile-label]');
+    const stepLabelTemplate = stepMobileLabel?.dataset.stepLabelTemplate ?? null;
+    const stepMobileTitle = document.querySelector('[data-step-mobile-title]');
+    const stepMobileSubtitle = document.querySelector('[data-step-mobile-subtitle]');
     const totalSteps = stepPanels.length;
     const isEditing = form.dataset.isEditing === 'true';
     let currentStep = 1;
@@ -175,12 +180,29 @@ const initCvForm = () => {
             button.classList.toggle('cursor-pointer', isVisited);
             button.classList.toggle('cursor-not-allowed', !isVisited);
             button.disabled = !isVisited;
+            button.tabIndex = isVisited ? 0 : -1;
+            button.setAttribute('aria-current', isActive ? 'step' : 'false');
+            button.setAttribute('aria-disabled', (!isVisited).toString());
+            button.classList.toggle('opacity-60', !isVisited && !isActive);
+            button.classList.toggle('opacity-100', isVisited || isActive);
+            button.classList.toggle('bg-white', isActive && !hasError);
+            button.classList.toggle('bg-white/70', !isActive && !hasError);
+            button.classList.toggle('bg-red-50', hasError);
+            button.classList.toggle('shadow-lg', isActive && !hasError);
+            button.classList.toggle('shadow-sm', !isActive || hasError);
+            button.classList.toggle('border-violet-200', isActive && !hasError);
+            button.classList.toggle('border-slate-200/80', !hasError && !isActive);
+            button.classList.toggle('border-red-300', hasError);
+            button.classList.toggle('ring-2', isActive);
+            button.classList.toggle('ring-violet-200', isActive && !hasError);
+            button.classList.toggle('ring-red-200', isActive && hasError);
+            button.classList.toggle('ring-0', !isActive);
 
             if (!circle) {
                 return;
             }
 
-            circle.className = 'flex h-12 w-12 items-center justify-center rounded-full border text-base font-semibold shadow-sm transition-all duration-300';
+            circle.className = 'flex h-12 w-12 shrink-0 items-center justify-center rounded-full border text-base font-semibold shadow-sm transition-all duration-300';
             if (hasError) {
                 circle.classList.add('bg-white', 'text-red-600', 'border-red-400', 'ring-2', 'ring-red-200');
             } else if (step < currentStep) {
@@ -191,6 +213,32 @@ const initCvForm = () => {
                 circle.classList.add('bg-white', 'text-slate-400', 'border-slate-200');
             }
         });
+
+        const activeButton =
+            stepButtons.find((button) => Number(button.dataset.stepTrigger) === currentStep) ?? null;
+
+        if (stepProgress) {
+            const progressPercent = Math.max((currentStep / totalSteps) * 100, 0);
+            stepProgress.style.width = `${progressPercent}%`;
+        }
+
+        if (stepMobileLabel) {
+            if (stepLabelTemplate) {
+                stepMobileLabel.textContent = stepLabelTemplate
+                    .replace(':current', String(currentStep))
+                    .replace(':total', String(totalSteps));
+            } else {
+                stepMobileLabel.textContent = `Step ${currentStep} of ${totalSteps}`;
+            }
+        }
+
+        if (stepMobileTitle) {
+            stepMobileTitle.textContent = activeButton?.dataset.stepTitle ?? '';
+        }
+
+        if (stepMobileSubtitle) {
+            stepMobileSubtitle.textContent = activeButton?.dataset.stepDescription ?? '';
+        }
 
         connectors.forEach((connector) => {
             const index = Number(connector.dataset.stepConnector);
