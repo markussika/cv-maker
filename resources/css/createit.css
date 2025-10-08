@@ -200,6 +200,10 @@
         @apply text-center text-sm text-slate-500;
     }
 
+    [x-cloak] {
+        display: none !important;
+    }
+
     .createit-navbar {
         @apply fixed inset-x-0 z-50 border-b border-slate-200 bg-white/85 backdrop-blur;
     }
@@ -225,7 +229,7 @@
     }
 
     .createit-navbar__actions {
-        @apply flex items-center gap-4 text-sm font-medium text-slate-600;
+        @apply hidden items-center gap-4 text-sm font-medium text-slate-600 md:flex;
     }
 
     .createit-navbar__link {
@@ -234,6 +238,54 @@
 
     .createit-navbar__primary {
         @apply rounded-full bg-slate-900 px-4 py-2 text-white transition hover:bg-slate-800;
+    }
+
+    .createit-navbar__toggle {
+        @apply inline-flex items-center justify-center rounded-full p-2 text-slate-600 transition hover:bg-slate-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-500 md:hidden;
+    }
+
+    .createit-navbar__mobile {
+        @apply md:hidden border-t border-slate-200 bg-white px-4 pb-6 pt-4 shadow-lg shadow-slate-900/5;
+    }
+
+    .createit-navbar__mobile-nav {
+        @apply flex flex-col gap-3 text-sm font-medium text-slate-700;
+    }
+
+    .createit-navbar__mobile-actions {
+        @apply mt-4 flex flex-col gap-3 text-sm font-medium text-slate-700;
+    }
+
+    .createit-navbar__mobile-link {
+        @apply inline-flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left transition hover:bg-slate-100 hover:text-slate-900;
+    }
+
+    .createit-navbar__mobile-primary {
+        @apply inline-flex w-full items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800;
+    }
+
+    .createit-navbar__mobile-enter {
+        @apply transition ease-out duration-200;
+    }
+
+    .createit-navbar__mobile-enter-start {
+        @apply -translate-y-2 opacity-0;
+    }
+
+    .createit-navbar__mobile-enter-end {
+        @apply translate-y-0 opacity-100;
+    }
+
+    .createit-navbar__mobile-leave {
+        @apply transition ease-in duration-150;
+    }
+
+    .createit-navbar__mobile-leave-start {
+        @apply translate-y-0 opacity-100;
+    }
+
+    .createit-navbar__mobile-leave-end {
+        @apply -translate-y-2 opacity-0;
     }
 
     .createit-hero {
