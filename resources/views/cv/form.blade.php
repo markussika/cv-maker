@@ -31,6 +31,9 @@
             ['title' => 'Template', 'description' => 'Pick a visual style'],
         ];
 
+        $totalSteps = max(count($stepItems), 1);
+        $firstStep = $stepItems[0] ?? ['title' => '', 'description' => ''];
+
         $templateMeta = [
             'classic' => [
                 'title' => 'Classic',
@@ -323,13 +326,22 @@
 
     <div class="min-h-screen -mx-4 -mt-8 bg-gradient-to-br from-slate-100 via-white to-slate-200 px-4 py-10 sm:px-6 lg:px-8">
         <div class="max-w-5xl mx-auto">
-            <div class="text-center text-slate-900 mb-12">
-                
-                <h1 class="mt-5 text-4xl md:text-5xl font-semibold tracking-tight">{{ $headline }}</h1>
-                <p class="mt-3 text-base md:text-lg text-slate-500">{{ $heroSubtitle }}</p>
-                @if ($isEditing && $editingTitle)
-                    <p class="mt-2 text-sm font-medium text-slate-500">{{ __('Working on: :title', ['title' => $editingTitle]) }}</p>
-                @endif
+            <div class="mb-12 text-slate-900">
+                <div class="mx-auto max-w-3xl space-y-4 text-center sm:text-left">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-600 shadow-sm ring-1 ring-white/60 backdrop-blur-sm">
+                        <span class="h-2 w-2 rounded-full bg-violet-400"></span>
+                        {{ $badgeLabel }}
+                    </span>
+                    <div class="space-y-3">
+                        <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">{{ $headline }}</h1>
+                        <p class="text-base text-slate-500 sm:text-lg">{{ $heroSubtitle }}</p>
+                        @if ($isEditing && $editingTitle)
+                            <p class="text-sm font-medium text-slate-500">
+                                {{ __('Working on: :title', ['title' => $editingTitle]) }}
+                            </p>
+                        @endif
+                    </div>
+                </div>
             </div>
 
             @if ($errors->any())
@@ -345,21 +357,49 @@
 
             <div class="bg-white/95 backdrop-blur-xl shadow-xl rounded-[32px] p-6 sm:p-10 md:p-12" data-scroll-anchor="cv-form-container">
                 <div class="mb-12">
-                    <div class="flex flex-col gap-6 md:flex-row md:items-center md:gap-4">
-                        @foreach ($stepItems as $index => $step)
-                            <div class="flex items-center gap-4 md:flex-1">
-                                <button type="button" data-step-trigger="{{ $loop->iteration }}" class="flex flex-col md:flex-row md:items-center text-slate-500 gap-2 transition" aria-label="Step {{ $loop->iteration }}: {{ $step['title'] }}">
-                                    <span data-step-circle class="flex h-12 w-12 items-center justify-center rounded-full border border-slate-200 bg-white text-base font-semibold shadow-sm transition-all duration-300">{{ $loop->iteration }}</span>
-                                    <span class="flex flex-col text-left md:text-left">
-                                        <span class="text-sm font-semibold">{{ $step['title'] }}</span>
-                                        <span class="text-xs text-slate-400">{{ $step['description'] }}</span>
-                                    </span>
-                                </button>
-                                @if (!$loop->last)
-                                    <div data-step-connector="{{ $loop->iteration }}" class="hidden md:block flex-1 h-0.5 bg-slate-200 rounded-full transition-colors duration-300"></div>
-                                @endif
-                            </div>
-                        @endforeach
+                    <div class="relative -mx-6 overflow-x-auto pb-6 md:mx-0 md:overflow-visible md:pb-0" data-stepper-region>
+                        <div class="flex min-w-max snap-x snap-mandatory gap-4 px-6 md:min-w-0 md:flex-1 md:items-center md:gap-6 md:px-0">
+                            @foreach ($stepItems as $index => $step)
+                                <div class="flex snap-start items-stretch gap-4 md:flex-1 md:items-center">
+                                    <button
+                                        type="button"
+                                        data-step-trigger="{{ $loop->iteration }}"
+                                        data-step-title="{{ $step['title'] }}"
+                                        data-step-description="{{ $step['description'] }}"
+                                        class="group flex min-w-[220px] flex-col gap-3 rounded-3xl border border-slate-200/80 bg-white/70 px-5 py-4 text-left text-slate-500 shadow-sm transition hover:border-violet-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-200 md:min-w-0 md:flex-row md:items-center md:gap-4 md:rounded-none md:border-none md:bg-transparent md:px-0 md:py-0 md:text-left md:shadow-none md:hover:border-none md:hover:shadow-none md:focus-visible:ring-0 md:ring-0"
+                                        aria-label="Step {{ $loop->iteration }}: {{ $step['title'] }}"
+                                    >
+                                        <div class="flex items-center gap-3 md:gap-4">
+                                            <span data-step-circle>{{ $loop->iteration }}</span>
+                                            <span class="flex flex-col text-left">
+                                                <span class="text-sm font-semibold md:text-base">{{ $step['title'] }}</span>
+                                                <span class="text-xs text-slate-400">{{ $step['description'] }}</span>
+                                            </span>
+                                        </div>
+                                    </button>
+                                    @if (!$loop->last)
+                                        <div data-step-connector="{{ $loop->iteration }}" class="hidden h-0.5 flex-1 rounded-full bg-slate-200 transition-colors duration-300 md:block"></div>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    <div class="space-y-3 md:hidden">
+                        <div class="flex items-center justify-between">
+                            <span
+                                data-step-mobile-label
+                                data-step-label-template="{{ __('Step :current of :total', ['current' => ':current', 'total' => ':total']) }}"
+                                class="text-xs font-medium uppercase tracking-[0.3em] text-slate-400"
+                                aria-live="polite"
+                            >
+                                {{ __('Step :current of :total', ['current' => 1, 'total' => $totalSteps]) }}
+                            </span>
+                            <span data-step-mobile-title class="text-sm font-semibold text-slate-700" aria-live="polite">{{ $firstStep['title'] ?? '' }}</span>
+                        </div>
+                        <div class="h-1.5 w-full overflow-hidden rounded-full bg-slate-200/80">
+                            <div data-step-progress class="h-full rounded-full bg-violet-500 transition-all duration-300 ease-out" style="width: {{ 100 / $totalSteps }}%"></div>
+                        </div>
+                        <p data-step-mobile-subtitle class="text-xs text-slate-500" aria-live="polite">{{ $firstStep['description'] ?? '' }}</p>
                     </div>
                 </div>
 
