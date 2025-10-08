@@ -209,7 +209,7 @@
     }
 
     .createit-navbar__container {
-        @apply mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8;
+        @apply mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:h-16 lg:px-8;
     }
 
     .createit-navbar__brand {
@@ -217,11 +217,11 @@
     }
 
     .createit-navbar__brand span {
-        @apply text-lg font-semibold tracking-tight;
+        @apply text-base font-semibold tracking-tight sm:text-lg;
     }
 
     .createit-navbar__nav {
-        @apply hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex;
+        @apply hidden items-center gap-4 text-sm font-medium text-slate-600 md:flex lg:gap-6;
     }
 
     .createit-navbar__nav a {
@@ -229,7 +229,7 @@
     }
 
     .createit-navbar__actions {
-        @apply hidden items-center gap-4 text-sm font-medium text-slate-600 md:flex;
+        @apply hidden items-center gap-3 text-sm font-medium text-slate-600 md:flex lg:gap-4;
     }
 
     .createit-navbar__link {
@@ -289,23 +289,23 @@
     }
 
     .createit-hero {
-        @apply py-20 text-center;
+        @apply px-4 py-16 text-center sm:px-6 md:py-20;
     }
 
     .createit-hero__title {
-        @apply text-5xl font-extrabold tracking-tight text-slate-900;
+        @apply text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl md:text-5xl;
     }
 
     .createit-hero__subtitle {
-        @apply mx-auto mt-6 max-w-2xl text-lg text-slate-600;
+        @apply mx-auto mt-4 max-w-2xl text-base leading-relaxed text-slate-600 sm:mt-6 sm:text-lg;
     }
 
     .createit-hero__actions {
-        @apply mt-10 flex flex-wrap justify-center gap-4;
+        @apply mt-8 flex flex-col items-stretch justify-center gap-3 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4;
     }
 
     .createit-hero__meta {
-        @apply mt-8 text-sm text-slate-600;
+        @apply mt-6 text-sm text-slate-600 sm:mt-8;
     }
 
     .createit-button--outline {
@@ -325,7 +325,7 @@
     }
 
     .createit-dashboard__hero {
-        @apply relative overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-950 via-slate-900 to-black px-10 py-14 text-white shadow-2xl;
+        @apply relative overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-950 via-slate-900 to-black px-6 py-12 text-white shadow-2xl md:px-10 md:py-14;
     }
 
     .createit-dashboard__hero::after {
@@ -354,7 +354,7 @@
     }
 
     .createit-dashboard__actions {
-        @apply mt-8 flex flex-wrap gap-4;
+        @apply mt-6 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4;
     }
 
     .createit-dashboard__action {
@@ -366,7 +366,7 @@
     }
 
     .createit-dashboard__card {
-        @apply relative overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-8 shadow-lg shadow-slate-200/60 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl;
+        @apply relative overflow-hidden rounded-[28px] border border-slate-200 bg-white/90 p-6 shadow-lg shadow-slate-200/60 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl md:p-8;
     }
 
     .createit-dashboard__card-badge {
@@ -410,7 +410,7 @@
     }
 
     .createit-template-card__preview {
-        @apply relative h-72 overflow-hidden rounded-t-[28px] bg-white;
+        @apply relative h-64 overflow-hidden rounded-t-[28px] bg-white sm:h-72;
     }
 
     .createit-template-card__preview-frame {
@@ -422,7 +422,7 @@
     }
 
     .createit-template-card__body {
-        @apply flex flex-1 flex-col gap-4 p-6;
+        @apply flex flex-1 flex-col gap-4 p-5 sm:p-6;
     }
 
     .createit-template-card__title {
@@ -454,11 +454,11 @@
     }
 
     .createit-modal {
-        @apply m-0 w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200 bg-white/95 p-0 shadow-2xl backdrop:bg-slate-900/70;
+        @apply m-4 w-full max-w-5xl overflow-hidden rounded-[32px] border border-slate-200 bg-white/95 p-0 shadow-2xl backdrop:bg-slate-900/70 sm:m-6;
     }
 
     .createit-modal__header {
-        @apply flex items-center justify-between border-b border-slate-200 bg-white/80 px-6 py-4;
+        @apply flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/80 px-5 py-4 sm:flex-nowrap sm:gap-0 sm:px-6;
     }
 
     .createit-modal__title {
@@ -466,7 +466,7 @@
     }
 
     .createit-modal__body {
-        @apply bg-slate-100/60 p-6;
+        @apply bg-slate-100/60 p-5 sm:p-6;
     }
 
     .createit-modal__iframe-wrapper {
@@ -474,7 +474,7 @@
     }
 
     .createit-modal__iframe {
-        @apply h-[28rem] w-full;
+        @apply h-[22rem] w-full sm:h-[24rem] md:h-[28rem];
     }
 
     .createit-modal__close {
