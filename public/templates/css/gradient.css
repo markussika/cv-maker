@@ -20,6 +20,11 @@ body.gradient-template {
     font-size: 13px;
     line-height: 1.7;
     padding: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .gradient-wrapper {
@@ -246,6 +251,8 @@ body.gradient-template {
     body.gradient-template {
         padding: 0;
         background: #ffffff;
+        min-height: auto;
+        display: block;
     }
 
     .gradient-wrapper {

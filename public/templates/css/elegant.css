@@ -21,6 +21,11 @@ body.elegant-template {
     font-size: 14px;
     line-height: 1.7;
     padding: 72px 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .elegant-document {
@@ -406,5 +411,19 @@ body.elegant-template {
 
     .elegant-card {
         padding: 28px 24px;
+    }
+}
+
+@media print {
+    body.elegant-template {
+        padding: 0;
+        background: #ffffff;
+        min-height: auto;
+        display: block;
+    }
+
+    .elegant-document {
+        border-radius: 0;
+        box-shadow: none;
     }
 }

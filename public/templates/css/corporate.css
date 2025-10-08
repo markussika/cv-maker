@@ -21,6 +21,20 @@ body.corporate-template {
     background: var(--corporate-background);
     color: var(--corporate-ink);
     padding: 72px 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+@media print {
+    body.corporate-template {
+        padding: 0;
+        background: #ffffff;
+        min-height: auto;
+        display: block;
+    }
 }
 
 .corporate-report {

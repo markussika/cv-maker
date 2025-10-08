@@ -23,6 +23,11 @@ body.futuristic-template {
     font-size: 13px;
     line-height: 1.75;
     padding: 56px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .futuristic-grid {
@@ -283,6 +288,8 @@ body.futuristic-template {
     body.futuristic-template {
         padding: 0;
         background: #000000;
+        min-height: auto;
+        display: block;
     }
 
     .futuristic-grid {
