@@ -3,7 +3,9 @@
         $user = auth()->user();
         $cvCount = $user ? $user->cvs()->count() : 0;
         $recentCv = $user ? $user->cvs()->latest('updated_at')->first() : null;
-        $templateCount = $user ? $user->cvs()->select('template')->distinct()->count() : 0;
+        $templateCount = $user
+            ? $user->cvs()->whereNotNull('template')->distinct('template')->count('template')
+            : 0;
 
         $lastUpdatedLabel = $recentCv && $recentCv->updated_at ? $recentCv->updated_at->diffForHumans() : null;
         $recentTemplate = $recentCv && $recentCv->template ? ucfirst($recentCv->template) : null;
