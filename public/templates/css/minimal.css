@@ -21,6 +21,11 @@ body.minimal-template {
     font-size: 14px;
     line-height: 1.7;
     padding: 64px 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .minimal-wrapper {
@@ -333,5 +338,20 @@ body.minimal-template {
     .minimal-education__details {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+@media print {
+    body.minimal-template {
+        padding: 0;
+        background: #ffffff;
+        min-height: auto;
+        display: block;
+    }
+
+    .minimal-wrapper {
+        border-radius: 0;
+        box-shadow: none;
+        border: none;
     }
 }

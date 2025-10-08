@@ -23,6 +23,11 @@ body.classic-template {
     font-size: 13px;
     line-height: 1.7;
     padding: 56px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .classic-template .page {
@@ -324,6 +329,8 @@ body.classic-template {
     body.classic-template {
         padding: 0;
         background: transparent;
+        min-height: auto;
+        display: block;
     }
 
     .classic-template .page {

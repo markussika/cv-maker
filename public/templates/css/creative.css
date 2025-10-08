@@ -22,6 +22,11 @@ body.creative-template {
     font-size: 13px;
     line-height: 1.7;
     padding: 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .creative-canvas {
@@ -310,6 +315,8 @@ body.creative-template {
     body.creative-template {
         padding: 0;
         background: #ffffff;
+        min-height: auto;
+        display: block;
     }
 
     .creative-canvas {

@@ -23,6 +23,11 @@ body.darkmode-template {
     font-size: 13px;
     line-height: 1.7;
     padding: 60px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
 }
 
 .darkmode-shell {
@@ -279,6 +284,8 @@ body.darkmode-template {
     body.darkmode-template {
         padding: 0;
         background: #000000;
+        min-height: auto;
+        display: block;
     }
 
     .darkmode-shell {
