@@ -7,6 +7,24 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Quick start
+
+```bash
+cp .env.example .env
+composer install
+npm install
+php artisan key:generate
+php artisan migrate --seed
+```
+
+Running the database seeders will create a set of fully populated demo accounts so a fresh clone has data ready to explore the CV builder. All seeded users share the password `password`.
+
+| Name            | Email                 |
+| --------------- | --------------------- |
+| Avery Johnson   | avery@example.com     |
+| Bianca Singh    | bianca@example.com    |
+| Carlos Mendes   | carlos@example.com    |
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
