@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>{{ trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? '')) ?: 'CV' }}</title>
     <style>
-        @page { margin: 36px; }
+        @page { margin: 0; }
         * { box-sizing: border-box; }
         body {
             margin: 0;
