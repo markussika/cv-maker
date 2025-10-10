@@ -283,33 +283,42 @@
         $removeProfileImageValue = old('remove_profile_image');
         $removeProfileImageRequested = in_array($removeProfileImageValue, ['1', 1, true, 'true'], true);
 
+        $validPhotoSources = ['upload', 'avatar', 'none'];
         $profileImageSource = old('profile_image_source');
-        if (!in_array($profileImageSource, ['upload', 'avatar'], true)) {
-            if ($matchesAccountAvatar) {
+        if (!in_array($profileImageSource, $validPhotoSources, true)) {
+            if ($removeProfileImageRequested) {
+                $profileImageSource = 'none';
+            } elseif ($matchesAccountAvatar) {
                 $profileImageSource = 'avatar';
             } elseif ($initialUploadPhotoUrl) {
                 $profileImageSource = 'upload';
             } elseif ($hasAccountAvatar && $isEditing) {
                 $profileImageSource = 'avatar';
+            } elseif ($hasAccountAvatar) {
+                $profileImageSource = 'avatar';
             } else {
-                $profileImageSource = 'upload';
+                $profileImageSource = $initialUploadPhotoUrl ? 'upload' : 'none';
             }
         }
 
         if ($profileImageSource === 'avatar' && !$hasAccountAvatar) {
-            $profileImageSource = 'upload';
+            $profileImageSource = $initialUploadPhotoUrl ? 'upload' : 'none';
         }
 
         if ($removeProfileImageRequested) {
-            $profileImageSource = 'upload';
+            $profileImageSource = 'none';
             $initialUploadPhotoUrl = null;
         }
 
-        $profileImageUrl = $profileImageSource === 'avatar' ? $accountAvatarUrl : $initialUploadPhotoUrl;
-
-        if ($removeProfileImageRequested) {
-            $profileImageUrl = null;
+        if ($profileImageSource === 'none') {
+            $initialUploadPhotoUrl = null;
         }
+
+        $profileImageUrl = match ($profileImageSource) {
+            'avatar' => $accountAvatarUrl,
+            'upload' => $initialUploadPhotoUrl,
+            default => null,
+        };
 
         $removeProfileImageInitialValue = $removeProfileImageRequested ? '1' : '0';
 
@@ -534,30 +543,32 @@
                                         </button>
                                     </div>
                                     <div class="flex-1 space-y-3">
-                                        @if ($hasAccountAvatar)
-                                            <div class="space-y-2">
-                                                <p class="text-sm font-medium text-slate-600">{{ __('Choose photo source') }}</p>
-                                                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+                                        <div class="space-y-2">
+                                            <p class="text-sm font-medium text-slate-600">{{ __('Choose photo preference') }}</p>
+                                            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap sm:gap-4">
+                                                @if ($hasAccountAvatar)
                                                     <label class="inline-flex items-center gap-2 text-sm text-slate-600">
                                                         <input type="radio" name="profile_image_source" value="avatar" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'avatar') data-photo-source-option="avatar">
                                                         <span>{{ __('Use my account profile photo') }}</span>
                                                     </label>
-                                                    <label class="inline-flex items-center gap-2 text-sm text-slate-600">
-                                                        <input type="radio" name="profile_image_source" value="upload" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'upload') data-photo-source-option="upload">
-                                                        <span>{{ __('Upload a different photo') }}</span>
-                                                    </label>
-                                                </div>
-                                                <p class="text-xs text-slate-500">{{ __('We’ll reuse your saved profile photo unless you pick a new one for this CV.') }}</p>
+                                                @endif
+                                                <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                                                    <input type="radio" name="profile_image_source" value="upload" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'upload') data-photo-source-option="upload">
+                                                    <span>{{ $hasAccountAvatar ? __('Upload a different photo') : __('Upload a photo') }}</span>
+                                                </label>
+                                                <label class="inline-flex items-center gap-2 text-sm text-slate-600">
+                                                    <input type="radio" name="profile_image_source" value="none" class="h-4 w-4 border-slate-300 text-blue-600 focus:ring-blue-500" @checked($profileImageSource === 'none') data-photo-source-option="none">
+                                                    <span>{{ __('Don\'t use a photo') }}</span>
+                                                </label>
                                             </div>
-                                        @else
-                                            <input type="hidden" name="profile_image_source" value="upload">
-                                        @endif
+                                            @if ($hasAccountAvatar)
+                                                <p class="text-xs text-slate-500">{{ __('We’ll reuse your saved profile photo unless you pick a new one for this CV.') }}</p>
+                                            @endif
+                                            <p class="text-xs text-slate-500">{{ __('Switch between the options above to keep, change, or remove your profile photo.') }}</p>
+                                        </div>
                                         <div>
                                             <input type="file" name="profile_image" accept="image/*" class="{{ $fileInputClasses }} @error('profile_image') border-red-500 focus:border-red-500 focus:ring-red-200 @enderror">
                                             <p class="mt-2 text-xs text-slate-500">{{ __('Upload any image file (JPG, PNG, WebP, HEIC, etc.). Max 2 MB.') }}</p>
-                                            @if ($hasAccountAvatar)
-                                                <p class="mt-1 text-xs text-slate-500">{{ __('Switch between the options above to keep your profile photo or upload a different picture.') }}</p>
-                                            @endif
                                             <p data-photo-error class="mt-2 text-sm text-red-600 hidden"></p>
                                             @error('profile_image')
                                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
