@@ -3,7 +3,7 @@
         $isEditing = $isEditing ?? false;
         $formAction = $formAction ?? route('cv.store');
         $formMethod = strtoupper($formMethod ?? 'POST');
-        $badgeLabel = $isEditing ? __('Editing saved CV') : __('Guided builder');
+        
         $headline = $isEditing ? __('Update your CV') : __('Craft your CV');
         $heroSubtitle = $isEditing
             ? __('Refresh sections, tweak your design, and save a polished revision.')
@@ -328,10 +328,7 @@
         <div class="max-w-5xl mx-auto">
             <div class="mb-12 text-slate-900">
                 <div class="mx-auto max-w-3xl space-y-4 text-center sm:text-left">
-                    <span class="inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-600 shadow-sm ring-1 ring-white/60 backdrop-blur-sm">
-                        <span class="h-2 w-2 rounded-full bg-violet-400"></span>
-                        {{ $badgeLabel }}
-                    </span>
+                    
                     <div class="space-y-3">
                         <h1 class="text-3xl font-semibold tracking-tight sm:text-4xl md:text-5xl">{{ $headline }}</h1>
                         <p class="text-base text-slate-500 sm:text-lg">{{ $heroSubtitle }}</p>
