@@ -111,13 +111,14 @@
                                 <a href="{{ route('cv.edit', $cv) }}" class="inline-flex items-center justify-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-blue-700">
                                     {{ __('Edit CV') }}
                                 </a>
-                                <form method="POST" action="{{ route('cv.destroy', $cv) }}" class="inline-flex" onsubmit="return confirm('{{ __('Are you sure you want to delete this CV?') }}');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-red-400 hover:text-red-600">
-                                        {{ __('Delete') }}
-                                    </button>
-                                </form>
+                                <button
+                                    type="button"
+                                    x-data=""
+                                    x-on:click.prevent="$dispatch('open-modal', 'confirm-cv-deletion-{{ $cv->id }}')"
+                                    class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-red-400 hover:text-red-600"
+                                >
+                                    {{ __('Delete') }}
+                                </button>
                             </div>
 
                             <form method="POST" action="{{ route('cv.update-template', $cv) }}" class="flex flex-wrap items-center gap-3">
@@ -145,6 +146,41 @@
                             </form>
                         </div>
                     </div>
+                    <x-modal name="confirm-cv-deletion-{{ $cv->id }}" focusable>
+                        <form method="POST" action="{{ route('cv.destroy', $cv) }}" class="space-y-6 p-6">
+                            @csrf
+                            @method('DELETE')
+
+                            <div class="flex items-start gap-4">
+                                <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-500">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true" class="h-6 w-6">
+                                        <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10.011 10.011 0 0 0 12 2Zm0 15.25a1.25 1.25 0 1 1 1.25-1.25A1.251 1.251 0 0 1 12 17.25Zm1.75-6.75a1.75 1.75 0 0 1-3.5 0V7.75a1.75 1.75 0 0 1 3.5 0Z" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h2 class="text-lg font-semibold text-slate-900">
+                                        {{ __('Delete CV') }}
+                                    </h2>
+                                    <p class="mt-2 text-sm text-slate-600">
+                                        {{ __('Are you sure you want to delete ":title"? This action cannot be undone.', ['title' => $entry['title']]) }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap justify-end gap-3">
+                                <button
+                                    type="button"
+                                    x-on:click="$dispatch('close')"
+                                    class="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-700"
+                                >
+                                    {{ __('Cancel') }}
+                                </button>
+                                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-semibold text-white shadow transition hover:-translate-y-0.5 hover:bg-rose-700">
+                                    {{ __('Delete CV') }}
+                                </button>
+                            </div>
+                        </form>
+                    </x-modal>
                 @endforeach
             </div>
         @endif
