@@ -456,7 +456,7 @@
     }
 
     .createit-template-preview__frame {
-        @apply h-full w-full border-0;
+        @apply h-full w-full border-0 pointer-events-none;
     }
 
     .createit-modal {
