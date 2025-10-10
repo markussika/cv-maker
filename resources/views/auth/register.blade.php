@@ -7,9 +7,9 @@
         </div>
 
         @if (session('oauth_error'))
-            <div class="createit-alert createit-alert--error">
+            <x-alert type="error">
                 {{ session('oauth_error') }}
-            </div>
+            </x-alert>
         @endif
 
         <x-auth.social-providers intent="register" />

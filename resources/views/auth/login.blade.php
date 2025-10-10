@@ -7,15 +7,15 @@
         </div>
 
         @if (session('status'))
-            <div class="createit-alert createit-alert--success">
+            <x-alert type="success" :title="false">
                 {{ session('status') }}
-            </div>
+            </x-alert>
         @endif
 
         @if (session('oauth_error'))
-            <div class="createit-alert createit-alert--error">
+            <x-alert type="error">
                 {{ session('oauth_error') }}
-            </div>
+            </x-alert>
         @endif
 
         <x-auth.social-providers intent="login" />
