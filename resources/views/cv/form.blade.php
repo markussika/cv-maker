@@ -280,13 +280,16 @@
         $matchesAccountAvatar = $hasAccountAvatar && $storedProfileImageUrl && $storedProfileImageUrl === $accountAvatarUrl;
         $initialUploadPhotoUrl = $matchesAccountAvatar ? null : $storedProfileImageUrl;
 
+        $removeProfileImageValue = old('remove_profile_image');
+        $removeProfileImageRequested = in_array($removeProfileImageValue, ['1', 1, true, 'true'], true);
+
         $profileImageSource = old('profile_image_source');
         if (!in_array($profileImageSource, ['upload', 'avatar'], true)) {
             if ($matchesAccountAvatar) {
                 $profileImageSource = 'avatar';
             } elseif ($initialUploadPhotoUrl) {
                 $profileImageSource = 'upload';
-            } elseif ($hasAccountAvatar) {
+            } elseif ($hasAccountAvatar && $isEditing) {
                 $profileImageSource = 'avatar';
             } else {
                 $profileImageSource = 'upload';
@@ -297,7 +300,18 @@
             $profileImageSource = 'upload';
         }
 
+        if ($removeProfileImageRequested) {
+            $profileImageSource = 'upload';
+            $initialUploadPhotoUrl = null;
+        }
+
         $profileImageUrl = $profileImageSource === 'avatar' ? $accountAvatarUrl : $initialUploadPhotoUrl;
+
+        if ($removeProfileImageRequested) {
+            $profileImageUrl = null;
+        }
+
+        $removeProfileImageInitialValue = $removeProfileImageRequested ? '1' : '0';
 
         $prefillBirthdayValue = data_get($prefill, 'birthday');
         if ($prefillBirthdayValue instanceof \Carbon\CarbonInterface) {
@@ -508,10 +522,16 @@
 
                             <div class="md:col-span-2" data-photo-section data-selected-source="{{ $profileImageSource }}" data-avatar-url="{{ $hasAccountAvatar ? e($accountAvatarUrl) : '' }}" data-initial-upload-url="{{ $initialUploadPhotoUrl ? e($initialUploadPhotoUrl) : '' }}">
                                 <label class="block text-sm font-medium text-slate-600">Profile photo</label>
+                                <input type="hidden" name="remove_profile_image" value="{{ old('remove_profile_image', $removeProfileImageInitialValue) }}" data-photo-remove-field>
                                 <div class="mt-2 flex flex-col gap-4 sm:flex-row sm:items-center">
-                                    <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50" data-photo-preview>
-                                        <img src="{{ $profileImageUrl }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover {{ $profileImageUrl ? '' : 'hidden' }}" data-photo-preview-image>
-                                        <span class="px-2 text-center text-xs text-slate-400 {{ $profileImageUrl ? 'hidden' : '' }}" data-photo-preview-placeholder>{{ __('No photo yet') }}</span>
+                                    <div class="flex flex-col items-center gap-3">
+                                        <div class="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-slate-300 bg-slate-50" data-photo-preview>
+                                            <img src="{{ $profileImageUrl }}" alt="{{ __('Profile photo preview') }}" class="h-full w-full object-cover {{ $profileImageUrl ? '' : 'hidden' }}" data-photo-preview-image>
+                                            <span class="px-2 text-center text-xs text-slate-400 {{ $profileImageUrl ? 'hidden' : '' }}" data-photo-preview-placeholder>{{ __('No photo yet') }}</span>
+                                        </div>
+                                        <button type="button" class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 transition hover:bg-slate-200 {{ $profileImageUrl ? '' : 'hidden' }}" data-photo-remove-button>
+                                            {{ __('Remove photo') }}
+                                        </button>
                                     </div>
                                     <div class="flex-1 space-y-3">
                                         @if ($hasAccountAvatar)
