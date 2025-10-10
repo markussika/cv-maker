@@ -410,11 +410,13 @@
     }
 
     .createit-template-card__preview {
-        @apply relative h-64 overflow-hidden rounded-t-[28px] bg-white sm:h-72;
+        @apply relative overflow-hidden rounded-t-[28px] bg-white;
+        aspect-ratio: 8.5 / 11;
+        max-height: 32rem;
     }
 
     .createit-template-card__preview-frame {
-        @apply h-full w-full border-0;
+        @apply h-full w-full border-0 pointer-events-none;
     }
 
     .createit-template-card__badge {
@@ -445,12 +447,16 @@
         @apply inline-flex items-center gap-2 rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:border-blue-500 hover:text-blue-600;
     }
 
+    .createit-template-preview {
+        aspect-ratio: 8.5 / 11;
+    }
+
     .createit-template-preview__inner {
-        @apply h-full w-full overflow-hidden;
+        @apply absolute inset-3 overflow-hidden rounded-3xl bg-white shadow-lg sm:inset-4;
     }
 
     .createit-template-preview__frame {
-        @apply h-full w-full border-0;
+        @apply h-full w-full border-0 pointer-events-none;
     }
 
     .createit-modal {
