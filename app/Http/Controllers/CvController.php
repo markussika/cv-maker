@@ -18,17 +18,8 @@ class CvController extends Controller
         $templates = $this->templateOptions();
 
         $prefill = null;
-        $latestCv = $request->user()?->cvs()->latest()->first();
-        if ($latestCv) {
-            $prefill = $this->formatCvForView($latestCv);
-        } else {
-            $sessionPrefill = session('cv_data');
-            if (is_array($sessionPrefill) && !empty($sessionPrefill)) {
-                $prefill = $sessionPrefill;
-            }
-        }
 
-        $initialTemplate = $prefill['template'] ?? ($templates[0] ?? 'classic');
+        $initialTemplate = $templates[0] ?? 'classic';
 
         $requestedTemplate = $request->string('template')->toString();
         if ($requestedTemplate && in_array($requestedTemplate, $templates, true)) {
@@ -57,16 +48,19 @@ class CvController extends Controller
         $attributes['user_id'] = $request->user()->id;
 
         $photoSource = $this->resolveProfileImageSource($request);
+        $removePhoto = $request->boolean('remove_profile_image');
 
-        if ($photoSource === 'avatar') {
+        if (!$removePhoto && $photoSource === 'avatar') {
             $avatarUrl = optional($request->user())->avatar_url;
             if (is_string($avatarUrl) && trim($avatarUrl) !== '') {
                 $attributes['profile_image'] = trim($avatarUrl);
             } elseif ($request->hasFile('profile_image')) {
                 $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
             }
-        } elseif ($request->hasFile('profile_image')) {
+        } elseif (!$removePhoto && $request->hasFile('profile_image')) {
             $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
+        } else {
+            $attributes['profile_image'] = null;
         }
 
         $cv = Cv::create($attributes);
@@ -124,9 +118,13 @@ class CvController extends Controller
         $attributes = $this->buildCvAttributes($validated);
 
         $photoSource = $this->resolveProfileImageSource($request);
+        $removePhoto = $request->boolean('remove_profile_image');
         $avatarUrl = optional($request->user())->avatar_url;
 
-        if ($photoSource === 'avatar' && is_string($avatarUrl) && trim($avatarUrl) !== '') {
+        if ($removePhoto) {
+            $this->deleteStoredProfileImage($cv->profile_image);
+            $attributes['profile_image'] = null;
+        } elseif ($photoSource === 'avatar' && is_string($avatarUrl) && trim($avatarUrl) !== '') {
             $this->deleteStoredProfileImage($cv->profile_image);
             $attributes['profile_image'] = trim($avatarUrl);
         } elseif ($photoSource === 'avatar' && $request->hasFile('profile_image')) {
@@ -342,6 +340,7 @@ class CvController extends Controller
             'github' => ['nullable', 'url', 'max:255'],
             'profile_image' => ['nullable', 'image', 'max:2048'],
             'profile_image_source' => ['nullable', 'string', Rule::in(['upload', 'avatar'])],
+            'remove_profile_image' => ['nullable', 'boolean'],
             'birthday' => ['nullable', 'date'],
             'country' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
@@ -778,6 +777,10 @@ class CvController extends Controller
 
     protected function resolveProfileImageSource(Request $request): string
     {
+        if ($request->boolean('remove_profile_image')) {
+            return 'upload';
+        }
+
         $source = $request->string('profile_image_source')->toString();
 
         return in_array($source, ['avatar', 'upload'], true) ? $source : 'upload';
