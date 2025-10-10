@@ -417,6 +417,11 @@
 
     .createit-template-card__preview-frame {
         @apply h-full w-full border-0 pointer-events-none;
+        scrollbar-width: none;
+    }
+
+    .createit-template-card__preview-frame::-webkit-scrollbar {
+        display: none;
     }
 
     .createit-template-card__badge {
