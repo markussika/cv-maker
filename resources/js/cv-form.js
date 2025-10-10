@@ -110,6 +110,18 @@ const initCvForm = () => {
     let removePhotoButton = form.querySelector('[data-photo-remove-button]');
     const initialPhotoSrc = photoPreviewImage?.getAttribute('src')?.trim() || null;
     const photoSection = form.querySelector('[data-photo-section]');
+    const validPhotoSources = ['avatar', 'upload', 'none'];
+    const normalisePhotoSource = (value) => {
+        if (value === 'avatar') {
+            return 'avatar';
+        }
+
+        if (value === 'none') {
+            return 'none';
+        }
+
+        return 'upload';
+    };
     const getDatasetValue = (element, key) => {
         if (!element || !element.dataset) {
             return null;
@@ -125,13 +137,21 @@ const initCvForm = () => {
     };
 
     const defaultAvatarPreview = getDatasetValue(photoSection, 'avatarUrl');
-    const defaultSelectedPhotoSource =
-        getDatasetValue(photoSection, 'selectedSource') ?? (defaultAvatarPreview ? 'avatar' : 'upload');
+    const datasetSelectedPhotoSource = getDatasetValue(photoSection, 'selectedSource');
+    let defaultSelectedPhotoSource = validPhotoSources.includes(datasetSelectedPhotoSource)
+        ? datasetSelectedPhotoSource
+        : null;
+    if (!defaultSelectedPhotoSource) {
+        defaultSelectedPhotoSource = defaultAvatarPreview ? 'avatar' : 'upload';
+    }
     const defaultUploadPreview =
         getDatasetValue(photoSection, 'initialUploadUrl') ??
         (defaultSelectedPhotoSource === 'upload' ? initialPhotoSrc : null);
     const initialRemoveValue = removePhotoField?.value === '1';
-    let fallbackSelectedPhotoSource = initialRemoveValue ? 'upload' : defaultSelectedPhotoSource;
+    let fallbackSelectedPhotoSource = initialRemoveValue ? 'none' : defaultSelectedPhotoSource;
+    if (!validPhotoSources.includes(fallbackSelectedPhotoSource)) {
+        fallbackSelectedPhotoSource = defaultAvatarPreview ? 'avatar' : 'upload';
+    }
     let currentUploadPreview = initialRemoveValue ? null : defaultUploadPreview;
     const photoSourceInputs = photoSection
         ? Array.from(photoSection.querySelectorAll('[data-photo-source-option]'))
@@ -408,15 +428,15 @@ const initCvForm = () => {
 
     const getSelectedPhotoSource = () => {
         if (!photoSourceInputs.length) {
-            return fallbackSelectedPhotoSource;
+            return normalisePhotoSource(fallbackSelectedPhotoSource);
         }
 
         const selected = photoSourceInputs.find((input) => input.checked);
         if (selected && typeof selected.value === 'string') {
-            return selected.value;
+            return normalisePhotoSource(selected.value);
         }
 
-        return fallbackSelectedPhotoSource;
+        return normalisePhotoSource(fallbackSelectedPhotoSource);
     };
 
     const showInitialPhoto = () => {
@@ -451,6 +471,16 @@ const initCvForm = () => {
 
     const applyPhotoSourceToPreview = ({ resetFileSelection = false } = {}) => {
         const source = getSelectedPhotoSource();
+
+        if (source === 'none') {
+            if (resetFileSelection && photoInput) {
+                photoInput.value = '';
+            }
+
+            validatePhotoFile(null);
+            showPhotoPlaceholder();
+            return;
+        }
 
         if (source === 'avatar' && defaultAvatarPreview) {
             if (resetFileSelection && photoInput) {
@@ -625,7 +655,8 @@ const initCvForm = () => {
     if (removePhotoButton) {
         removePhotoButton.addEventListener('click', (event) => {
             event.preventDefault();
-            fallbackSelectedPhotoSource = 'upload';
+            const noneOption = photoSourceInputs.find((input) => input.value === 'none');
+            fallbackSelectedPhotoSource = noneOption ? 'none' : 'upload';
             currentUploadPreview = null;
             setRemovePhotoField(true);
             revokeCurrentPhotoObjectUrl();
@@ -636,21 +667,32 @@ const initCvForm = () => {
 
             if (photoSourceInputs.length > 0) {
                 photoSourceInputs.forEach((input) => {
-                    input.checked = input.value === 'upload';
+                    if (noneOption) {
+                        input.checked = input === noneOption;
+                    } else {
+                        input.checked = input.value === 'upload';
+                    }
                 });
             }
 
-            validatePhotoFile(null);
-            showPhotoPlaceholder();
+            applyPhotoSourceToPreview({ resetFileSelection: true });
         });
     }
 
     if (photoSourceInputs.length > 0) {
         photoSourceInputs.forEach((input) => {
             input.addEventListener('change', () => {
-                fallbackSelectedPhotoSource = input.value === 'avatar' ? 'avatar' : 'upload';
+                const value = normalisePhotoSource(input.value);
+                fallbackSelectedPhotoSource = value;
+
+                if (value === 'none') {
+                    setRemovePhotoField(true);
+                    applyPhotoSourceToPreview({ resetFileSelection: true });
+                    return;
+                }
+
                 setRemovePhotoField(false);
-                const shouldReset = input.value === 'avatar';
+                const shouldReset = value === 'avatar';
                 applyPhotoSourceToPreview({ resetFileSelection: shouldReset });
             });
         });

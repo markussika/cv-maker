@@ -50,17 +50,17 @@ class CvController extends Controller
         $photoSource = $this->resolveProfileImageSource($request);
         $removePhoto = $request->boolean('remove_profile_image');
 
-        if (!$removePhoto && $photoSource === 'avatar') {
+        if ($removePhoto || $photoSource === 'none') {
+            $attributes['profile_image'] = null;
+        } elseif ($photoSource === 'avatar') {
             $avatarUrl = optional($request->user())->avatar_url;
             if (is_string($avatarUrl) && trim($avatarUrl) !== '') {
                 $attributes['profile_image'] = trim($avatarUrl);
             } elseif ($request->hasFile('profile_image')) {
                 $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
             }
-        } elseif (!$removePhoto && $request->hasFile('profile_image')) {
+        } elseif ($request->hasFile('profile_image')) {
             $attributes['profile_image'] = $request->file('profile_image')->store('cv-photos', 'public');
-        } else {
-            $attributes['profile_image'] = null;
         }
 
         $cv = Cv::create($attributes);
@@ -121,7 +121,7 @@ class CvController extends Controller
         $removePhoto = $request->boolean('remove_profile_image');
         $avatarUrl = optional($request->user())->avatar_url;
 
-        if ($removePhoto) {
+        if ($removePhoto || $photoSource === 'none') {
             $this->deleteStoredProfileImage($cv->profile_image);
             $attributes['profile_image'] = null;
         } elseif ($photoSource === 'avatar' && is_string($avatarUrl) && trim($avatarUrl) !== '') {
@@ -339,7 +339,7 @@ class CvController extends Controller
             'linkedin' => ['nullable', 'url', 'max:255'],
             'github' => ['nullable', 'url', 'max:255'],
             'profile_image' => ['nullable', 'image', 'max:2048'],
-            'profile_image_source' => ['nullable', 'string', Rule::in(['upload', 'avatar'])],
+            'profile_image_source' => ['nullable', 'string', Rule::in(['upload', 'avatar', 'none'])],
             'remove_profile_image' => ['nullable', 'boolean'],
             'birthday' => ['nullable', 'date'],
             'country' => ['nullable', 'string', 'max:255'],
@@ -777,13 +777,17 @@ class CvController extends Controller
 
     protected function resolveProfileImageSource(Request $request): string
     {
-        if ($request->boolean('remove_profile_image')) {
-            return 'upload';
-        }
-
         $source = $request->string('profile_image_source')->toString();
 
-        return in_array($source, ['avatar', 'upload'], true) ? $source : 'upload';
+        if ($request->boolean('remove_profile_image')) {
+            return 'none';
+        }
+
+        if (in_array($source, ['avatar', 'upload', 'none'], true)) {
+            return $source;
+        }
+
+        return 'upload';
     }
 
     protected function deleteStoredProfileImage(?string $path): void
