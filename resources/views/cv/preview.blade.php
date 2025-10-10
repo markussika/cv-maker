@@ -393,7 +393,7 @@
                         <p class="text-xs uppercase tracking-[0.35em] text-slate-400">{{ __('Template') }}</p>
                         <h2 class="text-lg font-semibold text-slate-900">{{ $templateInfo['title'] }}</h2>
                         <p class="text-sm text-slate-600">{{ $templateInfo['description'] }}</p>
-                        <div class="createit-template-preview relative mt-4 h-52 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
+                        <div class="createit-template-preview relative mt-4 overflow-hidden rounded-2xl bg-gradient-to-br {{ $templateInfo['preview'] }} shadow-inner shadow-slate-400/20">
                             <div class="createit-template-preview__inner">
                                 <iframe
                                     src="{{ $pdfPreviewUrl }}#toolbar=0&navpanes=0&scrollbar=0&zoom=page-fit"
