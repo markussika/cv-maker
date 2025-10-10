@@ -109,15 +109,69 @@
     }
 
     .createit-alert {
-        @apply rounded-2xl border px-4 py-3 text-sm;
+        @apply relative flex items-start gap-4 overflow-hidden rounded-3xl border border-transparent bg-white/80 px-5 py-4 text-sm font-medium text-slate-700 shadow-lg shadow-slate-900/5 ring-1 ring-inset transition;
+        @apply backdrop-blur;
+    }
+
+    .createit-alert::after {
+        content: "";
+        position: absolute;
+        top: 0.65rem;
+        bottom: 0.65rem;
+        right: -2.5rem;
+        width: 8rem;
+        border-radius: 9999px;
+        background: linear-gradient(110deg, rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0));
+        pointer-events: none;
+        filter: blur(0.5px);
+    }
+
+    .createit-alert__icon {
+        @apply mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/70 text-lg shadow-inner shadow-white/40 ring-1 ring-inset ring-white/60;
+    }
+
+    .createit-alert__content {
+        @apply flex-1 space-y-1 text-left;
+    }
+
+    .createit-alert__title {
+        @apply text-sm font-semibold tracking-tight;
+    }
+
+    .createit-alert__message {
+        @apply space-y-2 text-sm font-medium leading-relaxed text-inherit;
     }
 
     .createit-alert--success {
-        @apply border-emerald-200 bg-emerald-50/80 text-emerald-700;
+        @apply border-emerald-300/70 bg-emerald-50/80 text-emerald-800 ring-emerald-500/25;
+    }
+
+    .createit-alert--success .createit-alert__icon {
+        @apply text-emerald-600 ring-emerald-400/40;
     }
 
     .createit-alert--error {
-        @apply border-red-200 bg-red-50/80 text-red-700;
+        @apply border-rose-300/70 bg-rose-50/80 text-rose-800 ring-rose-500/20;
+    }
+
+    .createit-alert--error .createit-alert__icon {
+        @apply text-rose-600 ring-rose-400/40;
+    }
+
+    .createit-alert--info {
+        @apply border-sky-300/70 bg-sky-50/80 text-sky-800 ring-sky-500/20;
+    }
+
+    .createit-alert--info .createit-alert__icon {
+        @apply text-sky-600 ring-sky-400/40;
+    }
+
+    .createit-alert--warning {
+        @apply border-amber-300/70 bg-amber-50/80 text-amber-800 ring-amber-500/20;
+    }
+
+    .createit-alert--warning .createit-alert__icon {
+        @apply text-amber-600 ring-amber-400/40;
     }
 
     .createit-social {

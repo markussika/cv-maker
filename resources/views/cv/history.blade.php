@@ -28,9 +28,9 @@
         </div>
 
         @if (session('status'))
-            <div class="rounded-3xl border border-emerald-200 bg-emerald-50/80 px-6 py-4 text-sm text-emerald-700 shadow-sm">
+            <x-alert type="success" :title="false">
                 {{ session('status') }}
-            </div>
+            </x-alert>
         @endif
 
         @if ($entries->isEmpty())

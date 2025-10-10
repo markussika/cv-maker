@@ -51,12 +51,15 @@
             <x-input-error class="mt-2" :messages="$errors->get('email')" />
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-                <div class="mt-4 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                    <p class="font-medium">
+                <x-alert type="warning" class="mt-4" title="{{ __('Email verification needed') }}">
+                    <span class="block text-sm">
                         {{ __('Your email address is unverified.') }}
-                    </p>
+                    </span>
 
-                    <button form="send-verification" class="mt-2 inline-flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-amber-100">
+                    <button
+                        form="send-verification"
+                        class="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2 focus:ring-offset-amber-100"
+                    >
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 8.25 12 13.5l9-5.25M4.5 19.5h15a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5h-15A1.5 1.5 0 0 0 3 6v12a1.5 1.5 0 0 0 1.5 1.5Z" />
                         </svg>
@@ -64,11 +67,14 @@
                     </button>
 
                     @if (session('status') === 'verification-link-sent')
-                        <p class="mt-2 font-medium text-amber-700">
-                            {{ __('A new verification link has been sent to your email address.') }}
-                        </p>
+                        <span class="mt-3 inline-flex items-center gap-2 rounded-full bg-white/60 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-4 w-4">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75 9 17.25 19.5 6.75" />
+                            </svg>
+                            {{ __('Verification email sent') }}
+                        </span>
                     @endif
-                </div>
+                </x-alert>
             @endif
         </div>
 
@@ -132,13 +138,17 @@
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 
             @if (session('status') === 'profile-updated')
-                <p
+                <x-alert
+                    type="success"
+                    :title="false"
+                    class="mt-3 w-full sm:w-auto"
                     x-data="{ show: true }"
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm font-medium text-emerald-600"
-                >{{ __('Saved.') }}</p>
+                >
+                    {{ __('Profile saved successfully!') }}
+                </x-alert>
             @endif
         </div>
     </form>

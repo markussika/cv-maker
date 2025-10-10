@@ -3,9 +3,9 @@
 
     <div class="space-y-8">
         @if (session('status'))
-            <div class="rounded-3xl border border-emerald-200 bg-emerald-50/80 p-6 text-sm text-emerald-800 shadow-sm">
+            <x-alert type="success" :title="false">
                 {{ session('status') }}
-            </div>
+            </x-alert>
         @endif
 
         @if (!empty($cvData))
