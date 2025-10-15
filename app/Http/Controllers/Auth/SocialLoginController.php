@@ -30,7 +30,7 @@ class SocialLoginController extends Controller
         $intent = is_string($intent) && in_array($intent, ['login', 'register'], true) ? $intent : 'login';
         $request->session()->put($this->intentSessionKey($provider), $intent);
 
-        return $this->redirectToGoogle($state);
+        return $this->redirectToGoogle($request, $state);
     }
 
     public function callback(Request $request, string $provider)
@@ -68,11 +68,11 @@ class SocialLoginController extends Controller
         return redirect()->intended(route('dashboard'));
     }
 
-    protected function redirectToGoogle(string $state): RedirectResponse
+    protected function redirectToGoogle(Request $request, string $state): RedirectResponse
     {
         $config      = config('services.google');
         $clientId    = $config['client_id'] ?? null;
-        $redirectUri = $config['redirect'] ?? null;
+        $redirectUri = $this->resolveGoogleRedirectUri($request, $config);
 
         abort_if(empty($clientId) || empty($redirectUri), 500, 'Google OAuth is not configured.');
 
@@ -104,7 +104,7 @@ class SocialLoginController extends Controller
         $config       = config('services.google');
         $clientId     = $config['client_id'] ?? null;
         $clientSecret = $config['client_secret'] ?? null;
-        $redirectUri  = $config['redirect'] ?? null;
+        $redirectUri  = $this->resolveGoogleRedirectUri($request, $config);
 
         abort_if(empty($clientId) || empty($clientSecret) || empty($redirectUri), 500, 'Google OAuth is not configured.');
 
@@ -212,6 +212,30 @@ class SocialLoginController extends Controller
         return redirect()->route($route)
             ->with('oauth_error', $message)
             ->with('oauth_provider', $provider);
+    }
+
+    /**
+     * Resolve the redirect URI for Google OAuth ensuring it matches the incoming request host.
+     */
+    protected function resolveGoogleRedirectUri(Request $request, array $config): ?string
+    {
+        $redirectUri = $config['redirect'] ?? null;
+
+        if (empty($redirectUri)) {
+            return route('oauth.callback', ['provider' => 'google'], absolute: true);
+        }
+
+        $redirectUri = trim($redirectUri);
+
+        if (Str::startsWith($redirectUri, '/')) {
+            $redirectUri = $request->getSchemeAndHttpHost() . $redirectUri;
+        } elseif (!Str::startsWith($redirectUri, ['http://', 'https://'])) {
+            $redirectUri = rtrim($request->getSchemeAndHttpHost(), '/') . '/' . ltrim($redirectUri, '/');
+        }
+
+        $normalized = preg_replace('#(?<!:)//+#', '/', $redirectUri);
+
+        return is_string($normalized) ? $normalized : $redirectUri;
     }
 
     protected function stateSessionKey(string $provider): string
