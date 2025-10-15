@@ -36,16 +36,14 @@ Route::middleware('guest')->group(function () {
         ->name('password.store');
 });
 
-Route::prefix('oauth')->name('oauth.')->group(function () {
+Route::prefix('oauth')->name('oauth.')->middleware('web')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('{provider}/redirect', [SocialLoginController::class, 'redirect'])
-            ->whereIn('provider', ['google'])
-            ->name('redirect');
-    });
+            ->whereIn('provider', ['google'])->name('redirect');
 
-    Route::match(['get', 'post'], '{provider}/callback', [SocialLoginController::class, 'callback'])
-        ->whereIn('provider', ['google'])
-        ->name('callback');
+        Route::get('{provider}/callback', [SocialLoginController::class, 'callback'])
+            ->whereIn('provider', ['google'])->name('callback');
+    });
 });
 
 Route::middleware('auth')->group(function () {

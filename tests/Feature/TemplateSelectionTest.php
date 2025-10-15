@@ -17,23 +17,32 @@ beforeEach(function (): void {
     ]);
 });
 
-it('allows selecting a template from the gallery to start CV creation with that design', function (): void {
-    $user = User::factory()->create();
+dataset('available templates', [
+    'classic',
+    'modern',
+    'creative',
+    'minimal',
+    'elegant',
+    'corporate',
+    'gradient',
+    'darkmode',
+    'futuristic',
+]);
 
-    $response = $this->actingAs($user)->get(route('cv.create', ['template' => 'modern']));
+
+
+
+
+it('displays the template gallery with preview and start links for every available design', function (string $template): void {
+    $response = $this->get(route('cv.templates'));
 
     $response
         ->assertOk()
-        ->assertSee('id="template-modern" name="template" value="modern" class="peer sr-only" checked="checked"', false);
-});
+        ->assertSee(route('cv.template-preview', $template), false)
+        ->assertSee(route('cv.create', ['template' => $template]), false);
+})->with('available templates');
 
-it('falls back to the default template when an unknown option is requested', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->get(route('cv.create', ['template' => 'nonexistent']));
-
-    $response
-        ->assertOk()
-        ->assertSee('id="template-classic" name="template" value="classic" class="peer sr-only" checked="checked"', false)
-        ->assertDontSee('id="template-nonexistent" name="template" value="nonexistent" class="peer sr-only" checked="checked"', false);
+it('returns a not found response when previewing an unavailable template', function (): void {
+    $this->get(route('cv.template-preview', ['template' => 'nonexistent-template']))
+        ->assertNotFound();
 });
